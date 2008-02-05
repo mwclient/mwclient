@@ -158,7 +158,7 @@ class Site(object):
 				
 			except errors.HTTPStatusError, e:
 				if e[0] == 503 and e[1].getheader('X-Database-Lag'):
-					self.wait(wait_token, int(e[1].getheader('Retry-After')))
+					self.wait(token, int(e[1].getheader('Retry-After')))
 				elif e[0] < 500 or e[0] > 599:
 					raise
 				else:
