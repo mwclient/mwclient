@@ -174,7 +174,7 @@ class PageProperty(List):
 	def set_iter(self, data):
 		for page in data['query']['pages'].itervalues():
 			if page['title'] == self.page.name:
-				self._iter = iter(page.get(self.list_name))
+				self._iter = iter(page.get(self.list_name, ()))
 				return
 		raise StopIteration
 
