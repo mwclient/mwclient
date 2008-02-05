@@ -198,7 +198,7 @@ class Page(object):
 		kwargs = dict(listing.List.generate_kwargs(prefix, title = self.name,
 			namespace = namespace, filterredir = filterredir))
 		if redirect: kwargs['%sredirect' % prefix] = '1'
-		return listing.List.get_list(generator)('embeddedin', 'ei', limit = limit, return_values = 'title', **kwargs)
+		return listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit = limit, return_values = 'title', **kwargs)
 	def extlinks(self):
 		self.site.require(1, 11)
 		return listing.PageProperty(self, 'extlinks', 'el', return_values = '*')
