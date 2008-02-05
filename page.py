@@ -249,7 +249,7 @@ class Image(Page):
 
 	def imagehistory(self):
 		return listing.PageProperty(self, 'imageinfo', 'ii', 
-			prop = 'timestamp|user|comment|url|size|sha1|metadata')
+			iiprop = 'timestamp|user|comment|url|size|sha1|metadata')
 	def imageusage(self, namespace = None, filterredir = 'all', redirect = False, 
 			limit = None, generator = True):
 		self.site.require(1, 11)
