@@ -352,7 +352,7 @@ class Site(object):
 		kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), prefix = prefix, dir = dir))
 		return listing.List.get_list(generator)(self, 'allcategories', 'ac', limit = limit, **kwargs)
 	
-	def allusers(self, start = None, prefix = None, group = None, prop = '', limit = None):
+	def allusers(self, start = None, prefix = None, group = None, prop = None, limit = None):
 		self.require(1, 11)
 		
 		kwargs = dict(listing.List.generate_kwargs('au', ('from', start), prefix = prefix,
@@ -379,7 +379,7 @@ class Site(object):
 		kwargs = dict(listing.List.generate_kwargs('eu', query = query, prop = prop, 
 			protocol = protocol, namespace = namespace))
 		return listing.List(self, 'exturlusage', 'eu', limit = limit, **kwargs)	
-	def logevents(self, prop = None, type = None, start = None, end = None, 
+	def logevents(self, type = None, prop = None, start = None, end = None, 
 			dir = 'older', user = None, title = None, limit = None):
 		self.require(1, 9)
 		
@@ -412,6 +412,10 @@ class Site(object):
 		kwargs = dict(listing.List.generate_kwargs('uc', user = user, start = start, end = end, 
 			dir = dir, namespace = namespace, prop = prop, show = show))
 		return listing.List(self, 'usercontribs', 'uc', limit = limit, **kwargs)
+	def users(self, users, prop = 'blockinfo|groups|editcount'):
+		self.require(1, 12)
+		
+		return listing.List(self, 'users', 'us', ususers = '|'.join(users), usprop = prop)
 		
 	def watchlist(self, allrev = False, start = None, end = None, namespace = None, dir = 'older',
 			prop = None, show = None, limit = None):
