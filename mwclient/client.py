@@ -373,6 +373,12 @@ class Site(object):
 		kwargs = dict(listing.List.generate_kwargs('dr', start = start, end = end, dir = dir,
 			namespace = namespace, prop = prop))
 		return listing.List(self, 'deletedrevs', 'dr', limit = limit, **kwargs)
+	def exturlusage(self, query, prop = None, protocol = 'http', namespace = None, limit = None):
+		self.require(1, 11)
+		
+		kwargs = dict(listing.List.generate_kwargs('eu', query = query, prop = prop, 
+			protocol = protocol, namespace = namespace))
+		return listing.List(self, 'exturlusage', 'eu', limit = limit, **kwargs)	
 	def logevents(self, prop = None, type = None, start = None, end = None, 
 			dir = 'older', user = None, title = None, limit = None):
 		self.require(1, 9)
@@ -380,6 +386,12 @@ class Site(object):
 		kwargs = dict(listing.List.generate_kwargs('le', prop = prop, type = type, start = start,
 			end = end, dir = dir, user = user, title = title))
 		return listing.List(self, 'logevents', 'le', limit = limit, **kwargs)
+	def random(self, namespace, limit = 20):
+		self.require(1, 12)
+		
+		kwargs = dict(listing.List.generate_kwargs('rn', namespace = namespace))
+		return listing.List(self, 'random', 'rn', limit = limit, **kwargs)
+	
 	def recentchanges(self, start = None, end = None, dir = 'older', namespace = None, 
 				prop = None, show = None, limit = None, type = None):
 		self.require(1, 9)
@@ -400,3 +412,13 @@ class Site(object):
 		kwargs = dict(listing.List.generate_kwargs('uc', user = user, start = start, end = end, 
 			dir = dir, namespace = namespace, prop = prop, show = show))
 		return listing.List(self, 'usercontribs', 'uc', limit = limit, **kwargs)
+		
+	def watchlist(self, allrev = False, start = None, end = None, namespace = None, dir = 'older',
+			prop = None, show = None, limit = None):
+		self.require(1, 9)
+		
+		kwargs = dict(listing.List.generate_kwargs('wl', start = start, end = end, 
+			namespace = namespace, dir = dir, prop = prop, show = show))
+		if allrev: kwargs['wlallrev'] = '1'
+		return listing.List(self, 'watchlist', 'wl', limit = limit, **kwargs)
+		
