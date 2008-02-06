@@ -189,3 +189,6 @@ class HTTPPool(list):
 			raise_on_not_ok, auto_redirect):
 		return self.find_connection(host).request(method, host, path,
 			headers, data, stream_iter, raise_on_not_ok, auto_redirect)
+	def close(self):
+		for hosts, conn in self:
+			conn.close()
