@@ -60,33 +60,47 @@ class Site(object):
 			self.connection = http.HTTPPool()
 		else:
 			self.connection = pool
-		
-		if do_init:
-			meta = self.api('query', meta = 'siteinfo|userinfo', 
-				siprop = 'general|namespaces', uiprop = 'groups|rights')
-			self.site = meta['query']['general']
-			self.namespaces = dict(((i['id'], i.get('*', '')) for i in meta['query']['namespaces'].itervalues()))
 			
-			if self.site['generator'].startswith('MediaWiki '):
-				version = self.site['generator'][10:].split('.')
-				if len(version) == 2 and version[1].endswith('alpha'):
-					self.version = (int(version[0]), int(version[1][:-5]), 'alpha')
-				elif len(version) == 3:
-					self.version = (int(version[0]), int(version[1]), int(version[2]))
-				else:
-					raise errors.MediaWikiVersionError('Unknown MediaWiki %s' % '.'.join(version))
-			else:
-				raise errors.MediaWikiVersionError('Unknown generator %s' % self.site['generator'])
-			# Require 1.11 until some compatibility issues are fixed
-			self.require(1, 11)
-			
-			userinfo = compatibility.userinfo(meta, self.require(1, 12, raise_error = False))
-			self.groups = userinfo.get('groups', [])
-			self.rights = userinfo.get('rights', [])
-		
 		self.Pages = listing.PageList(self)
 		self.Categories = listing.PageList(self, namespace = 14)
 		self.Images = listing.PageList(self, namespace = 6)
+		
+		self.namespaces = self.default_namespaces
+		
+		self.initialized = False
+		
+		if do_init:
+			try:
+				self.site_init()
+			except errors.APIError, e:
+				# Private wiki, do init after login
+				if e[0] != u'unknown_action': raise
+				
+			
+	def site_init(self):
+		meta = self.api('query', meta = 'siteinfo|userinfo', 
+			siprop = 'general|namespaces', uiprop = 'groups|rights')
+		self.site = meta['query']['general']
+		self.namespaces = dict(((i['id'], i.get('*', '')) for i in meta['query']['namespaces'].itervalues()))
+			
+		if self.site['generator'].startswith('MediaWiki '):
+			version = self.site['generator'][10:].split('.')
+			if len(version) == 2 and version[1].endswith('alpha'):
+				self.version = (int(version[0]), int(version[1][:-5]), 'alpha')
+			elif len(version) == 3:
+				self.version = (int(version[0]), int(version[1]), int(version[2]))
+			else:
+				raise errors.MediaWikiVersionError('Unknown MediaWiki %s' % '.'.join(version))
+		else:
+			raise errors.MediaWikiVersionError('Unknown generator %s' % self.site['generator'])
+		# Require 1.11 until some compatibility issues are fixed
+		self.require(1, 11)
+			
+		userinfo = compatibility.userinfo(meta, self.require(1, 12, raise_error = False))
+		self.groups = userinfo.get('groups', [])
+		self.rights = userinfo.get('rights', [])
+		self.initialized = True
+		
 		
 	default_namespaces = {0: u'', 1: u'Talk', 2: u'User', 3: u'User talk', 4: u'Project', 5: u'Project talk', 
 		6: u'Image', 7: u'Image talk', 8: u'MediaWiki', 9: u'MediaWiki talk', 10: u'Template', 11: u'Template talk', 
@@ -228,7 +242,7 @@ class Site(object):
 
 
 	def login(self, username = None, password = None, cookies = None):
-		self.require(1, 10)
+		if self.initialized: self.require(1, 10)
 		
 		if username and password: 
 			self.credentials = (username, password)
@@ -241,11 +255,15 @@ class Site(object):
 			login = self.api('login', lgname = self.credentials[0], lgpassword = self.credentials[1])
 			if login['login']['result'] != 'Success':
 				raise errors.LoginError(self, login['login'])
-		info = self.api('query', meta = 'userinfo', uiprop = 'groups|rights')
-		userinfo = compatibility.userinfo(info, self.require(1, 12, raise_error = False))
-		self.groups = userinfo.get('groups', [])
-		self.rights = userinfo.get('rights', [])
-		self.tokens = {}		
+				
+		if self.initialized:				
+			info = self.api('query', meta = 'userinfo', uiprop = 'groups|rights')
+			userinfo = compatibility.userinfo(info, self.require(1, 12, raise_error = False))
+			self.groups = userinfo.get('groups', [])
+			self.rights = userinfo.get('rights', [])
+			self.tokens = {}
+		else:
+			self.site_init()
 
 
 	def upload(self, file, filename, description, license = '', ignore = False, file_size = None): 
