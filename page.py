@@ -245,7 +245,7 @@ class Image(Page):
 			extra_properties = {'imageinfo': (('iiprop', 
 			'timestamp|user|comment|url|size|sha1|metadata'), )})
 		self.imagerepository = self._info.get('imagerepository', '')
-		self.imageinfo = self._info.get('imageinfo', (()))[0]
+		self.imageinfo = self._info.get('imageinfo', ((), ))[0]
 
 	def imagehistory(self):
 		return listing.PageProperty(self, 'imageinfo', 'ii', 
