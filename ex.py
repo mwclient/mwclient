@@ -36,15 +36,15 @@ class ConfiguredSite(client.Site):
 		if 'name' in kwargs:
 			self.config.update(self.config['sites'][kwargs['name']])
 		
-		retry_timeout = self.config.get('retry_timeout', 30)
-		max_retries = self.config.get('max_retries', -1)
+		do_login = 'username' in self.config and 'password' in self.config
 		
 		client.Site.__init__(self, self.config['host'],
-			self.config['path'], retry_timeout = retry_timeout,
-			max_retries = max_retries)
+			self.config['path'], do_init = not do_login,
+			retry_timeout  = self.config.get('retry_timeout', 30),
+			max_retries = self.config.get('max_retries', -1))
 			
 			
-		if 'username' in self.config and 'password' in self.config:
+		if do_login:
 			self.login(self.config['username'],
 				self.config['password'])
 	
@@ -61,14 +61,13 @@ class ConfiguredPool(list):
 			cfg.update(site)
 			site.update(cfg)
 			
-			retry_timeout = site.get('retry_timeout', 30)
-			max_retries = site.get('max_retries', -1)
+			do_login = 'username' in site and 'password' in site
 					
 			self.append(client.Site(site['host'], 
-				site['path'], self.pool, 
-				retry_timeout = retry_timeout,
-				max_retries = max_retries))
-			if 'username' in site and 'password' in site:
+				site['path'], self.pool, do_init = not do_login,
+				retry_timeout = site.get('retry_timeout', 30),
+				max_retries = site.get('max_retries', -1)))
+			if do_login:
 				self[-1].login(site['username'], site['password'])
 			self[-1].config = site
 			
