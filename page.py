@@ -1,4 +1,5 @@
 import client, errors, listing
+import compatibility
 from HTMLParser import HTMLParser
 from htmlentitydefs import name2codepoint 
 import urllib, time
@@ -180,9 +181,11 @@ class Page(object):
 		self.site.require(1, 9)
 		# Fix title for < 1.11 !!
 		prefix = listing.List.get_prefix('bl', generator)
-		kwargs = dict(listing.List.generate_kwargs(prefix, title = self.name, 
+		kwargs = dict(listing.List.generate_kwargs(prefix, 
 			namespace = namespace, filterredir = filterredir))
 		if redirect: kwargs['%sredirect' % prefix] = '1'
+		kwargs[compatibility.title(prefix, self.site.require(1, 11))] = self.name
+			
 		return listing.List.get_list(generator)(self.site, 'backlinks', 'bl', limit = limit, return_values = 'title', **kwargs)
 	def categories(self, generator = True):
 		self.site.require(1, 11)
@@ -195,9 +198,11 @@ class Page(object):
 		self.site.require(1, 9)
 		# Fix title for < 1.11 !!
 		prefix = listing.List.get_prefix('ei', generator)
-		kwargs = dict(listing.List.generate_kwargs(prefix, title = self.name,
+		kwargs = dict(listing.List.generate_kwargs(prefix,
 			namespace = namespace, filterredir = filterredir))
 		if redirect: kwargs['%sredirect' % prefix] = '1'
+		kwargs[compatibility.title(prefix, self.site.require(1, 11))] = self.name
+			
 		return listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit = limit, return_values = 'title', **kwargs)
 	def extlinks(self):
 		self.site.require(1, 11)
