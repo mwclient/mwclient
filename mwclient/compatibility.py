@@ -1,8 +1,8 @@
-def title(prefix, compatible):
-	if compatible: 
-		return 'title'
-	else:
+def title(prefix, new_format):
+	if new_format: 
 		return prefix + 'title'
+	else:
+		return 'titles'
 		
 def userinfo(data, new_format):
 	if new_format:
