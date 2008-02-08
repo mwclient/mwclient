@@ -97,6 +97,7 @@ class Site(object):
 		self.require(1, 11)
 			
 		userinfo = compatibility.userinfo(meta, self.require(1, 12, raise_error = False))
+		self.username = userinfo['name']
 		self.groups = userinfo.get('groups', [])
 		self.rights = userinfo.get('rights', [])
 		self.initialized = True
