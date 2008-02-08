@@ -1,6 +1,6 @@
 This files describes mwclient-0.6.0. The latest version is available in the 
-subversion repository <>
-and also browsable <>
+subversion repository <https://mwclient.svn.sourceforge.net/svnroot/mwclient>
+and also browsable <http://mwclient.svn.sourceforge.net/viewvc/mwclient/>.
 
 Mwclient is a client to the MediaWiki API <http://mediawiki.org/wiki/API>
 and allows access to almost all implemented API functions. Mwclient requires
@@ -14,7 +14,7 @@ use and may or may not work for you. In case it doesn't, Bryan can be
 contacted on <http://commons.wikimedia.org/wiki/User_talk:Bryan>.
 
 This framework heavily depends on simplejson, (c) copyright Bob Ippolito.
-The version currently in use is simplejson-1.5. 
+The version currently in use is simplejson-1.7.2. 
 
 == Implementation notes ==
 Most properties and generators accept the same parameters as the API, without
@@ -26,7 +26,7 @@ their two letter prefix Exceptions:
 * deletedrevs is deletedrevisions
 * usercontribs is usercontributions
 * First parameters of search and usercontributions are search and user 
-   respectively
+  respectively
 
 Properties and generators are implemented as Python generators. Their limit 
 parameter is only an indication of the number of items in one chunk. It is not
@@ -35,6 +35,7 @@ generator, and not be limitted by the limit value.
 Default chunk size is generally the maximum chunk size.
 
 == Example ==
+## For more information, see REFERENCE.txt
 # Init site object
 import mwclient
 site = mwclient.Site('commons.wikimedia.org')
@@ -50,15 +51,15 @@ page.save(text + u'\nExtra data', summary = 'Test edit')
 image = page.Images['Example.jpg']
 print 'Image', image.name.encode('utf-8'), 'usage:'
 for page in image.imageusage():
-	print 'Used in', page.name.encode('utf-8'), 'in namespace', page.namespace
+	print 'Used:', page.name.encode('utf-8'), '; namespace', page.namespace
 	print 'Image info:', image.imageinfo
 
 # Uploading a file
 site.upload(open('file.jpg'), 'destination.jpg', 'Image description')
 
-
-== Package tree ==
-
+# Listing all categories (don't do this in reality)
+for category in site.allcategories():
+	print category
 
 == License ==
  Copyright (c) 2006-2008 Bryan Tong Minh
