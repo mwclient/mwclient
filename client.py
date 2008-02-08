@@ -259,6 +259,7 @@ class Site(object):
 		if self.initialized:				
 			info = self.api('query', meta = 'userinfo', uiprop = 'groups|rights')
 			userinfo = compatibility.userinfo(info, self.require(1, 12, raise_error = False))
+			self.username = userinfo['name']
 			self.groups = userinfo.get('groups', [])
 			self.rights = userinfo.get('rights', [])
 			self.tokens = {}
