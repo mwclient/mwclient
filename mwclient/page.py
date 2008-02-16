@@ -184,7 +184,7 @@ class Page(object):
 		kwargs = dict(listing.List.generate_kwargs(prefix, 
 			namespace = namespace, filterredir = filterredir))
 		if redirect: kwargs['%sredirect' % prefix] = '1'
-		kwargs[compatibility.title(prefix, self.site.require(1, 11))] = self.name
+		kwargs[compatibility.title(prefix, self.site.require(1, 11, raise_error = False))] = self.name
 			
 		return listing.List.get_list(generator)(self.site, 'backlinks', 'bl', limit = limit, return_values = 'title', **kwargs)
 	def categories(self, generator = True):
@@ -201,7 +201,7 @@ class Page(object):
 		kwargs = dict(listing.List.generate_kwargs(prefix,
 			namespace = namespace, filterredir = filterredir))
 		if redirect: kwargs['%sredirect' % prefix] = '1'
-		kwargs[compatibility.title(prefix, self.site.require(1, 11))] = self.name
+		kwargs[compatibility.title(prefix, self.site.require(1, 11, raise_error = False))] = self.name
 			
 		return listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit = limit, return_values = 'title', **kwargs)
 	def extlinks(self):
@@ -247,14 +247,14 @@ class Image(Page):
 	def __init__(self, site, name, info = None):
 		site.require(1, 11)
 		Page.__init__(self, site, name, info,
-			extra_properties = {'imageinfo': (('iiprop', 
-			'timestamp|user|comment|url|size|sha1|metadata'), )})
+			extra_properties = {'imageinfo': (('iiprop', compatibility.iiprop(
+				site.require(1, 12, raise_error = False))), )})
 		self.imagerepository = self._info.get('imagerepository', '')
 		self.imageinfo = self._info.get('imageinfo', ((), ))[0]
 
 	def imagehistory(self):
 		return listing.PageProperty(self, 'imageinfo', 'ii', 
-			iiprop = 'timestamp|user|comment|url|size|sha1|metadata')
+			iiprop = compatibility.iiprop(self.site.require(1, 12, raise_error = False)))
 	def imageusage(self, namespace = None, filterredir = 'all', redirect = False, 
 			limit = None, generator = True):
 		self.site.require(1, 11)
