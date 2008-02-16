@@ -1,4 +1,5 @@
 import client, page
+import compatibility
 
 class List(object):
 	def __init__(self, site, list_name, prefix, limit = None, return_values = None, *args, **kwargs):
@@ -95,7 +96,6 @@ class GeneratorList(List):
 		
 		self.args['prop'] = 'info|imageinfo'
 		self.args['inprop'] = 'protection'
-		self.args['iiprop'] = 'timestamp|user|comment|url|size|sha1|metadata'
 		
 		self.result_member = 'pages'
 		
@@ -108,6 +108,13 @@ class GeneratorList(List):
 		if info['ns'] == 6:
 			return page.Image(self.site, u'', info)
 		return page.Page(self.site, u'', info)
+		
+	def load_chunk(self):
+		# Put this here so that the constructor does not fail 
+		# on uninitialized sites
+		self.args['iiprop'] = compatibility.iiprop(site.require(1, 12, raise_error = False))
+		return List.load_chunk(self)
+		
 	
 class Category(page.Page, GeneratorList):
 	def __init__(self, site, name, info = None, namespace = None):

@@ -61,6 +61,8 @@ class Site(object):
 		else:
 			self.connection = pool
 			
+		self.version = None
+			
 		self.Pages = listing.PageList(self)
 		self.Categories = listing.PageList(self, namespace = 14)
 		self.Images = listing.PageList(self, namespace = 6)
@@ -127,15 +129,17 @@ class Site(object):
 		while True:
 			info = self.raw_api(action, **kwargs)
 			if not info: info = {}
-			if 'userinfo' in info.get('query', ()):
-				userinfo = info['query']['userinfo']
-				if 'blockedby' in userinfo:
-					self.blocked = (userinfo['blockedby'], 
-						userinfo.get('blockreason', u''))
-				else:
-					self.blocked = False
-				self.hasmsg = 'message' in userinfo
-				self.logged_in = 'anon' not in userinfo
+				
+			try:
+				userinfo = compatibility.userinfo(info, self.require(1, 12, raise_error = None))
+			except KeyError:
+				userinfo = ()
+			if 'blockedby' in userinfo:
+				self.blocked = (userinfo['blockedby'], userinfo.get('blockreason', u''))
+			else:
+				self.blocked = False
+			self.hasmsg = 'message' in userinfo
+			self.logged_in = 'anon' not in userinfo
 			if 'error' in info:
 				if info['error']['code'] in (u'internal_api_error_DBConnectionError', ):
 					self.wait(token)
@@ -212,6 +216,10 @@ class Site(object):
 		return self.wait_tokens[token]
 
 	def require(self, major, minor, revision = None, raise_error = True):
+		if self.version is None:
+			if raise_error is None: return 
+			raise RuntimeError('Site %s has not yet been initialized' % repr(self))
+		
 		if revision is None:
 			if self.version[:2] >= (major, minor):
 				return True
