@@ -125,10 +125,10 @@ class Category(page.Page, GeneratorList):
 	def __repr__(self):
 		return "<Category object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
 	def members(self, prop = 'ids|title', namespace = None, sort = 'sortkey', 
-			dir = 'asc', generator = True):
+			dir = 'asc', start = None, end = None, generator = True):
 		prefix = self.get_prefix('cm', generator)
 		kwargs = dict(self.generate_kwargs(prefix, prop = prop, namespace = namespace,
-			sort = sort, dir = dir))
+			sort = sort, dir = dir, start = start, end = end))
 		return self.get_list(generator)(self.site, 'categorymembers', 'cm', **kwargs)
 		
 class PageList(GeneratorList):
