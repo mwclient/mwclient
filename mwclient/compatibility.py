@@ -23,3 +23,10 @@ def iiprop(post_112):
 		return 'timestamp|user|comment|url|size|sha1|metadata'
 	else:
 		return 'timestamp|user|comment|url|size|sha1'
+		
+def cmtitle(page, new_format, prefix = ''):
+	if new_format:
+		return prefix + 'title', page.name
+	else:
+		return prefix + 'category', page.strip_namespace(page.name)
+		
