@@ -119,7 +119,9 @@ class GeneratorList(List):
 class Category(page.Page, GeneratorList):
 	def __init__(self, site, name, info = None, namespace = None):
 		page.Page.__init__(self, site, name, info)
-		kwargs = {'gcmcategory': self.strip_namespace(self.name)}
+		kwargs = {}
+		kwargs.update((compatibility.cmtitle(self, self.site.require(
+			1, 12, raise_error = False), prefix = 'gcm'), ))
 		if namespace: kwargs['gcmnamespace'] = namespace
 		GeneratorList.__init__(self, site, 'categorymembers', 'cm', **kwargs)
 	def __repr__(self):
@@ -128,7 +130,8 @@ class Category(page.Page, GeneratorList):
 			dir = 'asc', start = None, end = None, generator = True):
 		prefix = self.get_prefix('cm', generator)
 		kwargs = dict(self.generate_kwargs(prefix, prop = prop, namespace = namespace,
-			sort = sort, dir = dir, start = start, end = end))
+			sort = sort, dir = dir, start = start, end = end, *(compatibility.cmtitle(
+			self, self.site.require(1, 12, raise_error = False)), )))
 		return self.get_list(generator)(self.site, 'categorymembers', 'cm', **kwargs)
 		
 class PageList(GeneratorList):
