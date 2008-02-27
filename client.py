@@ -156,11 +156,7 @@ class Site(object):
 	@staticmethod
 	def _query_string(*args, **kwargs):
 		kwargs.update(args)
-		qs = urllib.urlencode([(k, Site._to_str(v)) for k, v in kwargs.iteritems()
-			if k != 'wpEditToken'])
-		if 'wpEditToken' in kwargs: 
-			qs += '&wpEditToken=' + Site._to_str(kwargs['wpEditToken'])
-		return qs
+		return urllib.urlencode([(k, Site._to_str(v)) for k, v in kwargs.iteritems()])
 		
 	def raw_call(self, script, data):
 		url = self.path + script + '.php'
