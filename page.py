@@ -64,7 +64,7 @@ class Page(object):
 		
 	def can(self, action):
 		level = self.protection.get(action, (action, ))[0]
-		if level == 'sysop': level = 'protect'
+		if level == 'sysop': level = compatibility.protectright(site.version)
 		
 		return level in self.site.rights
 		
@@ -247,14 +247,14 @@ class Image(Page):
 	def __init__(self, site, name, info = None):
 		site.require(1, 11)
 		Page.__init__(self, site, name, info,
-			extra_properties = {'imageinfo': (('iiprop', compatibility.iiprop(
-				site.require(1, 12, raise_error = False))), )})
+			extra_properties = {'imageinfo': (('iiprop', 
+				compatibility.iiprop(site.version)), )})
 		self.imagerepository = self._info.get('imagerepository', '')
 		self.imageinfo = self._info.get('imageinfo', ((), ))[0]
 
 	def imagehistory(self):
 		return listing.PageProperty(self, 'imageinfo', 'ii', 
-			iiprop = compatibility.iiprop(self.site.require(1, 12, raise_error = False)))
+			iiprop = compatibility.iiprop(site.version))
 	def imageusage(self, namespace = None, filterredir = 'all', redirect = False, 
 			limit = None, generator = True):
 		self.site.require(1, 11)

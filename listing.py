@@ -112,7 +112,7 @@ class GeneratorList(List):
 	def load_chunk(self):
 		# Put this here so that the constructor does not fail 
 		# on uninitialized sites
-		self.args['iiprop'] = compatibility.iiprop(self.site.require(1, 12, raise_error = False))
+		self.args['iiprop'] = compatibility.iiprop(self.site.version)
 		return List.load_chunk(self)
 		
 	
