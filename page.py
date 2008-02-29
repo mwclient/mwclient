@@ -64,7 +64,7 @@ class Page(object):
 		
 	def can(self, action):
 		level = self.protection.get(action, (action, ))[0]
-		if level == 'sysop': level = compatibility.protectright(site.version)
+		if level == 'sysop': level = compatibility.protectright(self.site.version)
 		
 		return level in self.site.rights
 		
@@ -254,7 +254,7 @@ class Image(Page):
 
 	def imagehistory(self):
 		return listing.PageProperty(self, 'imageinfo', 'ii', 
-			iiprop = compatibility.iiprop(site.version))
+			iiprop = compatibility.iiprop(self.site.version))
 	def imageusage(self, namespace = None, filterredir = 'all', redirect = False, 
 			limit = None, generator = True):
 		self.site.require(1, 11)
