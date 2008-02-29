@@ -18,8 +18,8 @@ def userinfo(data, new_format = None):
 	else:
 		return data['userinfo']
 
-def iiprop(post_112):
-	if post_112:
+def iiprop(version):
+	if version[:2] >= (1, 12):
 		return 'timestamp|user|comment|url|size|sha1|metadata'
 	else:
 		return 'timestamp|user|comment|url|size|sha1'
@@ -30,3 +30,8 @@ def cmtitle(page, new_format, prefix = ''):
 	else:
 		return prefix + 'category', page.strip_namespace(page.name)
 		
+def protectright(version):
+	if version[:2] >= (1, 13):
+		return 'editprotected'
+	else:
+		return 'protect'
