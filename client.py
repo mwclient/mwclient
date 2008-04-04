@@ -68,6 +68,7 @@ class Site(object):
 		self.Images = listing.PageList(self, namespace = 6)
 		
 		self.namespaces = self.default_namespaces
+		self.writeapi = False
 		
 		self.initialized = False
 		
@@ -84,6 +85,7 @@ class Site(object):
 			siprop = 'general|namespaces', uiprop = 'groups|rights')
 		self.site = meta['query']['general']
 		self.namespaces = dict(((i['id'], i.get('*', '')) for i in meta['query']['namespaces'].itervalues()))
+		self.writeapi = 'writeapi' in meta['general']
 			
 		if self.site['generator'].startswith('MediaWiki '):
 			version = self.site['generator'][10:].split('.')
