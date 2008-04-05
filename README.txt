@@ -1,4 +1,4 @@
-This files describes mwclient-0.6.0. The latest version is available in the 
+This files describes mwclient-0.6.1. The latest version is available in the 
 subversion repository <https://mwclient.svn.sourceforge.net/svnroot/mwclient>
 and also browsable <http://mwclient.svn.sourceforge.net/viewvc/mwclient/>.
 

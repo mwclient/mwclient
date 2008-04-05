@@ -1,7 +1,7 @@
 import client, errors, listing
 import compatibility
-from HTMLParser import HTMLParser
-from htmlentitydefs import name2codepoint 
+from page_nowriteapi import OldPage
+
 import urllib, time
 	
 class Page(object):
@@ -80,7 +80,16 @@ class Page(object):
 				if i['title'] == self.name:
 					self.site.tokens[type] = i['%stoken' % type]
 		return self.site.tokens[type]
+					
+	def get_expanded(self):
+		self.site.require(1, 12)
 		
+		revs = self.revisions(prop = 'content', limit = 1, expandtemplates = True)
+		try:
+			return revs.next()['*']
+		except StopIteration:
+			return u''
+			
 	def edit(self, section = None, readonly = False):
 		if not self.can('read'):
 			raise errors.InsufficientPermission(self)
@@ -96,7 +105,7 @@ class Page(object):
 			self.text = u''
 			self.edit_time = None
 		return self.text
-		
+	
 	def save(self, text = u'', summary = u'', minor = False):
 		if not self.site.logged_in and self.site.force_login:
 			# Should we really check for this?
@@ -108,31 +117,29 @@ class Page(object):
 		
 		if not text: text = self.text
 		
+		if not self.site.writeapi:
+			return OldPage.save(self, text = text, summary = summary, minor = False)
+		
 		data = {}
-		data['wpTextbox1'] = text
-		data['wpSummary'] = summary
-		data['wpSave'] = 'Save page'
-		data['wpEditToken'] = self.get_token('edit')
-		if self.edit_time:
-			data['wpEdittime'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
-		else:
-			data['wpEdittime'] = time.strftime('%Y%m%d%H%M%S', time.gmtime())
-		data['wpStarttime'] = time.strftime('%Y%m%d%H%M%S', time.gmtime())
+		if minor: data['minor'] = '1'
+		if not minor: data['notminor'] = '1'
+		if self.edit_time: data['basetimestamp'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
+		
+		try:
+			result = self.site.api('edit', title = self.name, text = text, 
+					summary = summary, token = self.get_token('edit'), 
+					**data)
+			if result['edit'].get('result').lower() == 'failure':
+				raise errors.EditError(self, result['edit']['result'])
+		except errors.APIError, e:
+			if e.code == 'editconflict':
+				raise errors.EditError(self, text, summary, e.info)
+			elif e.code in ('protectedtitle', 'cantcreate', 'cantcreate-anon', 'noimageredirect-anon', 
+				    'noimageredirect', 'noedit-anon', 'noedit'):
+				raise errors.ProtectedPageError(self, e.code, e.info)
+			else:
+				raise
 
-		if minor: data['wpMinoredit'] = '1'
-		data['title'] = self.name
-		
-		page_data = self.site.raw_index('submit', **data)
-				
-		page = EditPage('editform')
-		page.feed(page_data)
-		page.close()
-		
-		if page.data:
-			if page.readonly: raise errors.ProtectedPageError(self)
-			self.get_token('edit',  True)
-			raise errors.EditError(page.title, data)
-			
 	def get_expanded(self):
 		self.site.require(1, 12)
 		
@@ -145,33 +152,33 @@ class Page(object):
 	def move(self, new_title, reason = '', move_talk = True):
 		if not self.can('move'): raise errors.InsufficientPermission(self)
 		
-		postdata = {'wpNewTitle': new_title,
-			'wpOldTitle': self.name,
-			'wpReason': reason,
-			'wpMove': '1',
-			'wpEditToken': self.get_token('move')}
-		if move_talk: postdata['wpMovetalk'] = '1'
-		postdata['title'] = 'Special:Movepage'
+		if not self.site.writeapi:
+			return OldPage.move(self, new_title = new_title, 
+				reason = reason, move_talk = move_talk)
 		
-		page_data = self.site.raw_index('submit', **data)
-				
-		page = EditPage('movepage')
-		page.feed(page_data.decode('utf-8', 'ignore'))
-		page.close()
+		data = {}
+		if move_talk: data['movetalk'] = '1'
+		result = self.site.api(('from', self.name), to = new_title, 
+			token = self.get_token('move'), reason = reason, **data)
 		
-		if 'wpEditToken' in page.data:
-			raise errors.EditError(page.title, postdata)
+		
 			
-	def delete(self, reason = ''):
+	def delete(self, reason = '', watch = False, unwatch = False, oldimage = False):
 		if not self.can('delete'): raise errors.InsufficientPermission(self)
-			
-		postdata = {'wpReason': reason,
-			'wpConfirmB': 'Delete',
-			'mw-filedelete-submit': 'Delete',
-			'wpEditToken': self.get_token('delete'),
-			'title': self.name}
-			
-		page_data = self.site.raw_index('delete', **data)
+		
+		if not self.site.writeapi:
+			return OldPage.delete(self, reason = reason)
+		
+		data = {}
+		if watch: data['watch'] = '1'
+		if unwatch: data['unwatch'] = '1'
+		if oldimage: data['oldimage'] = oldimage
+		result = self.site.api('delete', title = self.name, 
+				token = self.get_token('delete'), 
+				reason = reason, **data)
+		
+
+
 		
 	def purge(self):
 		self.site.raw_index('purge', title = self.name)
@@ -273,57 +280,3 @@ class Image(Page):
 	def __repr__(self):
 		return "<Image object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
 	
-class EditPage(HTMLParser):
-	def __init__(self, form):
-		HTMLParser.__init__(self)
-		
-		self.form = form
-		
-		self.in_form = False
-		self.in_text = False
-		self.in_title = False
-		
-		self.data = {}
-		self.textdata = []
-		self.title = u''
-		
-		self.readonly = True
-		
-	def handle_starttag(self, tag, attrs):
-		self.in_title = (tag == 'title')
-		
-		if (u'id', self.form) in attrs:
-			attrs = dict(attrs)
-			self.in_form = True
-			self.action = attrs['action']
-			
-		if tag == 'input' and self.in_form and (u'type', u'submit') \
-				not in attrs and (u'type', u'checkbox') not in attrs:
-			attrs = dict(attrs)
-			if u'name' in attrs: self.data[attrs[u'name']] = attrs.get(u'value', u'')
-			
-		if self.in_form and tag == 'textarea':
-			self.in_text = True
-			self.readonly = (u'readonly', u'readonly') in attrs
-	
-			
-	def handle_endtag(self, tag):
-		if self.in_title and tag == 'title': self.in_title = False
-		if self.in_form and tag == 'form': self.in_form = False
-		if self.in_text and tag == 'textarea': self.in_text = False
-	
-	def handle_data(self, data):
-		if self.in_text: self.textdata.append(data)
-		if self.in_title: self.title += data
-		
-	def handle_entityref(self, name):
-		if name in name2codepoint: 
-			self.handle_data(unichr(name2codepoint[name]))
-		else:
-			self.handle_data(u'&%s;' % name)
-	def handle_charref(self, name):
-		try:
-			self.handle_data(unichr(int(name)))
-		except ValueError:
-			self.handle_data(u'&#$s;' % name)
-		
