@@ -48,7 +48,7 @@ print 'Text in sandbox:', text.encode('utf-8')
 page.save(text + u'\nExtra data', summary = 'Test edit')
 
 # Printing imageusage
-image = page.Images['Example.jpg']
+image = site.Images['Example.jpg']
 print 'Image', image.name.encode('utf-8'), 'usage:'
 for page in image.imageusage():
 	print 'Used:', page.name.encode('utf-8'), '; namespace', page.namespace
