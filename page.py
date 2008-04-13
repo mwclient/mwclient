@@ -270,12 +270,13 @@ class Image(Page):
 		kwargs = dict(listing.List.generate_kwargs(prefix, title = self.name,
 			namespace = namespace, filterredir = filterredir))
 		if redirect: kwargs['%sredirect' % prefix] = '1'
-		return listing.List.get_list(generator)('imageusage', 'iu', limit = limit, return_values = 'title', **kwargs)
+		return listing.List.get_list(generator)(self.site, 'imageusage', 'iu', 
+			limit = limit, return_values = 'title', **kwargs)
 
 	def download(self):
-		url = urlparse.urlparse(self.imageinfo[index]['url'])
+		url = urlparse.urlparse(self.imageinfo['url'])
 		# TODO: query string
-		return self.site.pool.get(url[1], url[2])
+		return self.site.connection.get(url[1], url[2])
 		
 	def __repr__(self):
 		return "<Image object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
