@@ -2,7 +2,7 @@ import client, errors, listing
 import compatibility
 from HTMLParser import HTMLParser
 from htmlentitydefs import name2codepoint 
-import urllib, time
+import urllib, urlparse, time
 	
 class Page(object):
 	def __init__(self, site, name, info = None, extra_properties = {}):
@@ -171,7 +171,7 @@ class Page(object):
 			'wpEditToken': self.get_token('delete'),
 			'title': self.name}
 			
-		page_data = self.site.raw_index('delete', **data)
+		page_data = self.site.raw_index('delete', **postdata)
 		
 	def purge(self):
 		self.site.raw_index('purge', title = self.name)
@@ -263,12 +263,13 @@ class Image(Page):
 		kwargs = dict(listing.List.generate_kwargs(prefix, title = self.name,
 			namespace = namespace, filterredir = filterredir))
 		if redirect: kwargs['%sredirect' % prefix] = '1'
-		return listing.List.get_list(generator)('imageusage', 'iu', limit = limit, return_values = 'title', **kwargs)
+		return listing.List.get_list(generator)(self.site, 'imageusage', 'iu', 
+			limit = limit, return_values = 'title', **kwargs)
 
 	def download(self):
-		url = urlparse.urlparse(self.imageinfo[index]['url'])
+		url = urlparse.urlparse(self.imageinfo['url'])
 		# TODO: query string
-		return self.site.pool.get(url[1], url[2])
+		return self.site.connection.get(url[1], url[2])
 		
 	def __repr__(self):
 		return "<Image object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
