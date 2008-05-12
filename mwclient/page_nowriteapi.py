@@ -2,6 +2,8 @@ import time
 from HTMLParser import HTMLParser
 from htmlentitydefs import name2codepoint 
 
+import errors
+
 class OldPage(object):
 	@staticmethod
 	def save(self, text = u'', summary = u'', minor = False):
