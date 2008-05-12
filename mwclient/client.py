@@ -34,11 +34,12 @@ class WaitToken(object):
 
 class Site(object):
 	api_limit = 500
-	def __init__(self, host, path = '/w/', pool = None, retry_timeout = 30, 
+	def __init__(self, host, path = '/w/', ext = '.php', pool = None, retry_timeout = 30, 
 			max_retries = 25, wait_callback = lambda *x: None, 
 			max_lag = 3, compress = True, force_login = True, do_init = True):
 		self.host = host
 		self.path = path
+		self.ext = ext
 		self.credentials = None
 		self.compress = compress
 		
@@ -163,7 +164,7 @@ class Site(object):
 		return qs
 		
 	def raw_call(self, script, data):
-		url = self.path + script + '.php'
+		url = self.path + script + self.ext
 		headers = {'Content-Type': 'application/x-www-form-urlencoded'}
 		if self.compress and gzip:
 			headers['Accept-Encoding'] = 'gzip'

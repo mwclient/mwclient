@@ -38,8 +38,9 @@ class ConfiguredSite(client.Site):
 		
 		do_login = 'username' in self.config and 'password' in self.config
 		
-		client.Site.__init__(self, self.config['host'],
-			self.config['path'], do_init = not do_login,
+		client.Site.__init__(self, host = self.config['host'],
+			path = self.config['path'], ext = self.config.get('ext', '.php'), 
+			do_init = not do_login,
 			retry_timeout  = self.config.get('retry_timeout', 30),
 			max_retries = self.config.get('max_retries', -1))
 			
@@ -63,8 +64,9 @@ class ConfiguredPool(list):
 			
 			do_login = 'username' in site and 'password' in site
 					
-			self.append(client.Site(site['host'], 
-				site['path'], self.pool, do_init = not do_login,
+			self.append(client.Site(host = site['host'], 
+				path = site['path'], ext = site.get('ext', '.php'),
+				pool = self.pool, do_init = not do_login,
 				retry_timeout = site.get('retry_timeout', 30),
 				max_retries = site.get('max_retries', -1)))
 			if do_login:
