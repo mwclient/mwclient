@@ -19,6 +19,8 @@ def userinfo(data, new_format = None):
 		return data['userinfo']
 
 def iiprop(version):
+	if version[:2] >= (1, 13):
+		return 'timestamp|user|comment|url|size|sha1|metadata|archivename'
 	if version[:2] >= (1, 12):
 		return 'timestamp|user|comment|url|size|sha1|metadata'
 	else:

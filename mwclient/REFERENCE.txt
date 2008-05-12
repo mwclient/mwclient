@@ -1,5 +1,5 @@
 This file is intended to be a reference to mwclient. The current version is 
-mwclient 0.6.0.
+mwclient 0.6.1.
 
 The mwclient framework provides an access to the MediaWiki API. It provides the
 functions of the MediaWiki API in a Pythonic manner.
@@ -58,8 +58,8 @@ fw.close()
 
 ==== Editting pages ====
 Call Page.edit() to retrieve the page content. Use Page.save(text, summary = 
-u'', ...) to save the page. Currently Page.save does not use the API, but the
-old way via index.php.
+u'', ...) to save the page. If available, Page.save uses the API to edit, but
+falls back to the old way if the write API is not available.
 
 == Generators ==
 == Exceptions ==

@@ -14,7 +14,10 @@ class MaximumRetriesExceeded(MwClientError):
 	pass
 	
 class APIError(MwClientError):
-	pass
+	def __init__(self, code, info):
+		self.code = code
+		self.info = info
+		MwClientError.__init__(self, code, info)
 	
 class InsufficientPermission(MwClientError):
 	pass
