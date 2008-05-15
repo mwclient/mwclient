@@ -274,7 +274,10 @@ class Image(Page):
 			limit = limit, return_values = 'title', **kwargs)
 
 	def download(self):
-		url = urlparse.urlparse(self.imageinfo['url'])
+		url = self.imageinfo['url']
+		if not url.startswith('http://'):
+			url = 'http://' + self.site.host + url
+		url = urlparse.urlparse(url)
 		# TODO: query string
 		return self.site.connection.get(url[1], url[2])
 		
