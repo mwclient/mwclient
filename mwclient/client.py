@@ -148,7 +148,7 @@ class Site(object):
 					self.wait(token)
 					continue
 				raise errors.APIError(info['error']['code'],
-					info['error']['info'])
+					info['error']['info'], kwargs)
 			return info
 		
 	@staticmethod
@@ -460,4 +460,18 @@ class Site(object):
 			namespace = namespace, dir = dir, prop = prop, show = show))
 		if allrev: kwargs['wlallrev'] = '1'
 		return listing.List(self, 'watchlist', 'wl', limit = limit, **kwargs)
+		
+	def expandtemplates(self, text, title = None, generatexml = False):
+		self.require(1, 11)
+		
+		kwargs = {}
+		if title is None: kwargs['title'] = title
+		if generatexml: kwargs['generatexml'] = '1'
+		
+		result = self.api('expandtemplates', text = text, **kwargs)
+		
+		if generatexml:
+			return result['expandtemplates']['*'], result['parsetree']['*']
+		else:
+			return result['expandtemplates']['*']
 		
