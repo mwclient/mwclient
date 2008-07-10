@@ -130,7 +130,7 @@ class Page(object):
 					summary = summary, token = self.get_token('edit'), 
 					**data)
 			if result['edit'].get('result').lower() == 'failure':
-				raise errors.EditError(self, result['edit']['result'])
+				raise errors.EditError(self, result['edit'])
 		except errors.APIError, e:
 			if e.code == 'editconflict':
 				raise errors.EditError(self, text, summary, e.info)
