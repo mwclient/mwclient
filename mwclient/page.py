@@ -158,9 +158,9 @@ class Page(object):
 		
 		data = {}
 		if move_talk: data['movetalk'] = '1'
-		result = self.site.api(('from', self.name), to = new_title, 
+		result = self.site.api('move', ('from', self.name), to = new_title, 
 			token = self.get_token('move'), reason = reason, **data)
-		
+		return result['move']
 		
 			
 	def delete(self, reason = '', watch = False, unwatch = False, oldimage = False):
@@ -176,9 +176,7 @@ class Page(object):
 		result = self.site.api('delete', title = self.name, 
 				token = self.get_token('delete'), 
 				reason = reason, **data)
-		
-
-
+		return result['delete']
 		
 	def purge(self):
 		self.site.raw_index('purge', title = self.name)
