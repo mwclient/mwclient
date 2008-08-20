@@ -268,9 +268,15 @@ class Site(object):
 			self.conn.cookies[self.host].update(cookies)
 			
 		if self.credentials:
-			login = self.api('login', lgname = self.credentials[0], lgpassword = self.credentials[1])
-			if login['login']['result'] != 'Success':
-				raise errors.LoginError(self, login['login'])
+			wait_token = self.wait_token()
+			while True:
+				login = self.api('login', lgname = self.credentials[0], lgpassword = self.credentials[1])
+				if login['login']['result'] == 'Success':
+					break
+				elif login['login']['result'] == 'Throttled':
+					self.wait(wait_token, login['login']['wait'])
+				else:
+					raise errors.LoginError(self, login['login'])
 				
 		if self.initialized:				
 			info = self.api('query', meta = 'userinfo', uiprop = 'groups|rights')
