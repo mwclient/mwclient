@@ -50,11 +50,14 @@ class Cookie(object):
 		self.value = value
 		
 class HTTPPersistentConnection(object):
+	http_class = httplib.HTTPConnection
+	scheme_name = 'http'
+	
 	def __init__(self, host, pool = None):
 		self.cookies = {}
 		self.pool = pool
 		if pool: self.cookies = pool.cookies
-		self._conn = httplib.HTTPConnection(host)
+		self._conn = self.http_class(host)
 		self._conn.connect()
 		self.last_request = time.time()
 		
@@ -110,15 +113,25 @@ class HTTPPersistentConnection(object):
 					del headers['Content-Length']
 				method = 'GET'
 				data = ''
+			old_path = path
 			path = location[2]
 			if location[4]: path = path + '?' + location[4]
 			
+			print location[0]
+			if location[0].lower() != self.scheme_name:
+				raise errors.HTTPRedirectError, ('Only HTTP connections are supported',
+					res.getheader('Location'))
+			
 			if self.pool is None:
 				if location[1] != host: 
-					raise errors.HTTPError, ('Redirecting to different hosts not supported', 
+					raise errors.HTTPRedirectError, ('Redirecting to different hosts not supported', 
 						res.getheader('Location'))
+
 				return self.request(method, host, path, headers, data)
 			else:
+				if host == location[1] and path == old_path:
+					conn = self.__class__(location[1], self.pool)
+					self.pool.append(([location[1]], conn))
 				return self.pool.request(method, location[1], path, 
 					headers, data, stream_iter, raise_on_not_ok, auto_redirect)
 			
@@ -153,6 +166,10 @@ class HTTPConnection(HTTPPersistentConnection):
 			stream_iter, raise_on_not_ok, auto_redirect)
 		return res
 
+class HTTPSPersistentConnection(HTTPPersistentConnection):
+	http_class = httplib.HTTPSConnection
+	scheme_name = 'https'
+
 	
 class HTTPPool(list):
 	def __init__(self):
@@ -161,13 +178,15 @@ class HTTPPool(list):
 	def find_connection(self, host):
 		for hosts, conn in self:
 			if host in hosts: return conn
-				
+		
+		redirected_host = None
 		for hosts, conn in self:
 			status, headers = conn.head(host, '/')
 			if status == 200:
 				hosts.append(host)
 				return conn
 			if status >= 300 and status <= 399:
+				# BROKEN!
 				headers = dict(headers)
 				location = urlparse.urlparse(headers.get('location', ''))
 				if location[1] == host:
@@ -192,3 +211,4 @@ class HTTPPool(list):
 	def close(self):
 		for hosts, conn in self:
 			conn.close()
+			

@@ -189,6 +189,8 @@ class Site(object):
 					raise
 				else:
 					self.wait(token)
+			except errors.HTTPRedirectError:
+				raise
 			except errors.HTTPError:
 				self.wait(token)
 			except ValueError:
@@ -198,7 +200,13 @@ class Site(object):
 		kwargs['action'] = action
 		kwargs['format'] = 'json'
 		data = self._query_string(*args, **kwargs)
-		return simplejson.load(self.raw_call('api', data))
+		json = self.raw_call('api', data).read()
+		try:
+			return simplejson.loads(json)
+		except ValueError:
+			if json.startswith('MediaWiki API is not enabled for this site.'):
+				raise errors.APIDisabledError
+			raise
 				
 	def raw_index(self, action, *args, **kwargs):
 		kwargs['action'] = action

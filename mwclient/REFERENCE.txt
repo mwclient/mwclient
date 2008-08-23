@@ -79,7 +79,8 @@ their two letter prefix Exceptions:
 Properties and generators are implemented as Python generators. Their limit 
 parameter is only an indication of the number of items in one chunk. It is not
 the total limit. Doing list(generator(limit = limit)) will return ALL items of 
-generator, and not be limitted by the limit value.
+generator, and not be limitted by the limit value. Use list(generator(
+max_items = max_items)) to limit the amount of items returned.
 Default chunk size is generally the maximum chunk size.
 
 == Links ==

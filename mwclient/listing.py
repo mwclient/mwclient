@@ -2,7 +2,7 @@ import client, page
 import compatibility
 
 class List(object):
-	def __init__(self, site, list_name, prefix, limit = None, return_values = None, *args, **kwargs):
+	def __init__(self, site, list_name, prefix, limit = None, return_values = None, max_items = None, *args, **kwargs):
 		# NOTE: Fix limit
 		self.site = site
 		self.list_name = list_name
@@ -15,6 +15,9 @@ class List(object):
 		if limit is None: limit = site.api_limit
 		self.args[self.prefix + 'limit'] = str(limit)
 		
+		self.count = 0
+		self.max_items = max_items
+		
 		self._iter = iter(xrange(0))
 		
 		self.last = False
@@ -25,8 +28,12 @@ class List(object):
 		return self
 		
 	def next(self, full = False):
+		if self.max_items is not None:
+			if self.count >= self.max_items:
+				raise StopIteration
 		try:
 			item = self._iter.next()
+			self.count += 1
 			if 'timestamp' in item:
 				item['timestamp'] = client.parse_timestamp(item['timestamp'])
 			if full: return item
