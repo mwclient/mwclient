@@ -64,9 +64,14 @@ class Site(object):
 			
 		self.version = None
 			
-		self.Pages = listing.PageList(self)
-		self.Categories = listing.PageList(self, namespace = 14)
-		self.Images = listing.PageList(self, namespace = 6)
+		self.pages = listing.PageList(self)
+		self.categories = listing.PageList(self, namespace = 14)
+		self.images = listing.PageList(self, namespace = 6)
+		
+		# Compat
+		self.Pages = self.pages
+		self.Categories = self.categories
+		self.Images = self.images
 		
 		self.namespaces = self.default_namespaces
 		self.writeapi = False
@@ -147,6 +152,9 @@ class Site(object):
 				if info['error']['code'] in (u'internal_api_error_DBConnectionError', ):
 					self.wait(token)
 					continue
+				if '*' in info['error']:
+					raise errors.APIError(info['error']['code'],
+						info['error']['info'], info['error']['*'])
 				raise errors.APIError(info['error']['code'],
 					info['error']['info'], kwargs)
 			return info

@@ -139,6 +139,7 @@ class Page(object):
 				raise errors.ProtectedPageError(self, e.code, e.info)
 			else:
 				raise
+		return result['edit']
 
 	def get_expanded(self):
 		self.site.require(1, 12)
