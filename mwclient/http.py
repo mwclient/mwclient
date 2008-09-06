@@ -117,7 +117,6 @@ class HTTPPersistentConnection(object):
 			path = location[2]
 			if location[4]: path = path + '?' + location[4]
 			
-			print location[0]
 			if location[0].lower() != self.scheme_name:
 				raise errors.HTTPRedirectError, ('Only HTTP connections are supported',
 					res.getheader('Location'))

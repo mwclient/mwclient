@@ -290,7 +290,7 @@ class Site(object):
 				if login['login']['result'] == 'Success':
 					break
 				elif login['login']['result'] == 'Throttled':
-					self.wait(wait_token, login['login']['wait'])
+					self.wait(wait_token, login['login'].get('wait', 5))
 				else:
 					raise errors.LoginError(self, login['login'])
 				
