@@ -321,7 +321,8 @@ class Site(object):
 			file.seek(0, 0)
 		
 		predata = {}
-		predata['wpDestFile'] = filename
+		# Do this thing later so that an incomplete upload won't work
+		# predata['wpDestFile'] = filename
 		predata['wpUploadDescription'] = description
 		predata['wpLicense'] = license
 		if ignore: predata['wpIgnoreWarning'] = 'true'
@@ -355,6 +356,12 @@ class Site(object):
 				if not chunk: break
 				yield chunk
 			yield '\r\n'
+			
+			yield '--%s\r\n' % boundary
+			yield 'Content-Disposition: form-data; name="wpDestFile"\r\n'
+			yield '\r\n'
+			yield filename.encode('utf-8')
+			
 			yield '--%s--' % boundary
 			yield '\r\n'
 		
