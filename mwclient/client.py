@@ -328,6 +328,7 @@ class Site(object):
 		if ignore: predata['wpIgnoreWarning'] = 'true'
 		predata['wpUpload'] = 'Upload file'
 		predata['wpSourceType'] = 'file'
+		predata['wpDestFile'] = filename
 	
 		boundary = '----%s----' % ''.join((random.choice(
 			'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') 
@@ -347,7 +348,14 @@ class Site(object):
 		data_header.append('')
 		
 		postdata = '\r\n'.join(data_header)
-		content_length = len(postdata) + file_size + 2 + (4 + len(boundary)) + 2
+		content_length = (len(postdata) + file_size + 
+				2 + # \r\n
+				(6 + len(boundary)) +
+				49 + # wpUpload
+				2 + # \r\n 
+				1 + # 1
+				(4 + len(boundary)) + 
+				2)
 		
 		def iterator():
 			yield postdata
@@ -358,9 +366,9 @@ class Site(object):
 			yield '\r\n'
 			
 			yield '--%s\r\n' % boundary
-			yield 'Content-Disposition: form-data; name="wpDestFile"\r\n'
+			yield 'Content-Disposition: form-data; name="wpUpload"\r\n'
 			yield '\r\n'
-			yield filename.encode('utf-8')
+			yield '1'
 			
 			yield '--%s--' % boundary
 			yield '\r\n'
