@@ -34,6 +34,9 @@ the total limit. Doing list(generator(limit = limit)) will return ALL items of
 generator, and not be limitted by the limit value.
 Default chunk size is generally the maximum chunk size.
 
+== HTTPS ==
+To use https, specify the host as a tuple in the form of ('https', hostname).
+
 == Example ==
 ## For more information, see REFERENCE.txt
 # Init site object

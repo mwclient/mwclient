@@ -63,6 +63,10 @@ class HTTPPersistentConnection(object):
 		
 	def request(self, method, host, path, headers, data, stream_iter = None,
 			raise_on_not_ok = True, auto_redirect = True):		
+		
+		# Strip scheme
+		if type(host) is tuple:
+			host = host[1]
 			
 		# Dirty hack...
 		if (time.time() - self.last_request) > 60:
@@ -174,25 +178,34 @@ class HTTPPool(list):
 	def __init__(self):
 		list.__init__(self)
 		self.cookies = {}
-	def find_connection(self, host):
+	def find_connection(self, host, scheme = 'http'):
+		if type(host) is tuple:
+			scheme, host = host
+			
 		for hosts, conn in self:
-			if host in hosts: return conn
+			if (scheme, host) in hosts: return conn
 		
 		redirected_host = None
 		for hosts, conn in self:
 			status, headers = conn.head(host, '/')
 			if status == 200:
-				hosts.append(host)
+				hosts.append((scheme, host))
 				return conn
 			if status >= 300 and status <= 399:
 				# BROKEN!
 				headers = dict(headers)
 				location = urlparse.urlparse(headers.get('location', ''))
-				if location[1] == host:
-					hosts.append(host)
+				if (location[0], location[1]) == (scheme, host):
+					hosts.append((scheme, host))
 					return conn
-		conn = HTTPPersistentConnection(host, self)
-		self.append(([host], conn))
+		if scheme == 'http':
+			cls = HTTPPersistentConnection
+		elif scheme == 'https':
+			cls = HTTPSPersistentConnection
+		else:
+			raise RuntimeError('Unsupported scheme', scheme)
+		conn = cls(host, self)
+		self.append(([(scheme, host)], conn))
 		return conn
 	def get(self, host, path, headers = None):
 		return self.find_connection(host).get(host, 
