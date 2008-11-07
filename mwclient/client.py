@@ -265,7 +265,7 @@ class Site(object):
 		postdata['uselang'] = 'en'
 		postdata['title'] = u'Special:Emailuser/' + user
 
-		data = self.raw_index('submit', postdata)
+		data = self.raw_index('submit', **postdata)
 		if 'var wgAction = "success";' not in data:
 			if 'This user has not specified a valid e-mail address' in data:
 				# Dirty hack
