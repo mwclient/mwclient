@@ -150,7 +150,7 @@ class Page(object):
 		except StopIteration:
 			return u''
 			
-	def move(self, new_title, reason = '', move_talk = True):
+	def move(self, new_title, reason = '', move_talk = True, no_redirect = False):
 		if not self.can('move'): raise errors.InsufficientPermission(self)
 		
 		if not self.site.writeapi:
@@ -159,6 +159,7 @@ class Page(object):
 		
 		data = {}
 		if move_talk: data['movetalk'] = '1'
+		if no_redirect: data['noredirect'] = '1'
 		result = self.site.api('move', ('from', self.name), to = new_title, 
 			token = self.get_token('move'), reason = reason, **data)
 		return result['move']
