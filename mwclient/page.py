@@ -106,7 +106,7 @@ class Page(object):
 			self.edit_time = None
 		return self.text
 	
-	def save(self, text = u'', summary = u'', minor = False):
+	def save(self, text = u'', summary = u'', minor = False, bot = True):
 		if not self.site.logged_in and self.site.force_login:
 			# Should we really check for this?
 			raise errors.LoginError(self.site)
@@ -124,6 +124,7 @@ class Page(object):
 		if minor: data['minor'] = '1'
 		if not minor: data['notminor'] = '1'
 		if self.edit_time: data['basetimestamp'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
+		if bot: data['bot'] = '1'
 		
 		try:
 			result = self.site.api('edit', title = self.name, text = text, 
