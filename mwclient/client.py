@@ -394,6 +394,12 @@ class Site(object):
 				return
 			file.seek(0, 0)
 			
+	def parse(self, text, title = None):
+		kwargs = {'text': text}
+		if title is not None: kwargs['title'] = title
+		result = self.api('parse', **kwargs)
+		return result['parse']
+			
 	# Lists
 	def allpages(self, start = None, prefix = None, namespace = '0', filterredir = 'all',
 			minsize = None, maxsize = None, prtype = None, prlevel = None,
