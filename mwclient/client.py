@@ -1,4 +1,4 @@
-__ver__ = '0.6.1'
+__ver__ = '0.6.2'
 
 import urllib, urlparse
 import time, random
@@ -7,6 +7,7 @@ import socket
 
 import simplejson
 import http
+import upload
 
 import errors
 import listing, page
@@ -329,58 +330,15 @@ class Site(object):
 		predata['wpUpload'] = 'Upload file'
 		predata['wpSourceType'] = 'file'
 		predata['wpDestFile'] = filename
-	
-		boundary = '----%s----' % ''.join((random.choice(
-			'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') 
-			for i in xrange(32)))
-		data_header = []
-		for name, value in predata.iteritems():
-			data_header.append('--' + boundary) 
-			data_header.append('Content-Disposition: form-data; name="%s"' % name)
-			data_header.append('')
-			data_header.append(value.encode('utf-8'))
-			
-		data_header.append('--' + boundary) 
-		data_header.append('Content-Disposition: form-data; name="wpUploadFile"; filename="%s"' % \
-			filename.encode('utf-8'))
-		data_header.append('Content-Type: application/octet-stream')
-		data_header.append('')
-		data_header.append('')
 		
-		postdata = '\r\n'.join(data_header)
-		content_length = (len(postdata) + file_size + 
-				2 + # \r\n
-				(6 + len(boundary)) +
-				49 + # wpUpload
-				2 + # \r\n 
-				1 + # 1
-				(4 + len(boundary)) + 
-				2)
-		
-		def iterator():
-			yield postdata
-			while True:
-				chunk = file.read(32768)
-				if not chunk: break
-				yield chunk
-			yield '\r\n'
-			
-			yield '--%s\r\n' % boundary
-			yield 'Content-Disposition: form-data; name="wpUpload"\r\n'
-			yield '\r\n'
-			yield '1'
-			
-			yield '--%s--' % boundary
-			yield '\r\n'
+		postdata = upload.UploadFile('wpUploadFile', filename, file_size, file, predata)
 		
 		wait_token = self.wait_token()
 		while True:
 			try:
 				self.connection.post(self.host,
 					self.path + 'index.php?title=Special:Upload&maxlag=' + self.max_lag,
-					headers = {'Content-Type': 'multipart/form-data; boundary=' + boundary,
-						'Content-Length': str(content_length)},
-					stream_iter = iterator()).read()
+					data = postdata).read()
 			except errors.HTTPStatusError, e:
 				if e[0] == 503 and e[1].getheader('X-Database-Lag'):
 					self.wait(wait_token, int(e[1].getheader('Retry-After')))

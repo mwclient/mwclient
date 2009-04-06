@@ -4,6 +4,7 @@ import httplib
 import socket
 import time
 
+import upload
 import errors
 
 from client import __ver__
@@ -61,7 +62,7 @@ class HTTPPersistentConnection(object):
 		self._conn.connect()
 		self.last_request = time.time()
 		
-	def request(self, method, host, path, headers, data, stream_iter = None,
+	def request(self, method, host, path, headers, data,
 			raise_on_not_ok = True, auto_redirect = True):		
 		
 		# Strip scheme
@@ -75,19 +76,27 @@ class HTTPPersistentConnection(object):
 		
 		_headers = headers
 		headers = {}
-		if not data: data = ''
+		
 		headers['Connection'] = 'Keep-Alive'
 		headers['User-Agent'] = 'MwClient/' + __ver__
 		headers['Host'] = host
 		if host in self.cookies: 
 			headers['Cookie'] = self.cookies[host].get_cookie_header()
+		if issubclass(data.__class__, upload.Upload):
+			headers['Content-Type'] = data.content_type
+			headers['Content-Length'] = data.length;
+		elif data:
+			headers['Content-Length'] = len(data)
+			
 		if _headers: headers.update(_headers)
 		
 		try:
-			self._conn.request(method, path, data, headers)
-			if stream_iter:
-				for s_data in stream_iter:
-					self._conn.send(s_data)
+			self._conn.request(method, path, headers = headers)
+			if issubclass(data.__class__, upload.Upload):
+				for str in data:
+					self._conn.send(str)
+			elif data:
+				self._conn.send(data)
 			
 			self.last_request = time.time()
 			try:
@@ -100,8 +109,8 @@ class HTTPPersistentConnection(object):
 		except socket.error, e:
 			self._conn.close()
 			raise errors.HTTPError, e
-		except Exception, e:
-			raise errors.HTTPError, e
+		#except Exception, e:
+		#	raise errors.HTTPError, e
 				
 		if not host in self.cookies: self.cookies[host] = CookieJar()
 		self.cookies[host].extract_cookies(res)
@@ -136,7 +145,7 @@ class HTTPPersistentConnection(object):
 					conn = self.__class__(location[1], self.pool)
 					self.pool.append(([location[1]], conn))
 				return self.pool.request(method, location[1], path, 
-					headers, data, stream_iter, raise_on_not_ok, auto_redirect)
+					headers, data, raise_on_not_ok, auto_redirect)
 			
 		if res.status != 200 and raise_on_not_ok:
 			try:
@@ -148,8 +157,8 @@ class HTTPPersistentConnection(object):
 		
 	def get(self, host, path, headers = None):
 		return self.request('GET', host, path, headers, None)
-	def post(self, host, path, headers = None, data = None, stream_iter = None):
-		return self.request('POST', host, path, headers, data, stream_iter)
+	def post(self, host, path, headers = None, data = None):
+		return self.request('POST', host, path, headers, data)
 	def head(self, host, path, headers = None, auto_redirect = False):
 		res = self.request('HEAD', host, path, headers, 
 			data = None, raise_on_not_ok = False,
@@ -161,12 +170,12 @@ class HTTPPersistentConnection(object):
 		self._conn.close()
 
 class HTTPConnection(HTTPPersistentConnection):
-	def request(self, method, host, path, headers, data, stream_iter = None,
+	def request(self, method, host, path, headers, data,
 			raise_on_not_ok = True, auto_redirect = True):
 		if not headers: headers = {}
 		headers['Connection'] = 'Close'
 		res = HTTPPersistentConnection.request(self, method, host, path, headers, data, 
-			stream_iter, raise_on_not_ok, auto_redirect)
+			raise_on_not_ok, auto_redirect)
 		return res
 
 class HTTPSPersistentConnection(HTTPPersistentConnection):
@@ -210,16 +219,16 @@ class HTTPPool(list):
 	def get(self, host, path, headers = None):
 		return self.find_connection(host).get(host, 
 			path, headers)
-	def post(self, host, path, headers = None, data = None, stream_iter = None):
+	def post(self, host, path, headers = None, data = None):
 		return self.find_connection(host).post(host, 
-			path, headers, data, stream_iter)
+			path, headers, data)
 	def head(self, host, path, headers = None, auto_redirect = False):
 		return self.find_connection(host).head(host, 
 			path, headers, auto_redirect)
-	def request(self, method, host, path, headers, data, stream_iter,
+	def request(self, method, host, path, headers, data,
 			raise_on_not_ok, auto_redirect):
 		return self.find_connection(host).request(method, host, path,
-			headers, data, stream_iter, raise_on_not_ok, auto_redirect)
+			headers, data, raise_on_not_ok, auto_redirect)
 	def close(self):
 		for hosts, conn in self:
 			conn.close()
