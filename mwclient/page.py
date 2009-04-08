@@ -39,6 +39,7 @@ class Page(object):
 		self.protection = dict([(i['type'], (i['level'], i['expiry'])) for i in info.get('protection', ()) if i])
 		self.redirect = 'redirect' in info
 		
+		self.last_rev_time = None
 		self.edit_time = None
 			
 	def __repr__(self):
@@ -100,10 +101,11 @@ class Page(object):
 		try:
 			rev = revs.next()
 			self.text = rev['*']
-			self.edit_time = rev['timestamp']
+			self.last_rev_time = rev['timestamp']
 		except StopIteration:
 			self.text = u''
 			self.edit_time = None
+		self.edit_time = time.gmtime()
 		return self.text
 	
 	def save(self, text = u'', summary = u'', minor = False, bot = True):
@@ -123,7 +125,8 @@ class Page(object):
 		data = {}
 		if minor: data['minor'] = '1'
 		if not minor: data['notminor'] = '1'
-		if self.edit_time: data['basetimestamp'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
+		if self.last_rev_time: data['basetimestamp'] = time.strftime('%Y%m%d%H%M%S', self.last_rev_time)
+		if self.edit_time: data['starttimestamp'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
 		if bot: data['bot'] = '1'
 		
 		try:
