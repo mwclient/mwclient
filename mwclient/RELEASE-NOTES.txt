@@ -22,5 +22,26 @@ Mwclient was released on 2 May 2009.
 * Improved general HTTP and upload handling.
 
 == Changes in version 0.6.1 and 0.6.0 ==
-Mwclient 0.6.1 was released in February 2008. No release notes were kept for 
-that version. It was the first official release via Sourceforge.
+Mwclient 0.6.1 was released in May 2008. No release notes were kept for 
+that version. 
+
+Mwclient 0.6.0 was released in February 2008. It was the first official 
+release via Sourceforge.
+
+This version kicked out some Pywikipedia influences added in 0.4.
+
+== Mwclient 0.5 ==
+Mwclient 0.5 was an architectural redesign which accomplished easy 
+extendibility and added proper support for continuations. 
+
+== Mwclient 0.4 ==
+Mwclient 0.3 is somewhat the basis for future releases and shows the current 
+module architecture. It was somewhat influenced by Pywikipedia that was then
+discovered by the author.
+
+== Mwclient 0.2 and 0.3 ==
+Mwclient 0.2 and 0.3 was probably a bit of a generalization, and maybe already 
+used the API for some part, but details are unknown.
+
+== Mwclient 0.1 ==
+Mwclient was a non-API module for accessing Wikipedia using an XML parser.
