@@ -1,6 +1,10 @@
 RELEASE NOTES FOR MWCLIENT
 
-This is mwclient 0.6.2. The following are the release notes for this version.
+This is mwclient 0.6.3. The following are the release notes for this version.
+
+== Changes in version 0.6.3 ==
+Mwclient 0.6.3 is unreleased.
+* No changes yet.
 
 == Changes in version 0.6.2 ==
 Mwclient was released on 2 May 2009.
