@@ -274,11 +274,11 @@ class Site(object):
 			raise errors.EmailError, data
 
 
-	def login(self, username = None, password = None, cookies = None):
+	def login(self, username = None, password = None, cookies = None, domain = None):
 		if self.initialized: self.require(1, 10)
 		
 		if username and password: 
-			self.credentials = (username, password)
+			self.credentials = (username, password, domain)
 		if cookies:
 			if self.host not in self.conn.cookies:
 				self.conn.cookies[self.host] = http.CookieJar()
@@ -287,7 +287,10 @@ class Site(object):
 		if self.credentials:
 			wait_token = self.wait_token()
 			while True:
-				login = self.api('login', lgname = self.credentials[0], lgpassword = self.credentials[1])
+				if self.credentials[2]:
+					login = self.api('login', lgname = self.credentials[0], lgpassword = self.credentials[1], lgdomain = self.credentials[2])
+				else:
+					login = self.api('login', lgname = self.credentials[0], lgpassword = self.credentials[1])
 				if login['login']['result'] == 'Success':
 					break
 				elif login['login']['result'] == 'Throttled':
