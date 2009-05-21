@@ -98,6 +98,8 @@ class Site(object):
 			version = self.site['generator'][10:].split('.')
 			if len(version) == 2 and version[1].endswith('alpha'):
 				self.version = (int(version[0]), int(version[1][:-5]), 'alpha')
+			elif len(version) == 3 and 'rc' in version[2]:
+				self.version = (int(version[0]), int(version[1]), version[2])
 			elif len(version) == 3:
 				self.version = (int(version[0]), int(version[1]), int(version[2]))
 			else:
