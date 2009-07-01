@@ -84,11 +84,11 @@ class UploadFile(Upload):
 		elif self.stage != self.STAGE_FILE:	
 			if self.str_data is None:
 				if self.stage == self.STAGE_FILEHEADER:
-				  	self.str_data = StringIO(self.fileheader)
+					self.str_data = StringIO(self.fileheader)
 				elif self.stage == self.STAGE_POSTDATA:
-				  	self.str_data = StringIO(self.postdata)
-			  	elif self.stage == self.STAGE_FOOTER:
-			  		self.str_data = StringIO(self.footer)
+					self.str_data = StringIO(self.postdata)
+				elif self.stage == self.STAGE_FOOTER:
+					self.str_data = StringIO(self.footer)
 			data = self.str_data.read(length)
 		else:
 			if self.length_left:

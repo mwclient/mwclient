@@ -12,10 +12,14 @@ class OldPage(object):
 		data['wpSummary'] = summary
 		data['wpSave'] = 'Save page'
 		data['wpEditToken'] = self.get_token('edit')
-		if self.edit_time:
-			data['wpEdittime'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
+		if self.last_rev_time:
+			data['wpEdittime'] = time.strftime('%Y%m%d%H%M%S', self.last_rev_time)
 		else:
 			data['wpEdittime'] = time.strftime('%Y%m%d%H%M%S', time.gmtime())
+		if self.edit_time:
+			data['wpStarttime'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
+		else:
+			data['wpStarttime'] = time.strftime('%Y%m%d%H%M%S', time.gmtime())
 		data['wpStarttime'] = time.strftime('%Y%m%d%H%M%S', time.gmtime())
 
 		if minor: data['wpMinoredit'] = '1'
