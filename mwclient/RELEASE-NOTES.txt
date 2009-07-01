@@ -5,6 +5,7 @@ This is mwclient 0.6.3. The following are the release notes for this version.
 == Changes in version 0.6.3 ==
 Mwclient 0.6.3 is unreleased.
 * Added domain parameter to login.
+* Applied edit fix to page_nowriteapi
 
 == Changes in version 0.6.2 ==
 Mwclient was released on 2 May 2009.
@@ -35,13 +36,13 @@ Mwclient 0.5 was an architectural redesign which accomplished easy
 extendibility and added proper support for continuations. 
 
 == Mwclient 0.4 ==
-Mwclient 0.3 is somewhat the basis for future releases and shows the current 
-module architecture. It was somewhat influenced by Pywikipedia that was then
+Mwclient 0.4 was somewhat the basis for future releases and shows the current 
+module architecture. It was influenced by Pywikipedia that was by then
 discovered by the author.
 
 == Mwclient 0.2 and 0.3 ==
-Mwclient 0.2 and 0.3 was probably a bit of a generalization, and maybe already 
-used the API for some part, but details are unknown.
+Mwclient 0.2 and 0.3 were probably a bit of a generalization, and maybe 
+already used the API for some part, but details are unknown.
 
 == Mwclient 0.1 ==
-Mwclient was a non-API module for accessing Wikipedia using an XML parser.
+Mwclient 0.1 was a non-API module for accessing Wikipedia using an XML parser.
