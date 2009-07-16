@@ -3,7 +3,6 @@ RELEASE NOTES FOR MWCLIENT
 This is mwclient 0.6.3. The following are the release notes for this version.
 
 == Changes in version 0.6.3 ==
-Mwclient 0.6.3 is unreleased.
 * Added domain parameter to login.
 * Applied edit fix to page_nowriteapi
 * Allow arbitrary data to be passed to page.save
