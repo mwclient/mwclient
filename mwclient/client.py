@@ -100,7 +100,7 @@ class Site(object):
 			if len(version) == 2 and version[1].endswith('alpha'):
 				self.version = (int(version[0]), int(version[1][:-5]), 'alpha')
 			elif len(version) == 2 and version[1].endswith('alpha-wmf'):
-				self.version = (int(version[0]), int(version[1][:-5]), 'alpha-wmf')
+				self.version = (int(version[0]), int(version[1][:-9]), 'alpha-wmf')
 			elif len(version) == 3 and 'rc' in version[2]:
 				self.version = (int(version[0]), int(version[1]), version[2])
 			elif len(version) == 3:
