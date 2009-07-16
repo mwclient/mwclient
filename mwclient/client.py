@@ -96,8 +96,11 @@ class Site(object):
 			
 		if self.site['generator'].startswith('MediaWiki '):
 			version = self.site['generator'][10:].split('.')
+			# FIXME! Fix those awful two hacks
 			if len(version) == 2 and version[1].endswith('alpha'):
 				self.version = (int(version[0]), int(version[1][:-5]), 'alpha')
+			elif len(version) == 2 and version[1].endswith('alpha-wmf'):
+				self.version = (int(version[0]), int(version[1][:-5]), 'alpha-wmf')
 			elif len(version) == 3 and 'rc' in version[2]:
 				self.version = (int(version[0]), int(version[1]), version[2])
 			elif len(version) == 3:

@@ -108,7 +108,7 @@ class Page(object):
 		self.edit_time = time.gmtime()
 		return self.text
 	
-	def save(self, text = u'', summary = u'', minor = False, bot = True):
+	def save(self, text = u'', summary = u'', minor = False, bot = True, **kwargs):
 		if not self.site.logged_in and self.site.force_login:
 			# Should we really check for this?
 			raise errors.LoginError(self.site)
@@ -129,6 +129,8 @@ class Page(object):
 		if self.edit_time: data['starttimestamp'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
 		if bot: data['bot'] = '1'
 		
+		data.update(kwargs)
+		
 		try:
 			result = self.site.api('edit', title = self.name, text = text, 
 					summary = summary, token = self.get_token('edit'), 
@@ -143,6 +145,8 @@ class Page(object):
 				raise errors.ProtectedPageError(self, e.code, e.info)
 			else:
 				raise
+		if result['edit'] == 'Success':
+			self.last_rev_time = client.parse_timestamp(result['newtimestamp'])
 		return result['edit']
 
 	def get_expanded(self):
