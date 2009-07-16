@@ -1,4 +1,4 @@
-__ver__ = '0.6.3'
+__ver__ = '0.6.4'
 
 import urllib, urlparse
 import time, random
