@@ -143,27 +143,32 @@ class Site(object):
 		while True:
 			info = self.raw_api(action, **kwargs)
 			if not info: info = {}
+			res = self.handle_api_result(info)
+			if res:
+				return info
 				
-			try:
-				userinfo = compatibility.userinfo(info, self.require(1, 12, raise_error = None))
-			except KeyError:
-				userinfo = ()
-			if 'blockedby' in userinfo:
-				self.blocked = (userinfo['blockedby'], userinfo.get('blockreason', u''))
-			else:
-				self.blocked = False
-			self.hasmsg = 'message' in userinfo
-			self.logged_in = 'anon' not in userinfo
-			if 'error' in info:
-				if info['error']['code'] in (u'internal_api_error_DBConnectionError', ):
-					self.wait(token)
-					continue
-				if '*' in info['error']:
-					raise errors.APIError(info['error']['code'],
-						info['error']['info'], info['error']['*'])
+	
+	def handle_api_result(self, info, kwargs = None):
+		try:
+			userinfo = compatibility.userinfo(info, self.require(1, 12, raise_error = None))
+		except KeyError:
+			userinfo = ()
+		if 'blockedby' in userinfo:
+			self.blocked = (userinfo['blockedby'], userinfo.get('blockreason', u''))
+		else:
+			self.blocked = False
+		self.hasmsg = 'message' in userinfo
+		self.logged_in = 'anon' not in userinfo
+		if 'error' in info:
+			if info['error']['code'] in (u'internal_api_error_DBConnectionError', ):
+				self.wait(token)
+				return False
+			if '*' in info['error']:
 				raise errors.APIError(info['error']['code'],
+					info['error']['info'], info['error']['*'])
+			raise errors.APIError(info['error']['code'],
 					info['error']['info'], kwargs)
-			return info
+		return True
 		
 	@staticmethod
 	def _to_str(data):
@@ -181,7 +186,9 @@ class Site(object):
 		
 	def raw_call(self, script, data):
 		url = self.path + script + self.ext
-		headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+		headers = {}
+		if not issubclass(data.__class__, upload.Upload):
+			headers['Content-Type'] = 'application/x-www-form-urlencoded'
 		if self.compress and gzip:
 			headers['Accept-Encoding'] = 'gzip'
 		
@@ -314,12 +321,16 @@ class Site(object):
 			self.site_init()
 
 
-	def upload(self, file, filename, description, license = '', ignore = False, file_size = None): 
+	def upload(self, file, filename, description, ignore = False, file_size = None):
+		if self.version[:2] < (1, 17):
+			# To 1.16 once deployed on Wikimedia
+			return compatibility.old_upload(self, file = file, filename = filename, 
+						description = description, ignore = ignore, 
+						file_size = file_size)
+		
 		image = self.Images[filename]
 		if not image.can('upload'):
 			raise errors.InsufficientPermission(filename)
-		if image.exists and not ignore:
-			raise errors.FileExists(filename)
 		
 		if type(file) is str:
 			file_size = len(file)
@@ -331,22 +342,26 @@ class Site(object):
 		
 		predata = {}
 		# Do this thing later so that an incomplete upload won't work
-		# predata['wpDestFile'] = filename
-		predata['wpUploadDescription'] = description
-		predata['wpLicense'] = license
-		if ignore: predata['wpIgnoreWarning'] = 'true'
-		predata['wpUpload'] = 'Upload file'
-		predata['wpSourceType'] = 'file'
-		predata['wpDestFile'] = filename
 		
-		postdata = upload.UploadFile('wpUploadFile', filename, file_size, file, predata)
+		predata['comment'] = description
+		if ignore: 
+			predata['ignorewarnings'] = 'true'
+		predata['token'] = image.get_token('edit')
+		predata['action'] = 'upload'
+		predata['format'] = 'json'
+		predata['filename'] = filename
+		
+		postdata = upload.UploadFile('file', filename, file_size, file, predata)
 		
 		wait_token = self.wait_token()
 		while True:
 			try:
-				self.connection.post(self.host,
-					self.path + 'index.php?title=Special:Upload&maxlag=' + self.max_lag,
-					data = postdata).read()
+				data = self.raw_call('api', postdata).read()
+				info = simplejson.loads(data)
+				if not info:
+					info = {}
+				if self.handle_api_result(info):
+					return info
 			except errors.HTTPStatusError, e:
 				if e[0] == 503 and e[1].getheader('X-Database-Lag'):
 					self.wait(wait_token, int(e[1].getheader('Retry-After')))
@@ -356,8 +371,6 @@ class Site(object):
 					self.wait(wait_token)
 			except errors.HTTPError:
 				self.wait(wait_token)
-			else:
-				return
 			file.seek(0, 0)
 			
 	def parse(self, text, title = None):
