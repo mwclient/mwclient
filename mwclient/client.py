@@ -143,12 +143,15 @@ class Site(object):
 		while True:
 			info = self.raw_api(action, **kwargs)
 			if not info: info = {}
-			res = self.handle_api_result(info)
+			res = self.handle_api_result(info, token = token)
 			if res:
 				return info
 				
 	
-	def handle_api_result(self, info, kwargs = None):
+	def handle_api_result(self, info, kwargs = None, token = None):
+		if token is None:
+			token = self.wait_token()
+		
 		try:
 			userinfo = compatibility.userinfo(info, self.require(1, 12, raise_error = None))
 		except KeyError:
@@ -361,7 +364,7 @@ class Site(object):
 				if not info:
 					info = {}
 				if self.handle_api_result(info):
-					return info
+					return info.get('upload', {})
 			except errors.HTTPStatusError, e:
 				if e[0] == 503 and e[1].getheader('X-Database-Lag'):
 					self.wait(wait_token, int(e[1].getheader('Retry-After')))
