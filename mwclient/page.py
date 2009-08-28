@@ -55,10 +55,10 @@ class Page(object):
 	@staticmethod
 	def normalize_title(title):
 		# TODO: Make site dependent
+		title = title.strip()		
 		if title[0] == ':':
-			title[0] = title[1:]
+			title = title[1:]
 		title = title[0].upper() + title[1:]
-		title = title.strip()
 		title = title.replace(' ', '_')
 		return title
 
