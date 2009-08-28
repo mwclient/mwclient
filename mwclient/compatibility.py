@@ -39,7 +39,8 @@ def protectright(version):
 		return 'editprotected'
 	else:
 		return 'protect'
-	
+
+from cStringIO import StringIO
 def old_upload(self, file, filename, description, license = '', ignore = False, file_size = None): 
 	image = self.Images[filename]
 	if not image.can('upload'):
