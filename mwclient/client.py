@@ -325,8 +325,7 @@ class Site(object):
 
 
 	def upload(self, file, filename, description, ignore = False, file_size = None):
-		if self.version[:2] < (1, 17):
-			# To 1.16 once deployed on Wikimedia
+		if self.version[:2] < (1, 16):
 			return compatibility.old_upload(self, file = file, filename = filename, 
 						description = description, ignore = ignore, 
 						file_size = file_size)
