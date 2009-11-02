@@ -96,14 +96,22 @@ class Site(object):
 			
 		if self.site['generator'].startswith('MediaWiki '):
 			version = self.site['generator'][10:].split('.')
+			def split_num(s):
+				i = 0
+				while i < len(s):
+					if s[i] < '0' or s[i] > '9':
+						break
+					i += 1
+				return int(s[:i]), s[i:]
 			# FIXME! Fix those awful two hacks
-			if len(version) == 2 and version[1].endswith('alpha'):
-				self.version = (int(version[0]), int(version[1][:-5]), 'alpha')
-			elif len(version) == 2 and version[1].endswith('alpha-wmf'):
-				self.version = (int(version[0]), int(version[1][:-9]), 'alpha-wmf')
+			if len(version) == 2:
+				# An alpha version
+				self.version = (int(version[0]), ) + split_num(version[1])
 			elif len(version) == 3 and 'rc' in version[2]:
+				# Release candidate
 				self.version = (int(version[0]), int(version[1]), version[2])
 			elif len(version) == 3:
+				# Regular y.x.z version
 				self.version = (int(version[0]), int(version[1]), int(version[2]))
 			else:
 				raise errors.MediaWikiVersionError('Unknown MediaWiki %s' % '.'.join(version))
@@ -273,6 +281,7 @@ class Site(object):
 
 	# Actions
 	def email(self, user, text, subject, cc = False):
+		#TODO: Use api!
 		postdata = {}
 		postdata['wpSubject'] = subject
 		postdata['wpText'] = text
@@ -324,7 +333,8 @@ class Site(object):
 			self.site_init()
 
 
-	def upload(self, file, filename, description, ignore = False, file_size = None):
+	def upload(self, file = None, filename = None, description = '', ignore = False, file_size = None,
+			url = None, session_key = None):
 		if self.version[:2] < (1, 16):
 			return compatibility.old_upload(self, file = file, filename = filename, 
 						description = description, ignore = ignore, 
@@ -334,13 +344,7 @@ class Site(object):
 		if not image.can('upload'):
 			raise errors.InsufficientPermission(filename)
 		
-		if type(file) is str:
-			file_size = len(file)
-			file = StringIO(file)
-		if file_size is None:
-			file.seek(0, 2)
-			file_size = file.tell()
-			file.seek(0, 0)
+
 		
 		predata = {}
 		# Do this thing later so that an incomplete upload won't work
@@ -352,8 +356,23 @@ class Site(object):
 		predata['action'] = 'upload'
 		predata['format'] = 'json'
 		predata['filename'] = filename
+		if url:
+			predata['url'] = url
+		if session_key:
+			predata['session_key'] = session_key 
 		
-		postdata = upload.UploadFile('file', filename, file_size, file, predata)
+		if file is None:
+			postdata = predata
+		else:			
+			if type(file) is str:
+				file_size = len(file)
+				file = StringIO(file)
+			if file_size is None:
+				file.seek(0, 2)
+				file_size = file.tell()
+				file.seek(0, 0)
+				
+			postdata = upload.UploadFile('file', filename, file_size, file, predata)
 		
 		wait_token = self.wait_token()
 		while True:
@@ -362,7 +381,7 @@ class Site(object):
 				info = simplejson.loads(data)
 				if not info:
 					info = {}
-				if self.handle_api_result(info):
+				if self.handle_api_result(info, kwargs = predata):
 					return info.get('upload', {})
 			except errors.HTTPStatusError, e:
 				if e[0] == 503 and e[1].getheader('X-Database-Lag'):
@@ -380,6 +399,11 @@ class Site(object):
 		if title is not None: kwargs['title'] = title
 		result = self.api('parse', **kwargs)
 		return result['parse']
+	
+	# def block: requires 1.12
+	# def unblock: requires 1.12
+	# def patrol: requires 1.14
+	# def import: requires 1.15
 			
 	# Lists
 	def allpages(self, start = None, prefix = None, namespace = '0', filterredir = 'all',
@@ -393,6 +417,8 @@ class Site(object):
 			namespace = namespace, filterredir = filterredir, dir = dir, 
 			filterlanglinks = filterlanglinks))
 		return listing.List.get_list(generator)(self, 'allpages', 'ap', limit = limit, return_values = 'title', **kwargs)
+	# def allimages(self): requires 1.12
+	# TODO!
 
 	def alllinks(self, start = None, prefix = None, unique = False, prop = 'title',
 			namespace = '0', limit = None, generator = True):
@@ -445,6 +471,7 @@ class Site(object):
 		kwargs = dict(listing.List.generate_kwargs('le', prop = prop, type = type, start = start,
 			end = end, dir = dir, user = user, title = title))
 		return listing.List(self, 'logevents', 'le', limit = limit, **kwargs)
+	# def protectedtitles requires 1.15
 	def random(self, namespace, limit = 20):
 		self.require(1, 12)
 		

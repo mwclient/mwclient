@@ -191,6 +191,8 @@ class Page(object):
 	def purge(self):
 		self.site.raw_index('purge', title = self.name)
 		
+	# def watch: requires 1.14
+		
 	# Properties
 	def backlinks(self, namespace = None, filterredir = 'all', redirect = False, limit = None, generator = True):
 		self.site.require(1, 9)
@@ -280,6 +282,10 @@ class Image(Page):
 		if redirect: kwargs['%sredirect' % prefix] = '1'
 		return listing.List.get_list(generator)(self.site, 'imageusage', 'iu', 
 			limit = limit, return_values = 'title', **kwargs)
+	def duplicatefiles(self, limit = None):
+		self.require(1, 14)
+		return listing.PageProperty(self, 'duplicatefiles', 'df',
+			dflimit = limit)
 
 	def download(self):
 		url = self.imageinfo['url']

@@ -4,7 +4,9 @@ This is mwclient 0.6.4. The following are the release notes for this version.
 
 == Changes in version 0.6.4 ==
 Mwclient 0.6.4 is unreleased.
-There are no changes yet.
+* Added support for upload API
+* Added prop=duplicatefiles
+* Properly fix detection of alpha versions
 
 == Changes in version 0.6.3 ==
 * Added domain parameter to login.
@@ -32,9 +34,8 @@ Mwclient 0.6.1 was released in May 2008. No release notes were kept for
 that version. 
 
 Mwclient 0.6.0 was released in February 2008. It was the first official 
-release via Sourceforge.
-
-This version kicked out some Pywikipedia influences added in 0.4.
+release via Sourceforge. This version removed some Pywikipedia influences 
+added in 0.4.
 
 == Mwclient 0.5 ==
 Mwclient 0.5 was an architectural redesign which accomplished easy 

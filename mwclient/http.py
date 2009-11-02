@@ -168,6 +168,8 @@ class HTTPPersistentConnection(object):
 		
 	def close(self):
 		self._conn.close()
+	def fileno(self):
+		return self._conn.sock.fileno()
 
 class HTTPConnection(HTTPPersistentConnection):
 	def request(self, method, host, path, headers, data,
