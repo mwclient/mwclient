@@ -5,7 +5,10 @@ import time, random
 import sys, weakref
 import socket
 
-import simplejson
+try:
+	import json
+except ImportError:
+	import simplejson as json
 import http
 import upload
 
@@ -232,11 +235,11 @@ class Site(object):
 		kwargs['action'] = action
 		kwargs['format'] = 'json'
 		data = self._query_string(*args, **kwargs)
-		json = self.raw_call('api', data).read()
+		json_data = self.raw_call('api', data).read()
 		try:
-			return simplejson.loads(json)
+			return json.loads(json_data)
 		except ValueError:
-			if json.startswith('MediaWiki API is not enabled for this site.'):
+			if json_data.startswith('MediaWiki API is not enabled for this site.'):
 				raise errors.APIDisabledError
 			raise
 				
@@ -378,7 +381,7 @@ class Site(object):
 		while True:
 			try:
 				data = self.raw_call('api', postdata).read()
-				info = simplejson.loads(data)
+				info = json.loads(data)
 				if not info:
 					info = {}
 				if self.handle_api_result(info, kwargs = predata):
