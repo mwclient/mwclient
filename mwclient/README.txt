@@ -1,4 +1,4 @@
-This files describes mwclient-0.6.1. The latest version is available in the 
+This files describes mwclient-0.6.4. The latest version is available in the 
 subversion repository <https://mwclient.svn.sourceforge.net/svnroot/mwclient>
 and also browsable <http://mwclient.svn.sourceforge.net/viewvc/mwclient/>.
 
@@ -11,17 +11,17 @@ is raised.
 This framework is written by Bryan Tong Minh and serves most of his bots.
 The framework and this documentation are primarily written for personal
 use and may or may not work for you. In case it doesn't, Bryan can be
-contacted on <http://commons.wikimedia.org/wiki/User_talk:Bryan>.
+contacted on btongminh@users.sourceforge.net.
 
 This framework heavily depends on simplejson, (c) copyright Bob Ippolito.
-The version currently in use is simplejson-1.7.2. 
+ 
 
 == Implementation notes ==
 Most properties and generators accept the same parameters as the API, without
-their two letter prefix Exceptions:
+their two letter prefix. Exceptions to this rule:
 * Image.imageinfo is the imageinfo of the latest image. Earlier versions can be
   fetched using imagehistory()
-* Site.all* : parameter (ap)from renamed to start
+* Site.all* : parameter [ap]from renamed to start
 * categorymembers is implemented as Category.members
 * deletedrevs is deletedrevisions
 * usercontribs is usercontributions
@@ -31,7 +31,7 @@ their two letter prefix Exceptions:
 Properties and generators are implemented as Python generators. Their limit 
 parameter is only an indication of the number of items in one chunk. It is not
 the total limit. Doing list(generator(limit = limit)) will return ALL items of 
-generator, and not be limitted by the limit value.
+generator, and not be limited by the limit value.
 Default chunk size is generally the maximum chunk size.
 
 == HTTPS ==
@@ -65,7 +65,7 @@ for category in site.allcategories():
 	print category
 
 == License ==
- Copyright (c) 2006-2008 Bryan Tong Minh
+ Copyright (c) 2006-2009 Bryan Tong Minh
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation

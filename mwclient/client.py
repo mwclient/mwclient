@@ -41,6 +41,7 @@ class Site(object):
 	def __init__(self, host, path = '/w/', ext = '.php', pool = None, retry_timeout = 30, 
 			max_retries = 25, wait_callback = lambda *x: None, 
 			max_lag = 3, compress = True, force_login = True, do_init = True):
+		# Setup member variables
 		self.host = host
 		self.path = path
 		self.ext = ext
@@ -51,35 +52,39 @@ class Site(object):
 		self.max_retries = max_retries
 		self.wait_callback = wait_callback
 		self.max_lag = str(max_lag)
-		
-		self.wait_tokens = weakref.WeakKeyDictionary()
-			
-		self.blocked = False
-		self.hasmsg = False
-		self.groups = []
-		self.rights = []
-		self.tokens = {}
 		self.force_login = force_login
+				
+		# The token string => token object mapping
+		self.wait_tokens = weakref.WeakKeyDictionary()
 		
+		# Site properties
+		self.blocked = False	# Whether current user is blocked
+		self.hasmsg = False	# Whether current user has new messages
+		self.groups = []	# Groups current user belongs to
+		self.rights = []	# Rights current user has
+		self.tokens = {}	# Edit tokens of the current user
+		self.version = None
+		
+		self.namespaces = self.default_namespaces
+		self.writeapi = False
+			
+		# Setup connection
 		if pool is None:
 			self.connection = http.HTTPPool()
 		else:
 			self.connection = pool
-			
-		self.version = None
-			
+		
+		# Page generators
 		self.pages = listing.PageList(self)
 		self.categories = listing.PageList(self, namespace = 14)
 		self.images = listing.PageList(self, namespace = 6)
 		
-		# Compat
+		# Compat page generators
 		self.Pages = self.pages
 		self.Categories = self.categories
 		self.Images = self.images
 		
-		self.namespaces = self.default_namespaces
-		self.writeapi = False
-		
+		# Initialization status
 		self.initialized = False
 		
 		if do_init:
@@ -93,10 +98,13 @@ class Site(object):
 	def site_init(self):
 		meta = self.api('query', meta = 'siteinfo|userinfo', 
 			siprop = 'general|namespaces', uiprop = 'groups|rights')
+		
+		# Extract site info
 		self.site = meta['query']['general']
 		self.namespaces = dict(((i['id'], i.get('*', '')) for i in meta['query']['namespaces'].itervalues()))
 		self.writeapi = 'writeapi' in self.site
-			
+		
+		# Determine version
 		if self.site['generator'].startswith('MediaWiki '):
 			version = self.site['generator'][10:].split('.')
 			def split_num(s):
@@ -122,7 +130,8 @@ class Site(object):
 			raise errors.MediaWikiVersionError('Unknown generator %s' % self.site['generator'])
 		# Require 1.11 until some compatibility issues are fixed
 		self.require(1, 11)
-			
+		
+		# User info	
 		userinfo = compatibility.userinfo(meta, self.require(1, 12, raise_error = False))
 		self.username = userinfo['name']
 		self.groups = userinfo.get('groups', [])
@@ -139,6 +148,7 @@ class Site(object):
 		
 	
 	def api(self, action, *args, **kwargs):
+		""" An API call. Handles errors and returns dict object. """
 		kwargs.update(args)
 		if action == 'query':
 			if 'meta' in kwargs:
@@ -350,7 +360,6 @@ class Site(object):
 
 		
 		predata = {}
-		# Do this thing later so that an incomplete upload won't work
 		
 		predata['comment'] = description
 		if ignore: 
