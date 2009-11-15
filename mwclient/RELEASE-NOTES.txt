@@ -8,6 +8,7 @@ Mwclient 0.6.4 is unreleased.
 * Added prop=duplicatefiles
 * Properly fix detection of alpha versions
 * Added support for builtin json library
+* Handle badtoken once
 
 == Changes in version 0.6.3 ==
 * Added domain parameter to login.

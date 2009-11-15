@@ -131,23 +131,38 @@ class Page(object):
 		
 		data.update(kwargs)
 		
-		try:
+		def do_edit():
 			result = self.site.api('edit', title = self.name, text = text, 
 					summary = summary, token = self.get_token('edit'), 
-					**data)
+					**data)		
 			if result['edit'].get('result').lower() == 'failure':
 				raise errors.EditError(self, result['edit'])
+			return result	
+		try:
+			result = do_edit()
 		except errors.APIError, e:
-			if e.code == 'editconflict':
-				raise errors.EditError(self, text, summary, e.info)
-			elif e.code in ('protectedtitle', 'cantcreate', 'cantcreate-anon', 'noimageredirect-anon', 
-				    'noimageredirect', 'noedit-anon', 'noedit'):
-				raise errors.ProtectedPageError(self, e.code, e.info)
+			if e.code == 'badtoken':
+				# Retry, but only once to avoid an infinite loop
+				self.get_token('edit', force = True)
+				try:
+					result = do_edit()
+				except errors.APIError, e:
+					self.handle_edit_error(e, summary)
 			else:
-				raise
+				self.handle_edit_error(e, summary)
+
 		if result['edit'] == 'Success':
 			self.last_rev_time = client.parse_timestamp(result['newtimestamp'])
 		return result['edit']
+	
+	def handle_edit_error(self, e,  summary):
+		if e.code == 'editconflict':
+			raise errors.EditError(self, summary, e.info)
+		elif e.code in ('protectedtitle', 'cantcreate', 'cantcreate-anon', 'noimageredirect-anon', 
+			    'noimageredirect', 'noedit-anon', 'noedit'):
+			raise errors.ProtectedPageError(self, e.code, e.info)
+		else:
+			raise		
 
 	def get_expanded(self):
 		self.site.require(1, 12)
