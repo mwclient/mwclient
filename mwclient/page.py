@@ -266,7 +266,7 @@ class Page(object):
 		kwargs['rvprop'] = prop
 		if expandtemplates: kwargs['rvexpandtemplates'] = '1'
 		
-		return listing.PageProperty(self, 'revisions', 'rv', limit = limit, **kwargs)
+		return RevisionsIterator(self, 'revisions', 'rv', limit = limit, **kwargs)
 	def templates(self, namespace = None, generator = True):
 		self.site.require(1, 8)
 		kwargs = dict(listing.List.generate_kwargs('tl', namespace = namespace))
@@ -312,4 +312,10 @@ class Image(Page):
 		
 	def __repr__(self):
 		return "<Image object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
+	
+class RevisionsIterator(listing.PageProperty):
+	def load_chunk(self):
+		if 'rvstartid' in self.args and 'rvstart' in self.args:
+			del self.args['rvstart']
+		return listing.PageProperty.load_chunk(self)
 	

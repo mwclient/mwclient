@@ -9,6 +9,7 @@ Mwclient 0.6.4 is unreleased.
 * Properly fix detection of alpha versions
 * Added support for builtin json library
 * Handle badtoken once
+* Bug 2690034: Fix revision iteration
 
 == Changes in version 0.6.3 ==
 * Added domain parameter to login.
