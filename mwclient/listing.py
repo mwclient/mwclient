@@ -205,5 +205,5 @@ class RevisionsIterator(PageProperty):
 	def load_chunk(self):
 		if 'rvstartid' in self.args and 'rvstart' in self.args:
 			del self.args['rvstart']
-		return listing.PageProperty.load_chunk(self)
+		return PageProperty.load_chunk(self)
 	
