@@ -200,3 +200,10 @@ class PagePropertyGenerator(GeneratorList):
 	def __init__(self, page, prop, prefix, *args, **kwargs):
 		GeneratorList.__init__(self, page.site, prop, prefix, titles = page.name, *args, **kwargs)
 		self.page = page
+
+class RevisionsIterator(PageProperty):
+	def load_chunk(self):
+		if 'rvstartid' in self.args and 'rvstart' in self.args:
+			del self.args['rvstart']
+		return listing.PageProperty.load_chunk(self)
+	

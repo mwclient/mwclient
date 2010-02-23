@@ -313,9 +313,3 @@ class Image(Page):
 	def __repr__(self):
 		return "<Image object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
 	
-class RevisionsIterator(listing.PageProperty):
-	def load_chunk(self):
-		if 'rvstartid' in self.args and 'rvstart' in self.args:
-			del self.args['rvstart']
-		return listing.PageProperty.load_chunk(self)
-	
