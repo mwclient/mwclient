@@ -10,6 +10,8 @@ Mwclient 0.6.4 is unreleased.
 * Added support for builtin json library
 * Handle badtoken once
 * Bug 2690034: Fix revision iteration
+* Fix module conflict with simplejson-1.x by inserting mwclient path at the 
+  beginning of sys.path instead of the end
 
 == Changes in version 0.6.3 ==
 * Added domain parameter to login.
