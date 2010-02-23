@@ -266,7 +266,7 @@ class Page(object):
 		kwargs['rvprop'] = prop
 		if expandtemplates: kwargs['rvexpandtemplates'] = '1'
 		
-		return RevisionsIterator(self, 'revisions', 'rv', limit = limit, **kwargs)
+		return listing.RevisionsIterator(self, 'revisions', 'rv', limit = limit, **kwargs)
 	def templates(self, namespace = None, generator = True):
 		self.site.require(1, 8)
 		kwargs = dict(listing.List.generate_kwargs('tl', namespace = namespace))
