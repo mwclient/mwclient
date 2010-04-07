@@ -323,13 +323,18 @@ class Site(object):
 			
 		if self.credentials:
 			wait_token = self.wait_token()
+			kwargs = {
+				'lgname': self.credentials[0],
+				'lgpassword': self.credentials[1]
+				}
+			if self.credentials[2]:
+				kwargs['lgdomain'] = self.credentials[2]
 			while True:
-				if self.credentials[2]:
-					login = self.api('login', lgname = self.credentials[0], lgpassword = self.credentials[1], lgdomain = self.credentials[2])
-				else:
-					login = self.api('login', lgname = self.credentials[0], lgpassword = self.credentials[1])
+				login = self.api('login', **kwargs)
 				if login['login']['result'] == 'Success':
 					break
+				elif login['login']['result'] == 'NeedToken':
+					kwargs['lgtoken'] = login['login']['token']
 				elif login['login']['result'] == 'Throttled':
 					self.wait(wait_token, login['login'].get('wait', 5))
 				else:
