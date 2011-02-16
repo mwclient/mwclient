@@ -379,7 +379,7 @@ class Site(object):
 			predata['session_key'] = session_key 
 		
 		if file is None:
-			postdata = predata
+			postdata = self._query_string(predata)
 		else:			
 			if type(file) is str:
 				file_size = len(file)
