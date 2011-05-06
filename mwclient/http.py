@@ -93,8 +93,8 @@ class HTTPPersistentConnection(object):
 		try:
 			self._conn.request(method, path, headers = headers)
 			if issubclass(data.__class__, upload.Upload):
-				for str in data:
-					self._conn.send(str)
+				for s in data:
+					self._conn.send(s)
 			elif data:
 				self._conn.send(data)
 			
