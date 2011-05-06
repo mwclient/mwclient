@@ -7,6 +7,7 @@ This is mwclient 0.6.5. The following are the release notes for this version.
   on some versions of Python.
 * Fix for upload by URL
 * Handle readapidenied error in site init
+* Fix version parsing for almost any sane version string
 
 == Changes in version 0.6.4 ==
 * Added support for upload API
