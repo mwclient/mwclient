@@ -65,7 +65,7 @@ for category in site.allcategories():
 	print category
 
 == License ==
- Copyright (c) 2006-2009 Bryan Tong Minh
+ Copyright (c) 2006-2011 Bryan Tong Minh
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
