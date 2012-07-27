@@ -163,7 +163,7 @@ class PageList(GeneratorList):
 			return page.Page(self.site, self.site.namespaces[self.namespace] + ':' + name, info)
 		else:
 			# Guessing page class
-			if type(name) is str:
+			if type(name) is not int:
 				namespace = self.guess_namespace(name)
 				if namespace == 14:
 					return Category(self.site, name, info)
@@ -206,4 +206,3 @@ class RevisionsIterator(PageProperty):
 		if 'rvstartid' in self.args and 'rvstart' in self.args:
 			del self.args['rvstart']
 		return PageProperty.load_chunk(self)
-	

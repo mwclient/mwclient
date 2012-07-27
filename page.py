@@ -1,4 +1,3 @@
-#vi:noexpandtab
 import client, errors, listing
 import compatibility
 from page_nowriteapi import OldPage
@@ -279,11 +278,6 @@ class Page(object):
 		if section: kwargs['rvsection'] = section
 		
 		return listing.RevisionsIterator(self, 'revisions', 'rv', limit = limit, **kwargs)
-
-	#def sections(self, namespace = None, generator = True):
-	#	self.site.require(1, 12)
-	#	return listing.PageProperty(self, 'sections', '', return_values = 'anchor')
-
 	def templates(self, namespace = None, generator = True):
 		self.site.require(1, 8)
 		kwargs = dict(listing.List.generate_kwargs('tl', namespace = namespace))

@@ -240,7 +240,6 @@ class Site(object):
 	def raw_api(self, action, *args, **kwargs):
 		kwargs['action'] = action
 		kwargs['format'] = 'json'
-		#print kwargs
 		data = self._query_string(*args, **kwargs)
 		json_data = self.raw_call('api', data).read()
 		try:
@@ -368,7 +367,6 @@ class Site(object):
 		else:
 			predata['comment'] = comment
 			predata['text'] = description
-
 		if ignore: 
 			predata['ignorewarnings'] = 'true'
 		predata['token'] = image.get_token('edit')
