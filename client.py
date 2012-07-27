@@ -362,7 +362,11 @@ class Site(object):
 		
 		predata = {}
 		
-		predata['comment'] = description
+		if comment == '':
+			predata['comment'] = description
+		else:
+			predata['comment'] = comment
+			predata['text'] = description
 		if ignore: 
 			predata['ignorewarnings'] = 'true'
 		predata['token'] = image.get_token('edit')
