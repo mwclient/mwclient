@@ -21,8 +21,12 @@ class Page(object):
 				prop = 'info'
 				extra_props = ()
 			
-			info = self.site.api('query', prop = prop, titles = name, 
-				inprop = 'protection', *extra_props)
+			if type(name) is int:
+				info = self.site.api('query', prop = prop, pageids = name,
+					inprop = 'protection', *extra_props)
+			else:
+				info = self.site.api('query', prop = prop, titles = name,
+					inprop = 'protection', *extra_props)
 			info = info['query']['pages'].itervalues().next()
 		self._info = info
 				

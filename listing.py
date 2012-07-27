@@ -163,13 +163,13 @@ class PageList(GeneratorList):
 			return page.Page(self.site, self.site.namespaces[self.namespace] + ':' + name, info)
 		else:
 			# Guessing page class
-			namespace = self.guess_namespace(name)
-			if namespace == 14:
-				return Category(self.site, name, info)
-			elif namespace == 6:
-				return page.Image(self.site, name, info)
-			else:
-				return page.Page(self.site, name, info)
+			if type(name) is not int:
+				namespace = self.guess_namespace(name)
+				if namespace == 14:
+					return Category(self.site, name, info)
+				elif namespace == 6:
+					return page.Image(self.site, name, info)
+			return page.Page(self.site, name, info)
 		
 	def guess_namespace(self, name):
 		normal_name = page.Page.normalize_title(name)
