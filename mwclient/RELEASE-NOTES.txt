@@ -3,7 +3,7 @@ RELEASE NOTES FOR MWCLIENT
 This is mwclient 0.6.6. The following are the release notes for this version.
 
 == Changes in version 0.6.6 ==
-No changes yet.
+* Allow setting both the upload description and the page content separately
 
 == Changes in version 0.6.5 ==
 * Explicitly convert the Content-Length header to str, avoiding a TypeError

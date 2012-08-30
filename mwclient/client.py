@@ -353,7 +353,7 @@ class Site(object):
 
 
 	def upload(self, file = None, filename = None, description = '', ignore = False, file_size = None,
-			url = None, session_key = None):
+			url = None, session_key = None, comment = None):
         """Upload a file to the wiki."""
 		if self.version[:2] < (1, 16):
 			return compatibility.old_upload(self, file = file, filename = filename, 
@@ -368,7 +368,12 @@ class Site(object):
 		
 		predata = {}
 		
-		predata['comment'] = description
+		if comment is None:
+			predata['comment'] = description
+		else:
+			predata['comment'] = comment
+			predata['text'] = description
+
 		if ignore: 
 			predata['ignorewarnings'] = 'true'
 		predata['token'] = image.get_token('edit')
