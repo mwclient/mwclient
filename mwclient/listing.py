@@ -61,6 +61,7 @@ class List(object):
 			self.args.update(data['query-continue'][self.list_name])
 		else:
 			self.last = True
+
 	def set_iter(self, data):
 		if self.result_member not in data['query']:
 			self._iter = iter(xrange(0))
@@ -79,12 +80,14 @@ class List(object):
 		for key, value in kwargs.iteritems():
 			if value != None:
 				yield _prefix + key, value
+
 	@staticmethod
 	def get_prefix(prefix, generator = False):
 		if generator:
 			return 'g' + prefix
 		else:
 			return prefix
+
 	@staticmethod
 	def get_list(generator = False):
 		if generator:
@@ -131,8 +134,10 @@ class Category(page.Page, GeneratorList):
 			1, 12, raise_error = False), prefix = 'gcm'), ))
 		if namespace: kwargs['gcmnamespace'] = namespace
 		GeneratorList.__init__(self, site, 'categorymembers', 'cm', **kwargs)
+
 	def __repr__(self):
 		return "<Category object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
+
 	def members(self, prop = 'ids|title', namespace = None, sort = 'sortkey', 
 			dir = 'asc', start = None, end = None, generator = True):
 		prefix = self.get_prefix('cm', generator)
@@ -154,6 +159,7 @@ class PageList(GeneratorList):
 
 	def __getitem__(self, name):
 		return self.get(name, None)
+
 	def get(self, name, info = ()):
 		if self.namespace == 14:
 			return Category(self.site, self.site.namespaces[14] + ':' + name, info)
@@ -188,6 +194,7 @@ class PageProperty(List):
 		List.__init__(self, page.site, prop, prefix, titles = page.name, *args, **kwargs)
 		self.page = page
 		self.generator = 'prop'
+
 	def set_iter(self, data):
 		for page in data['query']['pages'].itervalues():
 			if page['title'] == self.page.name:

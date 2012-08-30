@@ -44,6 +44,7 @@ class Page(object):
 			
 	def __repr__(self):
 		return "<Page object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
+
 	def __unicode__(self):
 		return self.name
 		
@@ -52,6 +53,7 @@ class Page(object):
 		if title[0] == ':':
 			title = title[1:]
 		return title[title.find(':') + 1:]
+
 	@staticmethod
 	def normalize_title(title):
 		# TODO: Make site dependent
@@ -92,6 +94,11 @@ class Page(object):
 			return u''
 			
 	def edit(self, section = None, readonly = False):
+        """Returns wikitext for a specified section or for the whole page.
+        
+        Retrieves the latest edit.
+        
+        """
 		if not self.can('read'):
 			raise errors.InsufficientPermission(self)
 		if not self.exists:
@@ -109,6 +116,7 @@ class Page(object):
 		return self.text
 	
 	def save(self, text = u'', summary = u'', minor = False, bot = True, **kwargs):
+        """Save text of page."""
 		if not self.site.logged_in and self.site.force_login:
 			# Should we really check for this?
 			raise errors.LoginError(self.site)
@@ -174,6 +182,15 @@ class Page(object):
 			return u''
 			
 	def move(self, new_title, reason = '', move_talk = True, no_redirect = False):
+        """Move (rename) page to new_title.
+
+        If user account is an administrator, specify no_direct as True to not
+        leave a redirect.
+        
+        If user does not have permission to move page, an InsufficientPermission
+        exception is raised.
+        
+        """
 		if not self.can('move'): raise errors.InsufficientPermission(self)
 		
 		if not self.site.writeapi:
@@ -189,6 +206,12 @@ class Page(object):
 		
 			
 	def delete(self, reason = '', watch = False, unwatch = False, oldimage = False):
+        """Delete page.
+        
+        If user does not have permission to delete page, an InsufficientPermission
+        exception is raised.
+        
+        """
 		if not self.can('delete'): raise errors.InsufficientPermission(self)
 		
 		if not self.site.writeapi:
@@ -204,6 +227,10 @@ class Page(object):
 		return result['delete']
 		
 	def purge(self):
+        """Purge server-side cache of page. This will re-render templates and other
+        dynamic content.
+        
+        """
 		self.site.raw_index('purge', title = self.name)
 		
 	# def watch: requires 1.14
@@ -219,6 +246,7 @@ class Page(object):
 		kwargs[compatibility.title(prefix, self.site.require(1, 11, raise_error = False))] = self.name
 			
 		return listing.List.get_list(generator)(self.site, 'backlinks', 'bl', limit = limit, return_values = 'title', **kwargs)
+
 	def categories(self, generator = True):
 		self.site.require(1, 11)
 		if generator:
@@ -226,6 +254,7 @@ class Page(object):
 		else:
 			# TODO: return sortkey if wanted
 			return listing.PageProperty(self, 'categories', 'cl', return_values = 'title')
+
 	def embeddedin(self, namespace = None, filterredir = 'all', redirect = False, limit = None, generator = True):
 		self.site.require(1, 9)
 		# Fix title for < 1.11 !!
@@ -236,18 +265,22 @@ class Page(object):
 		kwargs[compatibility.title(prefix, self.site.require(1, 11, raise_error = False))] = self.name
 			
 		return listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit = limit, return_values = 'title', **kwargs)
+
 	def extlinks(self):
 		self.site.require(1, 11)
 		return listing.PageProperty(self, 'extlinks', 'el', return_values = '*')
+
 	def images(self, generator = True):
 		self.site.require(1, 9)
 		if generator:
 			return listing.PagePropertyGenerator(self, 'images', '')
 		else:
 			return listing.PageProperty(self, 'images', '', return_values = 'title')
+
 	def langlinks(self):
 		self.site.require(1, 9)
 		return listing.PageProperty(self, 'langlinks', 'll', return_values = ('lang', '*'))
+
 	def links(self, namespace = None, generator = True):
 		self.site.require(1, 9)
 		kwargs = dict(listing.List.generate_kwargs('pl', namespace = namespace))
@@ -267,6 +300,7 @@ class Page(object):
 		if expandtemplates: kwargs['rvexpandtemplates'] = '1'
 		
 		return listing.RevisionsIterator(self, 'revisions', 'rv', limit = limit, **kwargs)
+
 	def templates(self, namespace = None, generator = True):
 		self.site.require(1, 8)
 		kwargs = dict(listing.List.generate_kwargs('tl', namespace = namespace))
@@ -287,6 +321,7 @@ class Image(Page):
 	def imagehistory(self):
 		return listing.PageProperty(self, 'imageinfo', 'ii', 
 			iiprop = compatibility.iiprop(self.site.version))
+
 	def imageusage(self, namespace = None, filterredir = 'all', redirect = False, 
 			limit = None, generator = True):
 		self.site.require(1, 11)
@@ -297,6 +332,7 @@ class Image(Page):
 		if redirect: kwargs['%sredirect' % prefix] = '1'
 		return listing.List.get_list(generator)(self.site, 'imageusage', 'iu', 
 			limit = limit, return_values = 'title', **kwargs)
+
 	def duplicatefiles(self, limit = None):
 		self.require(1, 14)
 		return listing.PageProperty(self, 'duplicatefiles', 'df',

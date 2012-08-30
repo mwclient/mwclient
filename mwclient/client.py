@@ -238,6 +238,7 @@ class Site(object):
 				self.wait(token)
 				
 	def raw_api(self, action, *args, **kwargs):
+        """Sends a call to the API."""
 		kwargs['action'] = action
 		kwargs['format'] = 'json'
 		data = self._query_string(*args, **kwargs)
@@ -250,6 +251,7 @@ class Site(object):
 			raise
 				
 	def raw_index(self, action, *args, **kwargs):
+        """Sends a call to index.php rather than the API."""
 		kwargs['action'] = action
 		kwargs['maxlag'] = self.max_lag
 		data = self._query_string(*args, **kwargs)
@@ -259,6 +261,7 @@ class Site(object):
 		token = WaitToken()
 		self.wait_tokens[token] = (0, args)
 		return token
+
 	def wait(self, token, min_wait = 0):
 		retry, args = self.wait_tokens[token]
 		self.wait_tokens[token] = (retry + 1, args)
@@ -290,6 +293,7 @@ class Site(object):
 
 	# Actions
 	def email(self, user, text, subject, cc = False):
+        """Sends email to a specified user on the wiki."""
 		#TODO: Use api!
 		postdata = {}
 		postdata['wpSubject'] = subject
@@ -308,6 +312,7 @@ class Site(object):
 
 
 	def login(self, username = None, password = None, cookies = None, domain = None):
+        """Login to the wiki."""
 		if self.initialized: self.require(1, 10)
 		
 		if username and password: 
@@ -349,6 +354,7 @@ class Site(object):
 
 	def upload(self, file = None, filename = None, description = '', ignore = False, file_size = None,
 			url = None, session_key = None):
+        """Upload a file to the wiki."""
 		if self.version[:2] < (1, 16):
 			return compatibility.old_upload(self, file = file, filename = filename, 
 						description = description, ignore = ignore, 
@@ -422,6 +428,7 @@ class Site(object):
 	def allpages(self, start = None, prefix = None, namespace = '0', filterredir = 'all',
 			minsize = None, maxsize = None, prtype = None, prlevel = None,
 			limit = None, dir = 'ascending', filterlanglinks = 'all', generator = True):
+        """Retrieve all pages on the wiki as a generator."""
 		self.require(1, 9)
 		
 		pfx = listing.List.get_prefix('ap', generator)
@@ -435,6 +442,7 @@ class Site(object):
 
 	def alllinks(self, start = None, prefix = None, unique = False, prop = 'title',
 			namespace = '0', limit = None, generator = True):
+        """Retrieve a list of all links on the wiki as a generator."""
 		self.require(1, 11)
 			
 		pfx = listing.List.get_prefix('al', generator)
@@ -444,6 +452,7 @@ class Site(object):
 		return listing.List.get_list(generator)(self, 'alllinks', 'al', limit = limit, return_values = 'title', **kwargs)
 
 	def allcategories(self, start = None, prefix = None, dir = 'ascending', limit = None, generator = True):
+        """Retrieve all categories on the wiki as a generator."""
 		self.require(1, 12)
 		
 		pfx = listing.List.get_prefix('ac', generator)
@@ -451,18 +460,35 @@ class Site(object):
 		return listing.List.get_list(generator)(self, 'allcategories', 'ac', limit = limit, **kwargs)
 	
 	def allusers(self, start = None, prefix = None, group = None, prop = None, limit = None):
+        """Retrieve all users on the wiki as a generator."""
 		self.require(1, 11)
 		
 		kwargs = dict(listing.List.generate_kwargs('au', ('from', start), prefix = prefix,
 			group = group, prop = prop))
 		return listing.List(self, 'allusers', 'au', limit = limit, **kwargs)
+
 	def blocks(self, start = None, end = None, dir = 'older', ids = None, users = None, limit = None, 
 			prop = 'id|user|by|timestamp|expiry|reason|flags'):
+        """Retrieve blocks as a generator.
+
+        Each block is a dictionary containing:
+        - user: the username or IP address of the user
+        - id: the ID of the block
+        - timestamp: when the block was added
+        - expiry: when the block runs out (infinity for indefinite blocks)
+        - reason: the reason they are blocked
+        - allowusertalk: key is present (empty string) if the user is allowed to edit their user talk page
+        - by: the administrator who blocked the user
+        - nocreate: key is present (empty string) if the user's ability to create accounts has been disabled.
+        
+        """
+
 		self.require(1, 12)
 		# TODO: Fix. Fix what?
 		kwargs = dict(listing.List.generate_kwargs('bk', start = start, end = end, dir = dir, 
 			users = users, prop = prop))
 		return listing.List(self, 'blocks', 'bk', limit = limit, **kwargs)
+
 	def deletedrevisions(self, start = None, end = None, dir = 'older', namespace = None, 
 			limit = None, prop = 'user|comment'):
 		# TODO: Fix
@@ -471,12 +497,31 @@ class Site(object):
 		kwargs = dict(listing.List.generate_kwargs('dr', start = start, end = end, dir = dir,
 			namespace = namespace, prop = prop))
 		return listing.List(self, 'deletedrevs', 'dr', limit = limit, **kwargs)
+
 	def exturlusage(self, query, prop = None, protocol = 'http', namespace = None, limit = None):
+        """Retrieves list of pages that link to a particular domain or URL as a generator.
+
+        This API call mirrors the Special:LinkSearch function on-wiki.
+
+        Query can be a domain like 'bbc.co.uk'. Wildcards can be used, e.g. '*.bbc.co.uk'.
+        Alternatively, a query can contain a full domain name and some or all of a URL:
+        e.g. '*.wikipedia.org/wiki/*'
+
+        See <https://meta.wikimedia.org/wiki/Help:Linksearch> for details.
+
+        The generator returns dictionaries containing three keys:
+        - url: the URL linked to.
+        - ns: namespace of the wiki page
+        - pageid: the ID of the wiki page
+        - title: the page title.
+        
+        """
 		self.require(1, 11)
 		
 		kwargs = dict(listing.List.generate_kwargs('eu', query = query, prop = prop, 
 			protocol = protocol, namespace = namespace))
 		return listing.List(self, 'exturlusage', 'eu', limit = limit, **kwargs)	
+
 	def logevents(self, type = None, prop = None, start = None, end = None, 
 			dir = 'older', user = None, title = None, limit = None):
 		self.require(1, 9)
@@ -484,8 +529,17 @@ class Site(object):
 		kwargs = dict(listing.List.generate_kwargs('le', prop = prop, type = type, start = start,
 			end = end, dir = dir, user = user, title = title))
 		return listing.List(self, 'logevents', 'le', limit = limit, **kwargs)
+
 	# def protectedtitles requires 1.15
 	def random(self, namespace, limit = 20):
+        """Retrieves a generator of random page from a particular namespace.
+        
+        limit specifies the number of random articles retrieved.
+        namespace is a namespace identifier integer.
+        
+        Generator contains dictionary with namespace, page ID and title.
+        
+        """
 		self.require(1, 12)
 		
 		kwargs = dict(listing.List.generate_kwargs('rn', namespace = namespace))
@@ -498,12 +552,14 @@ class Site(object):
 		kwargs = dict(listing.List.generate_kwargs('rc', start = start, end = end, dir = dir,
 			namespace = namespace, prop = prop, show = show, type = type))
 		return listing.List(self, 'recentchanges', 'rc', limit = limit, **kwargs)
+
 	def search(self, search, namespace = '0', what = 'title', redirects = False, limit = None):
 		self.require(1, 11)
 		
 		kwargs = dict(listing.List.generate_kwargs('sr', search = search, namespace = namespace, what = what))
 		if redirects: kwargs['srredirects'] = '1'
 		return listing.List(self, 'search', 'sr', limit = limit, **kwargs)
+
 	def usercontributions(self, user, start = None, end = None, dir = 'older', namespace = None, 
 			prop = None, show = None, limit = None):
 		self.require(1, 9)
@@ -511,6 +567,7 @@ class Site(object):
 		kwargs = dict(listing.List.generate_kwargs('uc', user = user, start = start, end = end, 
 			dir = dir, namespace = namespace, prop = prop, show = show))
 		return listing.List(self, 'usercontribs', 'uc', limit = limit, **kwargs)
+
 	def users(self, users, prop = 'blockinfo|groups|editcount'):
 		self.require(1, 12)
 		
@@ -526,6 +583,7 @@ class Site(object):
 		return listing.List(self, 'watchlist', 'wl', limit = limit, **kwargs)
 		
 	def expandtemplates(self, text, title = None, generatexml = False):
+        """Takes wikitext (text) and expands templates."""
 		self.require(1, 11)
 		
 		kwargs = {}
