@@ -58,6 +58,14 @@ class Page(object):
 		else:
 			return None
 
+	def resolve_redirect(self):
+		""" Returns the redirect target page, or the current page if it's not a redirect page."""
+		target_page = self.redirects_to() 
+		if target_page == None:
+			return self
+		else:
+			return target_page
+
 	def __repr__(self):
 		return "<Page object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
 
