@@ -418,9 +418,11 @@ class Site(object):
 				self.wait(wait_token)
 			file.seek(0, 0)
 			
-	def parse(self, text, title = None):
-		kwargs = {'text': text}
+	def parse(self, text = None, title = None, page = None):
+		kwargs = {}
+		if text is not None: kwargs['text'] = text
 		if title is not None: kwargs['title'] = title
+		if page is not None: kwargs['page'] = page
 		result = self.api('parse', **kwargs)
 		return result['parse']
 	

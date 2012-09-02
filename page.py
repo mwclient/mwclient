@@ -10,6 +10,7 @@ class Page(object):
 			return self.__dict__.update(name.__dict__)
 		self.site = site
 		self.name = name
+		self.section = None
 		
 		if not info:
 			if extra_properties:
@@ -20,8 +21,12 @@ class Page(object):
 				prop = 'info'
 				extra_props = ()
 			
-			info = self.site.api('query', prop = prop, titles = name, 
-				inprop = 'protection', *extra_props)
+			if type(name) is int:
+				info = self.site.api('query', prop = prop, pageids = name, 
+					inprop = 'protection', *extra_props)
+			else:
+				info = self.site.api('query', prop = prop, titles = name, 
+					inprop = 'protection', *extra_props)
 			info = info['query']['pages'].itervalues().next()
 		self._info = info
 				
@@ -34,7 +39,7 @@ class Page(object):
 
 		self.touched = client.parse_timestamp(info.get('touched', '0000-00-00T00:00:00Z'))
 		self.revision = info.get('lastrevid', 0)
-		self.exists = 'missing' not in info
+		self.exists = ('missing' not in info and 'invalid' not in info) # a page "<hello>" will not return missing, but invalid
 		self.length = info.get('length')
 		self.protection = dict([(i['type'], (i['level'], i['expiry'])) for i in info.get('protection', ()) if i])
 		self.redirect = 'redirect' in info
@@ -104,18 +109,20 @@ class Page(object):
 		if not self.exists:
 			return u''
 			
-		revs = self.revisions(prop = 'content|timestamp', limit = 1)
+		revs = self.revisions(prop = 'content|timestamp', limit = 1, section = section)
 		try:
 			rev = revs.next()
 			self.text = rev['*']
+			self.section = section
 			self.last_rev_time = rev['timestamp']
 		except StopIteration:
 			self.text = u''
+			self.section = None
 			self.edit_time = None
 		self.edit_time = time.gmtime()
 		return self.text
 	
-	def save(self, text = u'', summary = u'', minor = False, bot = True, **kwargs):
+	def save(self, text = u'', summary = u'', minor = False, bot = True, section = None, **kwargs):
         """Save text of page."""
 		if not self.site.logged_in and self.site.force_login:
 			# Should we really check for this?
@@ -126,6 +133,7 @@ class Page(object):
 			raise errors.ProtectedPageError(self)
 		
 		if not text: text = self.text
+		if not section: section = self.section
 		
 		if not self.site.writeapi:
 			return OldPage.save(self, text = text, summary = summary, minor = False)
@@ -136,6 +144,7 @@ class Page(object):
 		if self.last_rev_time: data['basetimestamp'] = time.strftime('%Y%m%d%H%M%S', self.last_rev_time)
 		if self.edit_time: data['starttimestamp'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
 		if bot: data['bot'] = '1'
+		if section: data['section'] = section
 		
 		data.update(kwargs)
 		
@@ -277,27 +286,29 @@ class Page(object):
 		else:
 			return listing.PageProperty(self, 'images', '', return_values = 'title')
 
-	def langlinks(self):
+	def langlinks(self, **kwargs):
 		self.site.require(1, 9)
-		return listing.PageProperty(self, 'langlinks', 'll', return_values = ('lang', '*'))
+		return listing.PageProperty(self, 'langlinks', 'll', return_values = ('lang', '*'), **kwargs)
 
-	def links(self, namespace = None, generator = True):
+	def links(self, namespace = None, generator = True, redirects = False):
 		self.site.require(1, 9)
 		kwargs = dict(listing.List.generate_kwargs('pl', namespace = namespace))
+		if redirects: kwargs['redirects'] = '1'
 		if generator:
-			return listing.PagePropertyGenerator(self, 'links', 'pl')
+			return listing.PagePropertyGenerator(self, 'links', 'pl', **kwargs)
 		else:
-			return listing.PageProperty(self, 'links', 'pl', return_values = 'title')
+			return listing.PageProperty(self, 'links', 'pl', return_values = 'title', **kwargs)
 
 	def revisions(self, startid = None, endid = None, start = None, end = None, 
 			dir = 'older', user = None, excludeuser = None, limit = 50, 
-			 prop = 'ids|timestamp|flags|comment|user', expandtemplates = False):
+			 prop = 'ids|timestamp|flags|comment|user', expandtemplates = False, section = None):
 		self.site.require(1, 8)
 		kwargs = dict(listing.List.generate_kwargs('rv', startid = startid, endid = endid,
 			start = start, end = end, user = user, excludeuser = excludeuser))
 		kwargs['rvdir'] = dir
 		kwargs['rvprop'] = prop
 		if expandtemplates: kwargs['rvexpandtemplates'] = '1'
+		if section: kwargs['rvsection'] = section
 		
 		return listing.RevisionsIterator(self, 'revisions', 'rv', limit = limit, **kwargs)
 
