@@ -46,7 +46,18 @@ class Page(object):
 		
 		self.last_rev_time = None
 		self.edit_time = None
-			
+
+	def redirects_to(self):
+		""" Returns the redirect target page, or None if the page is not a redirect page."""
+		info = self.site.api('query', prop = 'pageprops', titles = self.name, redirects = '')['query']
+		if 'redirects' in info:
+			for page in info['redirects']:
+				if page['from'] == self.name:
+					return Page(self.site, page['to'])
+			return None
+		else:
+			return None
+
 	def __repr__(self):
 		return "<Page object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
 
