@@ -530,11 +530,11 @@ class Site(object):
 		return listing.List(self, 'exturlusage', 'eu', limit = limit, **kwargs)	
 
 	def logevents(self, type = None, prop = None, start = None, end = None, 
-			dir = 'older', user = None, title = None, limit = None):
-		self.require(1, 9)
+			dir = 'older', user = None, title = None, limit = None, action = None):
+		self.require(1, 10)
 		
 		kwargs = dict(listing.List.generate_kwargs('le', prop = prop, type = type, start = start,
-			end = end, dir = dir, user = user, title = title))
+			end = end, dir = dir, user = user, title = title, action = action))
 		return listing.List(self, 'logevents', 'le', limit = limit, **kwargs)
 
 	# def protectedtitles requires 1.15
