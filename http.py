@@ -54,9 +54,10 @@ class HTTPPersistentConnection(object):
 	http_class = httplib.HTTPConnection
 	scheme_name = 'http'
 	
-	def __init__(self, host, pool = None):
+	def __init__(self, host, pool = None, user_agent='MwClient-' + __ver__):
 		self.cookies = {}
 		self.pool = pool
+		self.user_agent = user_agent
 		if pool: self.cookies = pool.cookies
 		self._conn = self.http_class(host)
 		self._conn.connect()
@@ -78,7 +79,7 @@ class HTTPPersistentConnection(object):
 		headers = {}
 		
 		headers['Connection'] = 'Keep-Alive'
-		headers['User-Agent'] = 'MwClient/' + __ver__
+		headers['User-Agent'] = self.user_agent
 		headers['Host'] = host
 		if host in self.cookies: 
 			headers['Cookie'] = self.cookies[host].get_cookie_header()
@@ -186,9 +187,10 @@ class HTTPSPersistentConnection(HTTPPersistentConnection):
 
 	
 class HTTPPool(list):
-	def __init__(self):
+	def __init__(self, user_agent='MwClient-' + __ver__):
 		list.__init__(self)
 		self.cookies = {}
+		self.user_agent = user_agent
 	def find_connection(self, host, scheme = 'http'):
 		if type(host) is tuple:
 			scheme, host = host
@@ -215,7 +217,7 @@ class HTTPPool(list):
 			cls = HTTPSPersistentConnection
 		else:
 			raise RuntimeError('Unsupported scheme', scheme)
-		conn = cls(host, self)
+		conn = cls(host, self, user_agent=self.user_agent)
 		self.append(([(scheme, host)], conn))
 		return conn
 	def get(self, host, path, headers = None):

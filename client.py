@@ -40,7 +40,8 @@ class Site(object):
 	api_limit = 500
 	def __init__(self, host, path = '/w/', ext = '.php', pool = None, retry_timeout = 30, 
 			max_retries = 25, wait_callback = lambda *x: None, 
-			max_lag = 3, compress = True, force_login = True, do_init = True):
+			max_lag = 3, compress = True, force_login = True, do_init = True,
+			user_agent = 'MwClient-' + __ver__):
 		# Setup member variables
 		self.host = host
 		self.path = path
