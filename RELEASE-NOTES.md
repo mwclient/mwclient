@@ -1,4 +1,4 @@
-RELEASE NOTES FOR MWCLIENT
+# RELEASE NOTES FOR MWCLIENT #
 
 This is mwclient 0.6.6. The following are the release notes for this version.
 
