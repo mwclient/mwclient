@@ -9,18 +9,6 @@ import errors
 
 from client import __ver__
 
-class Request(urllib2.Request):
-	def __init__(self, url, data=None, headers={},
-		origin_req_host=None, unverifiable=False, head = False):
-		urllib2.Request.__init__(self, url, data, headers, origin_req_host, unverifiable)
-		
-		self.add_header('User-Agent', 'MwClient-' + __ver__)
-		self.head = head
-	def get_method(self):
-		if self.head: return 'HEAD'
-		return urllib2.Request.get_method(self)
-
-		
 class CookieJar(dict):
 	def __init__(self):
 		dict.__init__(self, ())
