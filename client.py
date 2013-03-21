@@ -39,7 +39,7 @@ class WaitToken(object):
 class Site(object):
 	api_limit = 500
 	def __init__(self, host, path = '/w/', ext = '.php', pool = None, retry_timeout = 30, 
-			max_retries = 25, wait_callback = lambda *x: None, 
+			max_retries = 25, wait_callback = lambda *x: None, clients_useragent = None,
 			max_lag = 3, compress = True, force_login = True, do_init = True):
 		# Setup member variables
 		self.host = host
@@ -70,7 +70,7 @@ class Site(object):
 			
 		# Setup connection
 		if pool is None:
-			self.connection = http.HTTPPool()
+			self.connection = http.HTTPPool(clients_useragent)
 		else:
 			self.connection = pool
 		
