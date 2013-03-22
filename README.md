@@ -1,7 +1,6 @@
 This file describes mwclient-0.6.5.
 The latest version is available in the 
-[subversion repository](https://mwclient.svn.sourceforge.net/svnroot/mwclient)
-and is also [browsable online](http://mwclient.svn.sourceforge.net/viewvc/mwclient/).
+[github repository](https://github.com/btongminh/mwclient).
 
 Mwclient is a client to the [MediaWiki API](http://mediawiki.org/wiki/API)
 and allows access to almost all implemented API functions.
@@ -46,7 +45,7 @@ To use https, specify the host as a tuple in the form of `('https', hostname)`.
 
 ## Example ##
 ```python
-## For more information, see REFERENCE.txt
+## For more information, see REFERENCE.md
 # Init site object
 import mwclient
 site = mwclient.Site('commons.wikimedia.org')
@@ -74,7 +73,7 @@ for category in site.allcategories():
 ```
 
 ## License ##
- Copyright (c) 2006-2011 Bryan Tong Minh
+ Copyright (c) 2006-2013 Bryan Tong Minh
  
  Permission is hereby granted, free of charge, to any person
  obtaining a copy of this software and associated documentation
