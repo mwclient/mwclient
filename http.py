@@ -9,18 +9,6 @@ import errors
 
 from client import __ver__
 
-class Request(urllib2.Request):
-	def __init__(self, url, data=None, headers={},
-		origin_req_host=None, unverifiable=False, head = False):
-		urllib2.Request.__init__(self, url, data, headers, origin_req_host, unverifiable)
-		
-		self.add_header('User-Agent', 'MwClient-' + __ver__)
-		self.head = head
-	def get_method(self):
-		if self.head: return 'HEAD'
-		return urllib2.Request.get_method(self)
-
-		
 class CookieJar(dict):
 	def __init__(self):
 		dict.__init__(self, ())
@@ -53,14 +41,20 @@ class Cookie(object):
 class HTTPPersistentConnection(object):
 	http_class = httplib.HTTPConnection
 	scheme_name = 'http'
+	useragent = None
 	
-	def __init__(self, host, pool = None):
-		self.cookies = {}
-		self.pool = pool
-		if pool: self.cookies = pool.cookies
+	def __init__(self, host, pool = None, clients_useragent = None):
 		self._conn = self.http_class(host)
 		self._conn.connect()
 		self.last_request = time.time()
+		self.cookies = {}
+
+		self.pool = pool
+		if pool: self.cookies = pool.cookies
+
+		clients_useragent = clients_useragent or ""
+		if clients_useragent != "": clients_useragent += " "
+		self.useragent = clients_useragent + 'MwClient/' + __ver__
 		
 	def request(self, method, host, path, headers, data,
 			raise_on_not_ok = True, auto_redirect = True):		
@@ -78,7 +72,7 @@ class HTTPPersistentConnection(object):
 		headers = {}
 		
 		headers['Connection'] = 'Keep-Alive'
-		headers['User-Agent'] = 'MwClient/' + __ver__
+		headers['User-Agent'] = self.useragent
 		headers['Host'] = host
 		if host in self.cookies: 
 			headers['Cookie'] = self.cookies[host].get_cookie_header()
@@ -186,9 +180,11 @@ class HTTPSPersistentConnection(HTTPPersistentConnection):
 
 	
 class HTTPPool(list):
-	def __init__(self):
+	def __init__(self, clients_useragent = None):
 		list.__init__(self)
 		self.cookies = {}
+		self.clients_useragent = clients_useragent
+
 	def find_connection(self, host, scheme = 'http'):
 		if type(host) is tuple:
 			scheme, host = host
@@ -215,7 +211,7 @@ class HTTPPool(list):
 			cls = HTTPSPersistentConnection
 		else:
 			raise RuntimeError('Unsupported scheme', scheme)
-		conn = cls(host, self)
+		conn = cls(host, self, self.clients_useragent)
 		self.append(([(scheme, host)], conn))
 		return conn
 	def get(self, host, path, headers = None):
