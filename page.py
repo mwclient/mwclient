@@ -94,11 +94,11 @@ class Page(object):
 			return u''
 			
 	def edit(self, section = None, readonly = False):
-        """Returns wikitext for a specified section or for the whole page.
-        
-        Retrieves the latest edit.
-        
-        """
+		"""Returns wikitext for a specified section or for the whole page.
+		
+		Retrieves the latest edit.
+		
+		"""
 		if not self.can('read'):
 			raise errors.InsufficientPermission(self)
 		if not self.exists:
@@ -116,7 +116,7 @@ class Page(object):
 		return self.text
 	
 	def save(self, text = u'', summary = u'', minor = False, bot = True, **kwargs):
-        """Save text of page."""
+		"""Save text of page."""
 		if not self.site.logged_in and self.site.force_login:
 			# Should we really check for this?
 			raise errors.LoginError(self.site)
@@ -167,7 +167,7 @@ class Page(object):
 		if e.code == 'editconflict':
 			raise errors.EditError(self, summary, e.info)
 		elif e.code in ('protectedtitle', 'cantcreate', 'cantcreate-anon', 'noimageredirect-anon', 
-			    'noimageredirect', 'noedit-anon', 'noedit'):
+				'noimageredirect', 'noedit-anon', 'noedit'):
 			raise errors.ProtectedPageError(self, e.code, e.info)
 		else:
 			raise		
@@ -182,15 +182,15 @@ class Page(object):
 			return u''
 			
 	def move(self, new_title, reason = '', move_talk = True, no_redirect = False):
-        """Move (rename) page to new_title.
+		"""Move (rename) page to new_title.
 
-        If user account is an administrator, specify no_direct as True to not
-        leave a redirect.
-        
-        If user does not have permission to move page, an InsufficientPermission
-        exception is raised.
-        
-        """
+		If user account is an administrator, specify no_direct as True to not
+		leave a redirect.
+		
+		If user does not have permission to move page, an InsufficientPermission
+		exception is raised.
+		
+		"""
 		if not self.can('move'): raise errors.InsufficientPermission(self)
 		
 		if not self.site.writeapi:
@@ -206,12 +206,12 @@ class Page(object):
 		
 			
 	def delete(self, reason = '', watch = False, unwatch = False, oldimage = False):
-        """Delete page.
-        
-        If user does not have permission to delete page, an InsufficientPermission
-        exception is raised.
-        
-        """
+		"""Delete page.
+		
+		If user does not have permission to delete page, an InsufficientPermission
+		exception is raised.
+		
+		"""
 		if not self.can('delete'): raise errors.InsufficientPermission(self)
 		
 		if not self.site.writeapi:
@@ -227,10 +227,10 @@ class Page(object):
 		return result['delete']
 		
 	def purge(self):
-        """Purge server-side cache of page. This will re-render templates and other
-        dynamic content.
-        
-        """
+		"""Purge server-side cache of page. This will re-render templates and other
+		dynamic content.
+		
+		"""
 		self.site.raw_index('purge', title = self.name)
 		
 	# def watch: requires 1.14
