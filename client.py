@@ -418,9 +418,11 @@ class Site(object):
 				self.wait(wait_token)
 			file.seek(0, 0)
 			
-	def parse(self, text, title = None):
-		kwargs = {'text': text}
+	def parse(self, text = None, title = None, page = None):
+		kwargs = {}
+		if text is not None: kwargs['text'] = text
 		if title is not None: kwargs['title'] = title
+		if page is not None: kwargs['page'] = page
 		result = self.api('parse', **kwargs)
 		return result['parse']
 	
@@ -528,11 +530,11 @@ class Site(object):
 		return listing.List(self, 'exturlusage', 'eu', limit = limit, **kwargs)	
 
 	def logevents(self, type = None, prop = None, start = None, end = None, 
-			dir = 'older', user = None, title = None, limit = None):
-		self.require(1, 9)
+			dir = 'older', user = None, title = None, limit = None, action = None):
+		self.require(1, 10)
 		
 		kwargs = dict(listing.List.generate_kwargs('le', prop = prop, type = type, start = start,
-			end = end, dir = dir, user = user, title = title))
+			end = end, dir = dir, user = user, title = title, action = action))
 		return listing.List(self, 'logevents', 'le', limit = limit, **kwargs)
 
 	# def protectedtitles requires 1.15
@@ -549,7 +551,7 @@ class Site(object):
 		
 		kwargs = dict(listing.List.generate_kwargs('rn', namespace = namespace))
 		return listing.List(self, 'random', 'rn', limit = limit, **kwargs)
-	
+
 	def recentchanges(self, start = None, end = None, dir = 'older', namespace = None, 
 				prop = None, show = None, limit = None, type = None):
 		self.require(1, 9)
