@@ -1,6 +1,8 @@
-This file describes mwclient-0.6.5.
-The latest version is available in the 
-[github repository](https://github.com/btongminh/mwclient).
+> *This file describes the latest stable version of mwclient: version 0.6.5, released 6 May 2011*
+> **([download 0.6.5](https://github.com/btongminh/mwclient/archive/REL_0_6_5.zip)).**  
+> *The development version is available in the*
+> *[github repository](https://github.com/btongminh/mwclient)*
+> **([download latest](https://github.com/btongminh/mwclient/archive/master.zip)).**
 
 Mwclient is a client to the [MediaWiki API](http://mediawiki.org/wiki/API)
 and allows access to almost all implemented API functions.
@@ -15,7 +17,7 @@ and may or may not work for you.
 In case it doesn't, Bryan can be contacted on btongminh@users.sourceforge.net.
 
 This framework heavily depends on Bob Ippolito's
-[simplejson](https://pypi.python.org/pypi/simplejson).
+[simplejson](https://github.com/simplejson/simplejson).
 
 
 ## Implementation notes ##
