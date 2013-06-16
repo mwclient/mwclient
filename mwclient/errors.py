@@ -1,46 +1,46 @@
 class MwClientError(RuntimeError):
-	pass
+    pass
 
 class MediaWikiVersionError(MwClientError):
-	pass
+    pass
 
 class APIDisabledError(MwClientError):
-	pass
+    pass
 
 class HTTPError(MwClientError):
-	pass
+    pass
 class HTTPStatusError(MwClientError):
-	pass
+    pass
 class HTTPRedirectError(HTTPError):
-	pass
+    pass
 
 class MaximumRetriesExceeded(MwClientError):
-	pass
-	
+    pass
+    
 class APIError(MwClientError):
-	def __init__(self, code, info, kwargs):
-		self.code = code
-		self.info = info
-		MwClientError.__init__(self, code, info, kwargs)
-	
+    def __init__(self, code, info, kwargs):
+        self.code = code
+        self.info = info
+        MwClientError.__init__(self, code, info, kwargs)
+    
 class InsufficientPermission(MwClientError):
-	pass
+    pass
 class UserBlocked(InsufficientPermission):
-	pass
+    pass
 
 class EditError(MwClientError):
-	pass
+    pass
 class ProtectedPageError(EditError, InsufficientPermission):
-	pass
+    pass
 class FileExists(EditError):
-	pass
-	
+    pass
+    
 
 class LoginError(MwClientError):
-	pass
+    pass
 
 class EmailError(MwClientError):
-	pass
+    pass
 class NoSpecifiedEmail(EmailError):
-	pass
-	
+    pass
+    
