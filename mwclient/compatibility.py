@@ -6,7 +6,7 @@ def title(prefix, new_format):
     else:
         return 'titles'
         
-def userinfo(data, new_format = None):
+def userinfo(data, new_format=None):
     if new_format is None:
         # Unknown version; trying to guess
         if 'userinfo' in data: 
@@ -28,7 +28,7 @@ def iiprop(version):
     else:
         return 'timestamp|user|comment|url|size|sha1'
         
-def cmtitle(page, new_format, prefix = ''):
+def cmtitle(page, new_format, prefix=''):
     if new_format:
         return prefix + 'title', page.name
     else:
@@ -41,7 +41,7 @@ def protectright(version):
         return 'protect'
 
 from cStringIO import StringIO
-def old_upload(self, file, filename, description, license = '', ignore = False, file_size = None): 
+def old_upload(self, file, filename, description, license='', ignore=False, file_size=None): 
     image = self.Images[filename]
     if not image.can('upload'):
         raise errors.InsufficientPermission(filename)
@@ -74,7 +74,7 @@ def old_upload(self, file, filename, description, license = '', ignore = False, 
         try:
             self.connection.post(self.host,
                     self.path + 'index.php?title=Special:Upload&maxlag=' 
-                    + self.max_lag, data = postdata).read()
+                    + self.max_lag, data=postdata).read()
         except errors.HTTPStatusError, e:
             if e[0] == 503 and e[1].getheader('X-Database-Lag'):
                 self.wait(wait_token, int(e[1].getheader('Retry-After')))

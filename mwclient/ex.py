@@ -31,18 +31,18 @@ class SiteList(object):
 
 class ConfiguredSite(client.Site):
     def __init__(self, *config_files, **kwargs):
-        self.config = read_config(config_files, sites = SiteList())
+        self.config = read_config(config_files, sites=SiteList())
         
         if 'name' in kwargs:
             self.config.update(self.config['sites'][kwargs['name']])
         
         do_login = 'username' in self.config and 'password' in self.config
         
-        client.Site.__init__(self, host = self.config['host'],
-            path = self.config['path'], ext = self.config.get('ext', '.php'), 
-            do_init = not do_login,
-            retry_timeout  = self.config.get('retry_timeout', 30),
-            max_retries = self.config.get('max_retries', -1))
+        client.Site.__init__(self, host=self.config['host'],
+            path=self.config['path'], ext=self.config.get('ext', '.php'), 
+            do_init=not do_login,
+            retry_timeout =self.config.get('retry_timeout', 30),
+            max_retries=self.config.get('max_retries', -1))
             
             
         if do_login:
@@ -51,7 +51,7 @@ class ConfiguredSite(client.Site):
     
 class ConfiguredPool(list):
     def __init__(self, *config_files):
-        self.config = read_config(config_files, sites = SiteList())
+        self.config = read_config(config_files, sites=SiteList())
         self.pool = http.HTTPPool()
         
         config = dict([(k, v) for k, v in self.config.iteritems()
@@ -64,11 +64,11 @@ class ConfiguredPool(list):
             
             do_login = 'username' in site and 'password' in site
                     
-            self.append(client.Site(host = site['host'], 
-                path = site['path'], ext = site.get('ext', '.php'),
-                pool = self.pool, do_init = not do_login,
-                retry_timeout = site.get('retry_timeout', 30),
-                max_retries = site.get('max_retries', -1)))
+            self.append(client.Site(host=site['host'], 
+                path=site['path'], ext=site.get('ext', '.php'),
+                pool=self.pool, do_init=not do_login,
+                retry_timeout=site.get('retry_timeout', 30),
+                max_retries=site.get('max_retries', -1)))
             if do_login:
                 self[-1].login(site['username'], site['password'])
             self[-1].config = site

@@ -2,7 +2,7 @@ import client, page
 import compatibility
 
 class List(object):
-    def __init__(self, site, list_name, prefix, limit = None, return_values = None, max_items = None, *args, **kwargs):
+    def __init__(self, site, list_name, prefix, limit=None, return_values=None, max_items=None, *args, **kwargs):
         # NOTE: Fix limit
         self.site = site
         self.list_name = list_name
@@ -27,7 +27,7 @@ class List(object):
     def __iter__(self):
         return self
         
-    def next(self, full = False):
+    def next(self, full=False):
         if self.max_items is not None:
             if self.count >= self.max_items:
                 raise StopIteration
@@ -48,7 +48,7 @@ class List(object):
         except StopIteration:
             if self.last: raise StopIteration
             self.load_chunk()
-            return List.next(self, full = full)
+            return List.next(self, full=full)
             
     def load_chunk(self):
         data = self.site.api('query', (self.generator, self.list_name), *[(str(k), v) for k, v in self.args.iteritems()])
@@ -82,14 +82,14 @@ class List(object):
                 yield _prefix + key, value
 
     @staticmethod
-    def get_prefix(prefix, generator = False):
+    def get_prefix(prefix, generator=False):
         if generator:
             return 'g' + prefix
         else:
             return prefix
 
     @staticmethod
-    def get_list(generator = False):
+    def get_list(generator=False):
         if generator:
             return GeneratorList
         else:
@@ -112,7 +112,7 @@ class GeneratorList(List):
         self.page_class = page.Page
         
     def next(self):
-        info = List.next(self, full = True)
+        info = List.next(self, full=True)
         if info['ns'] == 14:
             return Category(self.site, u'', info)
         if info['ns'] == 6:
@@ -127,27 +127,27 @@ class GeneratorList(List):
         
     
 class Category(page.Page, GeneratorList):
-    def __init__(self, site, name, info = None, namespace = None):
+    def __init__(self, site, name, info=None, namespace=None):
         page.Page.__init__(self, site, name, info)
         kwargs = {}
         kwargs.update((compatibility.cmtitle(self, self.site.require(
-            1, 12, raise_error = False), prefix = 'gcm'), ))
+            1, 12, raise_error=False), prefix='gcm'), ))
         if namespace: kwargs['gcmnamespace'] = namespace
         GeneratorList.__init__(self, site, 'categorymembers', 'cm', **kwargs)
 
     def __repr__(self):
         return "<Category object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
 
-    def members(self, prop = 'ids|title', namespace = None, sort = 'sortkey', 
-            dir = 'asc', start = None, end = None, generator = True):
+    def members(self, prop='ids|title', namespace=None, sort='sortkey', 
+            dir='asc', start=None, end=None, generator=True):
         prefix = self.get_prefix('cm', generator)
-        kwargs = dict(self.generate_kwargs(prefix, prop = prop, namespace = namespace,
-            sort = sort, dir = dir, start = start, end = end, *(compatibility.cmtitle(
-            self, self.site.require(1, 12, raise_error = False)), )))
+        kwargs = dict(self.generate_kwargs(prefix, prop=prop, namespace=namespace,
+            sort=sort, dir=dir, start=start, end=end, *(compatibility.cmtitle(
+            self, self.site.require(1, 12, raise_error=False)), )))
         return self.get_list(generator)(self.site, 'categorymembers', 'cm', **kwargs)
         
 class PageList(GeneratorList):
-    def __init__(self, site, prefix = None, start = None, namespace = 0, redirects = 'all'):
+    def __init__(self, site, prefix=None, start=None, namespace=0, redirects='all'):
         self.namespace = namespace
         
         kwargs = {}
@@ -155,12 +155,12 @@ class PageList(GeneratorList):
         if start: kwargs['apfrom'] = start
             
         GeneratorList.__init__(self, site, 'allpages', 'ap',
-            apnamespace = str(namespace), apfilterredir = redirects, **kwargs)
+            apnamespace=str(namespace), apfilterredir=redirects, **kwargs)
 
     def __getitem__(self, name):
         return self.get(name, None)
 
-    def get(self, name, info = ()):
+    def get(self, name, info=()):
         if self.namespace == 14:
             return Category(self.site, self.site.namespaces[14] + ':' + name, info)
         elif self.namespace == 6:
@@ -191,7 +191,7 @@ class PageList(GeneratorList):
         
 class PageProperty(List):
     def __init__(self, page, prop, prefix, *args, **kwargs):
-        List.__init__(self, page.site, prop, prefix, titles = page.name, *args, **kwargs)
+        List.__init__(self, page.site, prop, prefix, titles=page.name, *args, **kwargs)
         self.page = page
         self.generator = 'prop'
 
@@ -205,7 +205,7 @@ class PageProperty(List):
         
 class PagePropertyGenerator(GeneratorList):
     def __init__(self, page, prop, prefix, *args, **kwargs):
-        GeneratorList.__init__(self, page.site, prop, prefix, titles = page.name, *args, **kwargs)
+        GeneratorList.__init__(self, page.site, prop, prefix, titles=page.name, *args, **kwargs)
         self.page = page
 
 class RevisionsIterator(PageProperty):

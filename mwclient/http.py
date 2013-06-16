@@ -43,7 +43,7 @@ class HTTPPersistentConnection(object):
     scheme_name = 'http'
     useragent = None
     
-    def __init__(self, host, pool = None, clients_useragent = None):
+    def __init__(self, host, pool=None, clients_useragent=None):
         self._conn = self.http_class(host)
         self._conn.connect()
         self.last_request = time.time()
@@ -57,7 +57,7 @@ class HTTPPersistentConnection(object):
         self.useragent = clients_useragent + 'MwClient/' + __ver__
         
     def request(self, method, host, path, headers, data,
-            raise_on_not_ok = True, auto_redirect = True):      
+            raise_on_not_ok=True, auto_redirect=True):      
         
         # Strip scheme
         if type(host) is tuple:
@@ -85,7 +85,7 @@ class HTTPPersistentConnection(object):
         if _headers: headers.update(_headers)
         
         try:
-            self._conn.request(method, path, headers = headers)
+            self._conn.request(method, path, headers=headers)
             if issubclass(data.__class__, upload.Upload):
                 for s in data:
                     self._conn.send(s)
@@ -149,14 +149,14 @@ class HTTPPersistentConnection(object):
             
         return res
         
-    def get(self, host, path, headers = None):
+    def get(self, host, path, headers=None):
         return self.request('GET', host, path, headers, None)
-    def post(self, host, path, headers = None, data = None):
+    def post(self, host, path, headers=None, data=None):
         return self.request('POST', host, path, headers, data)
-    def head(self, host, path, headers = None, auto_redirect = False):
+    def head(self, host, path, headers=None, auto_redirect=False):
         res = self.request('HEAD', host, path, headers, 
-            data = None, raise_on_not_ok = False,
-            auto_redirect = auto_redirect)
+            data=None, raise_on_not_ok=False,
+            auto_redirect=auto_redirect)
         res.read()
         return res.status, res.getheaders()
         
@@ -167,7 +167,7 @@ class HTTPPersistentConnection(object):
 
 class HTTPConnection(HTTPPersistentConnection):
     def request(self, method, host, path, headers, data,
-            raise_on_not_ok = True, auto_redirect = True):
+            raise_on_not_ok=True, auto_redirect=True):
         if not headers: headers = {}
         headers['Connection'] = 'Close'
         res = HTTPPersistentConnection.request(self, method, host, path, headers, data, 
@@ -180,12 +180,12 @@ class HTTPSPersistentConnection(HTTPPersistentConnection):
 
     
 class HTTPPool(list):
-    def __init__(self, clients_useragent = None):
+    def __init__(self, clients_useragent=None):
         list.__init__(self)
         self.cookies = {}
         self.clients_useragent = clients_useragent
 
-    def find_connection(self, host, scheme = 'http'):
+    def find_connection(self, host, scheme='http'):
         if type(host) is tuple:
             scheme, host = host
             
@@ -214,13 +214,13 @@ class HTTPPool(list):
         conn = cls(host, self, self.clients_useragent)
         self.append(([(scheme, host)], conn))
         return conn
-    def get(self, host, path, headers = None):
+    def get(self, host, path, headers=None):
         return self.find_connection(host).get(host, 
             path, headers)
-    def post(self, host, path, headers = None, data = None):
+    def post(self, host, path, headers=None, data=None):
         return self.find_connection(host).post(host, 
             path, headers, data)
-    def head(self, host, path, headers = None, auto_redirect = False):
+    def head(self, host, path, headers=None, auto_redirect=False):
         return self.find_connection(host).head(host, 
             path, headers, auto_redirect)
     def request(self, method, host, path, headers, data,

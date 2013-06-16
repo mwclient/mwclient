@@ -6,7 +6,7 @@ import errors
 
 class OldPage(object):
     @staticmethod
-    def save(self, text = u'', summary = u'', minor = False):
+    def save(self, text=u'', summary=u'', minor=False):
         data = {}
         data['wpTextbox1'] = text
         data['wpSummary'] = summary
@@ -37,7 +37,7 @@ class OldPage(object):
             raise errors.EditError(page.title, data)
 
     @staticmethod
-    def move(self, new_title, reason = '', move_talk = True):
+    def move(self, new_title, reason='', move_talk=True):
         postdata = {'wpNewTitle': new_title,
             'wpOldTitle': self.name,
             'wpReason': reason,
@@ -56,7 +56,7 @@ class OldPage(object):
             raise errors.EditError(page.title, postdata)
             
     @staticmethod
-    def delete(self, reason = ''):
+    def delete(self, reason=''):
         postdata = {'wpReason': reason,
             'wpConfirmB': 'Delete',
             'mw-filedelete-submit': 'Delete',

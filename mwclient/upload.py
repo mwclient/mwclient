@@ -36,7 +36,7 @@ class UploadRawData(Upload):
     """
     This upload class is simply a wrapper around StringIO 
     """
-    def __init__(self, data, content_type = 'application/x-www-form-urlencoded'):
+    def __init__(self, data, content_type='application/x-www-form-urlencoded'):
         self.fstr = StringIO(data)
         Upload.__init__(self, len(data), content_type)
     def read(self, length = -1):
