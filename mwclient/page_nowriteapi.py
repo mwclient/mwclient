@@ -37,7 +37,7 @@ class OldPage(object):
         if page.data:
             if page.readonly:
                 raise errors.ProtectedPageError(self)
-            self.get_token('edit',  True)
+            self.get_token('edit', True)
             raise errors.EditError(page.title, data)
 
     @staticmethod

@@ -67,7 +67,7 @@ class Page(object):
     def resolve_redirect(self):
         """ Returns the redirect target page, or the current page if it's not a redirect page."""
         target_page = self.redirects_to()
-        if target_page == None:
+        if target_page is None:
             return self
         else:
             return target_page
@@ -205,7 +205,7 @@ class Page(object):
             self.last_rev_time = client.parse_timestamp(result['newtimestamp'])
         return result['edit']
 
-    def handle_edit_error(self, e,  summary):
+    def handle_edit_error(self, e, summary):
         if e.code == 'editconflict':
             raise errors.EditError(self, summary, e.info)
         elif e.code in ('protectedtitle', 'cantcreate', 'cantcreate-anon', 'noimageredirect-anon',

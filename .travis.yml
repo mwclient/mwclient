@@ -14,5 +14,4 @@ before_script:
   - pip install -r test_requirements.txt --use-mirrors
 
 script: 
-  #- py.test --pep8 mwclient -v --doctest-modules tests/client-test.py
-  - py.test -v --doctest-modules tests/client-test.py
+  - py.test --pep8 mwclient -v --doctest-modules tests/client-test.py

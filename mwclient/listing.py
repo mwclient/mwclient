@@ -83,7 +83,7 @@ class List(object):
     def generate_kwargs(_prefix, *args, **kwargs):
         kwargs.update(args)
         for key, value in kwargs.iteritems():
-            if value != None:
+            if value is not None:
                 yield _prefix + key, value
 
     @staticmethod
