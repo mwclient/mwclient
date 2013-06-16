@@ -21,6 +21,27 @@
   (by [@eug48](https://github.com/eug48))
   [99e786d](https://github.com/btongminh/mwclient/commit/99e786d),
   [#16](https://github.com/btongminh/mwclient/pull/16)
+* [2013-05-13] Support for requesting pages by their page id (`site.pages[page_id]`)
+  (by [@danmichaelo](https://github.com/danmichaelo))
+  [a1a2ced](https://github.com/danmichaelo/mwclient/commit/a1a2ced),
+  [#19](https://github.com/btongminh/mwclient/pull/19)
+* [2013-05-13] Support for editing sections
+  (by [@danmichaelo](https://github.com/danmichaelo))
+  [546f77d](https://github.com/danmichaelo/mwclient/commit/546f77d),
+  [#19](https://github.com/btongminh/mwclient/pull/19)
+* [2013-05-13] New method `Page.redirects_to()` and helper method `Page.resolve_redirect()`
+  (by [@danmichaelo](https://github.com/danmichaelo))
+  [3b851cb](https://github.com/danmichaelo/mwclient/commit/3b851cb),
+  [36e8dcc](https://github.com/danmichaelo/mwclient/commit/36e8dcc),
+  [#19](https://github.com/btongminh/mwclient/pull/19)
+* [2013-05-13] Support argument `action` with `logevents()`
+  (by [@danmichaelo](https://github.com/danmichaelo))
+  [241ed37](https://github.com/danmichaelo/mwclient/commit/241ed37),
+  [#19](https://github.com/btongminh/mwclient/pull/19)
+* [2013-05-13] Support argument `page` with `parse()`
+  (by [@danmichaelo](https://github.com/danmichaelo))
+  [223aa0](https://github.com/danmichaelo/mwclient/commit/223aa0),
+  [#19](https://github.com/btongminh/mwclient/pull/19)
 
 ## Changes in version 0.6.5
 Mwclient 0.6.5 was released on 6 May 2011
