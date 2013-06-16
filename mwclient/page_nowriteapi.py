@@ -4,7 +4,9 @@ from htmlentitydefs import name2codepoint
 
 import errors
 
+
 class OldPage(object):
+
     @staticmethod
     def save(self, text=u'', summary=u'', minor=False):
         data = {}
@@ -22,7 +24,8 @@ class OldPage(object):
             data['wpStarttime'] = time.strftime('%Y%m%d%H%M%S', time.gmtime())
         data['wpStarttime'] = time.strftime('%Y%m%d%H%M%S', time.gmtime())
 
-        if minor: data['wpMinoredit'] = '1'
+        if minor:
+            data['wpMinoredit'] = '1'
         data['title'] = self.name
 
         page_data = self.site.raw_index('submit', **data)
@@ -32,18 +35,20 @@ class OldPage(object):
         page.close()
 
         if page.data:
-            if page.readonly: raise errors.ProtectedPageError(self)
+            if page.readonly:
+                raise errors.ProtectedPageError(self)
             self.get_token('edit',  True)
             raise errors.EditError(page.title, data)
 
     @staticmethod
     def move(self, new_title, reason='', move_talk=True):
         postdata = {'wpNewTitle': new_title,
-            'wpOldTitle': self.name,
-            'wpReason': reason,
-            'wpMove': '1',
-            'wpEditToken': self.get_token('move')}
-        if move_talk: postdata['wpMovetalk'] = '1'
+                    'wpOldTitle': self.name,
+                    'wpReason': reason,
+                    'wpMove': '1',
+                    'wpEditToken': self.get_token('move')}
+        if move_talk:
+            postdata['wpMovetalk'] = '1'
         postdata['title'] = 'Special:Movepage'
 
         page_data = self.site.raw_index('submit', **data)
@@ -58,14 +63,16 @@ class OldPage(object):
     @staticmethod
     def delete(self, reason=''):
         postdata = {'wpReason': reason,
-            'wpConfirmB': 'Delete',
-            'mw-filedelete-submit': 'Delete',
-            'wpEditToken': self.get_token('delete'),
-            'title': self.name}
+                    'wpConfirmB': 'Delete',
+                    'mw-filedelete-submit': 'Delete',
+                    'wpEditToken': self.get_token('delete'),
+                    'title': self.name}
 
         page_data = self.site.raw_index('delete', **postdata)
 
+
 class EditPage(HTMLParser):
+
     def __init__(self, form):
         HTMLParser.__init__(self)
 
@@ -92,27 +99,33 @@ class EditPage(HTMLParser):
         if tag == 'input' and self.in_form and (u'type', u'submit') \
                 not in attrs and (u'type', u'checkbox') not in attrs:
             attrs = dict(attrs)
-            if u'name' in attrs: self.data[attrs[u'name']] = attrs.get(u'value', u'')
+            if u'name' in attrs:
+                self.data[attrs[u'name']] = attrs.get(u'value', u'')
 
         if self.in_form and tag == 'textarea':
             self.in_text = True
             self.readonly = (u'readonly', u'readonly') in attrs
 
-
     def handle_endtag(self, tag):
-        if self.in_title and tag == 'title': self.in_title = False
-        if self.in_form and tag == 'form': self.in_form = False
-        if self.in_text and tag == 'textarea': self.in_text = False
+        if self.in_title and tag == 'title':
+            self.in_title = False
+        if self.in_form and tag == 'form':
+            self.in_form = False
+        if self.in_text and tag == 'textarea':
+            self.in_text = False
 
     def handle_data(self, data):
-        if self.in_text: self.textdata.append(data)
-        if self.in_title: self.title += data
+        if self.in_text:
+            self.textdata.append(data)
+        if self.in_title:
+            self.title += data
 
     def handle_entityref(self, name):
         if name in name2codepoint:
             self.handle_data(unichr(name2codepoint[name]))
         else:
             self.handle_data(u'&%s;' % name)
+
     def handle_charref(self, name):
         try:
             self.handle_data(unichr(int(name)))

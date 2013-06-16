@@ -1,10 +1,16 @@
-import client, errors, listing
+import client
+import errors
+import listing
 import compatibility
 from page_nowriteapi import OldPage
 
-import urllib, urlparse, time
+import urllib
+import urlparse
+import time
+
 
 class Page(object):
+
     def __init__(self, site, name, info=None, extra_properties={}):
         if type(name) is type(self):
             return self.__dict__.update(name.__dict__)
@@ -23,10 +29,10 @@ class Page(object):
 
             if type(name) is int:
                 info = self.site.api('query', prop=prop, pageids=name,
-                    inprop='protection', *extra_props)
+                                     inprop='protection', *extra_props)
             else:
                 info = self.site.api('query', prop=prop, titles=name,
-                    inprop='protection', *extra_props)
+                                     inprop='protection', *extra_props)
             info = info['query']['pages'].itervalues().next()
         self._info = info
 
@@ -88,10 +94,10 @@ class Page(object):
         title = title.replace(' ', '_')
         return title
 
-
     def can(self, action):
         level = self.protection.get(action, (action, ))[0]
-        if level == 'sysop': level = compatibility.protectright(self.site.version)
+        if level == 'sysop':
+            level = compatibility.protectright(self.site.version)
 
         return level in self.site.rights
 
@@ -102,7 +108,7 @@ class Page(object):
             self.site.tokens[type] = '0'
         if self.site.tokens.get(type, '0') == '0' or force:
             info = self.site.api('query', titles=self.name,
-                prop='info', intoken=type)
+                                 prop='info', intoken=type)
             for i in info['query']['pages'].itervalues():
                 if i['title'] == self.name:
                     self.site.tokens[type] = i['%stoken' % type]
@@ -151,26 +157,34 @@ class Page(object):
         if not self.can('edit'):
             raise errors.ProtectedPageError(self)
 
-        if not text: text = self.text
-        if not section: section = self.section
+        if not text:
+            text = self.text
+        if not section:
+            section = self.section
 
         if not self.site.writeapi:
             return OldPage.save(self, text=text, summary=summary, minor=False)
 
         data = {}
-        if minor: data['minor'] = '1'
-        if not minor: data['notminor'] = '1'
-        if self.last_rev_time: data['basetimestamp'] = time.strftime('%Y%m%d%H%M%S', self.last_rev_time)
-        if self.edit_time: data['starttimestamp'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
-        if bot: data['bot'] = '1'
-        if section: data['section'] = section
+        if minor:
+            data['minor'] = '1'
+        if not minor:
+            data['notminor'] = '1'
+        if self.last_rev_time:
+            data['basetimestamp'] = time.strftime('%Y%m%d%H%M%S', self.last_rev_time)
+        if self.edit_time:
+            data['starttimestamp'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
+        if bot:
+            data['bot'] = '1'
+        if section:
+            data['section'] = section
 
         data.update(kwargs)
 
         def do_edit():
             result = self.site.api('edit', title=self.name, text=text,
-                    summary=summary, token=self.get_token('edit'),
-                    **data)
+                                   summary=summary, token=self.get_token('edit'),
+                                   **data)
             if result['edit'].get('result').lower() == 'failure':
                 raise errors.EditError(self, result['edit'])
             return result
@@ -195,7 +209,7 @@ class Page(object):
         if e.code == 'editconflict':
             raise errors.EditError(self, summary, e.info)
         elif e.code in ('protectedtitle', 'cantcreate', 'cantcreate-anon', 'noimageredirect-anon',
-                'noimageredirect', 'noedit-anon', 'noedit'):
+                        'noimageredirect', 'noedit-anon', 'noedit'):
             raise errors.ProtectedPageError(self, e.code, e.info)
         else:
             raise
@@ -219,19 +233,21 @@ class Page(object):
         exception is raised.
 
         """
-        if not self.can('move'): raise errors.InsufficientPermission(self)
+        if not self.can('move'):
+            raise errors.InsufficientPermission(self)
 
         if not self.site.writeapi:
             return OldPage.move(self, new_title=new_title,
-                reason=reason, move_talk=move_talk)
+                                reason=reason, move_talk=move_talk)
 
         data = {}
-        if move_talk: data['movetalk'] = '1'
-        if no_redirect: data['noredirect'] = '1'
+        if move_talk:
+            data['movetalk'] = '1'
+        if no_redirect:
+            data['noredirect'] = '1'
         result = self.site.api('move', ('from', self.name), to=new_title,
-            token=self.get_token('move'), reason=reason, **data)
+                               token=self.get_token('move'), reason=reason, **data)
         return result['move']
-
 
     def delete(self, reason='', watch=False, unwatch=False, oldimage=False):
         """Delete page.
@@ -240,18 +256,22 @@ class Page(object):
         exception is raised.
 
         """
-        if not self.can('delete'): raise errors.InsufficientPermission(self)
+        if not self.can('delete'):
+            raise errors.InsufficientPermission(self)
 
         if not self.site.writeapi:
             return OldPage.delete(self, reason=reason)
 
         data = {}
-        if watch: data['watch'] = '1'
-        if unwatch: data['unwatch'] = '1'
-        if oldimage: data['oldimage'] = oldimage
+        if watch:
+            data['watch'] = '1'
+        if unwatch:
+            data['unwatch'] = '1'
+        if oldimage:
+            data['oldimage'] = oldimage
         result = self.site.api('delete', title=self.name,
-                token=self.get_token('delete'),
-                reason=reason, **data)
+                               token=self.get_token('delete'),
+                               reason=reason, **data)
         return result['delete']
 
     def purge(self):
@@ -269,8 +289,9 @@ class Page(object):
         # Fix title for < 1.11 !!
         prefix = listing.List.get_prefix('bl', generator)
         kwargs = dict(listing.List.generate_kwargs(prefix,
-            namespace=namespace, filterredir=filterredir))
-        if redirect: kwargs['%sredirect' % prefix] = '1'
+                                                   namespace=namespace, filterredir=filterredir))
+        if redirect:
+            kwargs['%sredirect' % prefix] = '1'
         kwargs[compatibility.title(prefix, self.site.require(1, 11, raise_error=False))] = self.name
 
         return listing.List.get_list(generator)(self.site, 'backlinks', 'bl', limit=limit, return_values='title', **kwargs)
@@ -288,8 +309,9 @@ class Page(object):
         # Fix title for < 1.11 !!
         prefix = listing.List.get_prefix('ei', generator)
         kwargs = dict(listing.List.generate_kwargs(prefix,
-            namespace=namespace, filterredir=filterredir))
-        if redirect: kwargs['%sredirect' % prefix] = '1'
+                                                   namespace=namespace, filterredir=filterredir))
+        if redirect:
+            kwargs['%sredirect' % prefix] = '1'
         kwargs[compatibility.title(prefix, self.site.require(1, 11, raise_error=False))] = self.name
 
         return listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit=limit, return_values='title', **kwargs)
@@ -312,22 +334,25 @@ class Page(object):
     def links(self, namespace=None, generator=True, redirects=False):
         self.site.require(1, 9)
         kwargs = dict(listing.List.generate_kwargs('pl', namespace=namespace))
-        if redirects: kwargs['redirects'] = '1'
+        if redirects:
+            kwargs['redirects'] = '1'
         if generator:
             return listing.PagePropertyGenerator(self, 'links', 'pl', **kwargs)
         else:
             return listing.PageProperty(self, 'links', 'pl', return_values='title', **kwargs)
 
     def revisions(self, startid=None, endid=None, start=None, end=None,
-            dir='older', user=None, excludeuser=None, limit=50,
-             prop='ids|timestamp|flags|comment|user', expandtemplates=False, section=None):
+                  dir='older', user=None, excludeuser=None, limit=50,
+                  prop='ids|timestamp|flags|comment|user', expandtemplates=False, section=None):
         self.site.require(1, 8)
         kwargs = dict(listing.List.generate_kwargs('rv', startid=startid, endid=endid,
-            start=start, end=end, user=user, excludeuser=excludeuser))
+                                                   start=start, end=end, user=user, excludeuser=excludeuser))
         kwargs['rvdir'] = dir
         kwargs['rvprop'] = prop
-        if expandtemplates: kwargs['rvexpandtemplates'] = '1'
-        if section: kwargs['rvsection'] = section
+        if expandtemplates:
+            kwargs['rvexpandtemplates'] = '1'
+        if section:
+            kwargs['rvsection'] = section
 
         return listing.RevisionsIterator(self, 'revisions', 'rv', limit=limit, **kwargs)
 
@@ -339,34 +364,37 @@ class Page(object):
         else:
             return listing.PageProperty(self, 'templates', 'tl', return_values='title')
 
+
 class Image(Page):
+
     def __init__(self, site, name, info=None):
         site.require(1, 11)
         Page.__init__(self, site, name, info,
-            extra_properties={'imageinfo': (('iiprop',
-                compatibility.iiprop(site.version)), )})
+                      extra_properties={'imageinfo': (('iiprop',
+                                                       compatibility.iiprop(site.version)), )})
         self.imagerepository = self._info.get('imagerepository', '')
         self.imageinfo = self._info.get('imageinfo', ({}, ))[0]
 
     def imagehistory(self):
         return listing.PageProperty(self, 'imageinfo', 'ii',
-            iiprop=compatibility.iiprop(self.site.version))
+                                    iiprop=compatibility.iiprop(self.site.version))
 
     def imageusage(self, namespace=None, filterredir='all', redirect=False,
-            limit=None, generator=True):
+                   limit=None, generator=True):
         self.site.require(1, 11)
         # TODO: Fix for versions < 1.11
         prefix = listing.List.get_prefix('iu', generator)
         kwargs = dict(listing.List.generate_kwargs(prefix, title=self.name,
-            namespace=namespace, filterredir=filterredir))
-        if redirect: kwargs['%sredirect' % prefix] = '1'
+                                                   namespace=namespace, filterredir=filterredir))
+        if redirect:
+            kwargs['%sredirect' % prefix] = '1'
         return listing.List.get_list(generator)(self.site, 'imageusage', 'iu',
-            limit=limit, return_values='title', **kwargs)
+                                                limit=limit, return_values='title', **kwargs)
 
     def duplicatefiles(self, limit=None):
         self.require(1, 14)
         return listing.PageProperty(self, 'duplicatefiles', 'df',
-            dflimit=limit)
+                                    dflimit=limit)
 
     def download(self):
         url = self.imageinfo['url']

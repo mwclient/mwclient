@@ -1,10 +1,13 @@
-import upload, errors
+import upload
+import errors
+
 
 def title(prefix, new_format):
     if new_format:
         return prefix + 'title'
     else:
         return 'titles'
+
 
 def userinfo(data, new_format=None):
     if new_format is None:
@@ -20,6 +23,7 @@ def userinfo(data, new_format=None):
     else:
         return data['userinfo']
 
+
 def iiprop(version):
     if version[:2] >= (1, 13):
         return 'timestamp|user|comment|url|size|sha1|metadata|archivename'
@@ -28,11 +32,13 @@ def iiprop(version):
     else:
         return 'timestamp|user|comment|url|size|sha1'
 
+
 def cmtitle(page, new_format, prefix=''):
     if new_format:
         return prefix + 'title', page.name
     else:
         return prefix + 'category', page.strip_namespace(page.name)
+
 
 def protectright(version):
     if version[:2] >= (1, 13):
@@ -41,6 +47,8 @@ def protectright(version):
         return 'protect'
 
 from cStringIO import StringIO
+
+
 def old_upload(self, file, filename, description, license='', ignore=False, file_size=None):
     image = self.Images[filename]
     if not image.can('upload'):
@@ -61,7 +69,8 @@ def old_upload(self, file, filename, description, license='', ignore=False, file
     # predata['wpDestFile'] = filename
     predata['wpUploadDescription'] = description
     predata['wpLicense'] = license
-    if ignore: predata['wpIgnoreWarning'] = 'true'
+    if ignore:
+        predata['wpIgnoreWarning'] = 'true'
     predata['wpUpload'] = 'Upload file'
     predata['wpSourceType'] = 'file'
     predata['wpDestFile'] = filename
@@ -73,8 +82,8 @@ def old_upload(self, file, filename, description, license='', ignore=False, file
     while True:
         try:
             self.connection.post(self.host,
-                    self.path + 'index.php?title=Special:Upload&maxlag='
-                    + self.max_lag, data=postdata).read()
+                                 self.path + 'index.php?title=Special:Upload&maxlag='
+                                 + self.max_lag, data=postdata).read()
         except errors.HTTPStatusError, e:
             if e[0] == 503 and e[1].getheader('X-Database-Lag'):
                 self.wait(wait_token, int(e[1].getheader('Retry-After')))
