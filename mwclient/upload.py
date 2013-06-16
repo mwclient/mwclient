@@ -3,18 +3,18 @@ from cStringIO import StringIO
 
 class Upload(object):
     """
-    Base class for upload objects. This class should always be subclassed 
+    Base class for upload objects. This class should always be subclassed
     by upload classes and its constructor always be called.
-    
-    Upload classes are file like object/iterators that have additional 
+
+    Upload classes are file like object/iterators that have additional
     variables length and content_type.
     """
-    
+
     BLOCK_SIZE = 8192
     def __init__(self, length, content_type):
         self.length = length
         self.content_type = content_type
-        
+
     def __iter__(self):
         return self
     def next(self):
@@ -22,7 +22,7 @@ class Upload(object):
         if data == '':
             raise StopIteration
         return data
-        
+
     @staticmethod
     def encode(s):
         if type(s) is str:
@@ -34,24 +34,24 @@ class Upload(object):
 
 class UploadRawData(Upload):
     """
-    This upload class is simply a wrapper around StringIO 
+    This upload class is simply a wrapper around StringIO
     """
     def __init__(self, data, content_type='application/x-www-form-urlencoded'):
         self.fstr = StringIO(data)
         Upload.__init__(self, len(data), content_type)
-    def read(self, length = -1):
+    def read(self, length=-1):
         return self.fstr.read(length)
-        
-        
+
+
 class UploadDict(UploadRawData):
     """
-    This class creates an x-www-form-urlencoded representation of a dict 
-    and then passes it through its parent UploadRawData 
+    This class creates an x-www-form-urlencoded representation of a dict
+    and then passes it through its parent UploadRawData
     """
     def __init__(self, data):
         postdata = '&'.join('%s=%s' % (self.encode(i), self.encode(data[i])) for i in data)
         UploadRawData.__init__(self, postdata)
-        
+
 class UploadFile(Upload):
     """
     This class accepts a file with information and a postdata dictionary
@@ -74,14 +74,14 @@ class UploadFile(Upload):
         self.file = file
         self.length_left = filelength
         self.str_data = None
-        
+
         Upload.__init__(self, len(self.fileheader) + filelength + len(self.postdata) + len(self.footer) + 2,
             'multipart/form-data; boundary=' + self.boundary)
-        
+
     def read(self, length):
         if self.stage == self.STAGE_DONE:
             return ''
-        elif self.stage != self.STAGE_FILE: 
+        elif self.stage != self.STAGE_FILE:
             if self.str_data is None:
                 if self.stage == self.STAGE_FILEHEADER:
                     self.str_data = StringIO(self.fileheader)
@@ -99,24 +99,24 @@ class UploadFile(Upload):
             else:
                 self.stage += 1
                 return '\r\n'
-        
+
         if data == '':
             self.stage += 1
             self.str_data = None
             return self.read(length)
         return data
 
-        
+
     @staticmethod
     def generate_boundary():
         return '----%s----' % ''.join((random.choice(
-            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') 
+            'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
             for i in xrange(32)))
-    
+
     def generate_multipart_from_dict(self, data):
         postdata = []
         for i in data:
-            postdata.append('--' + self.boundary) 
+            postdata.append('--' + self.boundary)
             postdata.append('Content-Disposition: form-data; name="%s"' % self.encode(i))
             postdata.append('')
             postdata.append(self.encode(data[i]))

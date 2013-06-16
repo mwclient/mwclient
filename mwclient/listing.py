@@ -8,25 +8,25 @@ class List(object):
         self.list_name = list_name
         self.generator = 'list'
         self.prefix = prefix
-        
+
         kwargs.update(args)
         self.args = kwargs
-        
+
         if limit is None: limit = site.api_limit
         self.args[self.prefix + 'limit'] = str(limit)
-        
+
         self.count = 0
         self.max_items = max_items
-        
+
         self._iter = iter(xrange(0))
-        
+
         self.last = False
         self.result_member = list_name
         self.return_values = return_values
-        
+
     def __iter__(self):
         return self
-        
+
     def next(self, full=False):
         if self.max_items is not None:
             if self.count >= self.max_items:
@@ -37,26 +37,26 @@ class List(object):
             if 'timestamp' in item:
                 item['timestamp'] = client.parse_timestamp(item['timestamp'])
             if full: return item
-                
+
             if type(self.return_values) is tuple:
                 return tuple((item[i] for i in self.return_values))
             elif self.return_values is None:
                 return item
             else:
                 return item[self.return_values]
-            
+
         except StopIteration:
             if self.last: raise StopIteration
             self.load_chunk()
             return List.next(self, full=full)
-            
+
     def load_chunk(self):
         data = self.site.api('query', (self.generator, self.list_name), *[(str(k), v) for k, v in self.args.iteritems()])
         if not data:
             # Non existent page
             raise StopIteration
         self.set_iter(data)
-        
+
         if self.list_name in data.get('query-continue', ()):
             self.args.update(data['query-continue'][self.list_name])
         else:
@@ -69,12 +69,12 @@ class List(object):
             self._iter = iter(data['query'][self.result_member])
         else:
             self._iter = data['query'][self.result_member].itervalues()
-                
-        
+
+
     def __repr__(self):
         return "<List object '%s' for %s>" % (self.list_name, self.site)
 
-    @staticmethod 
+    @staticmethod
     def generate_kwargs(_prefix, *args, **kwargs):
         kwargs.update(args)
         for key, value in kwargs.iteritems():
@@ -99,18 +99,18 @@ class List(object):
 class GeneratorList(List):
     def __init__(self, site, list_name, prefix, *args, **kwargs):
         List.__init__(self, site, list_name, prefix, *args, **kwargs)
-        
+
         self.args['g' + self.prefix + 'limit'] = self.args[self.prefix + 'limit']
         del self.args[self.prefix + 'limit']
         self.generator = 'generator'
-        
+
         self.args['prop'] = 'info|imageinfo'
         self.args['inprop'] = 'protection'
-        
+
         self.result_member = 'pages'
-        
+
         self.page_class = page.Page
-        
+
     def next(self):
         info = List.next(self, full=True)
         if info['ns'] == 14:
@@ -118,14 +118,14 @@ class GeneratorList(List):
         if info['ns'] == 6:
             return page.Image(self.site, u'', info)
         return page.Page(self.site, u'', info)
-        
+
     def load_chunk(self):
-        # Put this here so that the constructor does not fail 
+        # Put this here so that the constructor does not fail
         # on uninitialized sites
         self.args['iiprop'] = compatibility.iiprop(self.site.version)
         return List.load_chunk(self)
-        
-    
+
+
 class Category(page.Page, GeneratorList):
     def __init__(self, site, name, info=None, namespace=None):
         page.Page.__init__(self, site, name, info)
@@ -138,22 +138,22 @@ class Category(page.Page, GeneratorList):
     def __repr__(self):
         return "<Category object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
 
-    def members(self, prop='ids|title', namespace=None, sort='sortkey', 
+    def members(self, prop='ids|title', namespace=None, sort='sortkey',
             dir='asc', start=None, end=None, generator=True):
         prefix = self.get_prefix('cm', generator)
         kwargs = dict(self.generate_kwargs(prefix, prop=prop, namespace=namespace,
             sort=sort, dir=dir, start=start, end=end, *(compatibility.cmtitle(
             self, self.site.require(1, 12, raise_error=False)), )))
         return self.get_list(generator)(self.site, 'categorymembers', 'cm', **kwargs)
-        
+
 class PageList(GeneratorList):
     def __init__(self, site, prefix=None, start=None, namespace=0, redirects='all'):
         self.namespace = namespace
-        
+
         kwargs = {}
         if prefix: kwargs['apprefix'] = prefix
         if start: kwargs['apfrom'] = start
-            
+
         GeneratorList.__init__(self, site, 'allpages', 'ap',
             apnamespace=str(namespace), apfilterredir=redirects, **kwargs)
 
@@ -176,7 +176,7 @@ class PageList(GeneratorList):
                 elif namespace == 6:
                     return page.Image(self.site, name, info)
             return page.Page(self.site, name, info)
-        
+
     def guess_namespace(self, name):
         normal_name = page.Page.normalize_title(name)
         for ns in self.site.namespaces:
@@ -188,7 +188,7 @@ class PageList(GeneratorList):
                     return ns
         return 0
 
-        
+
 class PageProperty(List):
     def __init__(self, page, prop, prefix, *args, **kwargs):
         List.__init__(self, page.site, prop, prefix, titles=page.name, *args, **kwargs)
@@ -202,7 +202,7 @@ class PageProperty(List):
                 return
         raise StopIteration
 
-        
+
 class PagePropertyGenerator(GeneratorList):
     def __init__(self, page, prop, prefix, *args, **kwargs):
         GeneratorList.__init__(self, page.site, prop, prefix, titles=page.name, *args, **kwargs)
@@ -213,4 +213,3 @@ class RevisionsIterator(PageProperty):
         if 'rvstartid' in self.args and 'rvstart' in self.args:
             del self.args['rvstart']
         return PageProperty.load_chunk(self)
-    
