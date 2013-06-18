@@ -327,6 +327,10 @@ class Page(object):
         else:
             return listing.PageProperty(self, 'images', '', return_values='title')
 
+    def iwlinks(self):
+        self.site.require(1, 9)  # guessing...
+        return listing.PageProperty(self, 'iwlinks', 'iw', return_values=('prefix', '*'))
+
     def langlinks(self, **kwargs):
         self.site.require(1, 9)
         return listing.PageProperty(self, 'langlinks', 'll', return_values=('lang', '*'), **kwargs)
