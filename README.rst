@@ -1,29 +1,32 @@
 mwclient
 ========
 
-Mwclient is a client to the `MediaWiki API`_ which provides access to most 
-API functionality. It depends heavily on Bob Ippolito's SimpleJSON_, 
-requires Python 2.4 and supports MediaWiki 1.11 and above. For functions not 
-available in the current MediaWiki, a ``MediaWikiVersionError`` is raised.
+Mwclient is a client to the `MediaWiki API <//mediawiki.org/wiki/API>`_
+which provides access to most API functionality.
+It depends heavily on Bob Ippolito's `SimpleJSON <//github.com/simplejson/simplejson>`_,
+requires Python 2.4 and supports MediaWiki 1.11 and above.
+For functions not available in the current MediaWiki, a ``MediaWikiVersionError`` is raised.
 
 This framework was written by Bryan Tong Minh, who released the latest stable 
-`version 0.6.5`_ at 6 May 2011. The current `development version`_ can be 
-installed directly off github:
+`version 0.6.5 <//github.com/btongminh/mwclient/archive/REL_0_6_5.zip>`_ on 6 May 2011.
+The current `development version <//github.com/btongminh/mwclient>`_
+can be installed directly off github:
 
 .. code-block:: console
 
     $ pip install git+git://github.com/btongminh/mwclient.git
 
-Please see `release notes`_ for a list of changes.
+Please see the `release notes <//github.com/btongminh/mwclient/blob/master/RELEASE-NOTES.md>`_
+for a list of changes.
 
 Implementation notes
 --------------------
 
-Most properties and generators accept the same parameters as the API, without 
-their two letter prefix. Exceptions to this rule:
+Most properties and generators accept the same parameters as the API,
+without their two-letter prefix. Exceptions to this rule:
 
-* ``Image.imageinfo`` is the imageinfo of the latest image. Earlier versions can be
-  fetched using ``imagehistory()``
+* ``Image.imageinfo`` is the imageinfo of the latest image.
+  Earlier versions can be fetched using ``imagehistory()``
 * ``Site.all*``: parameter ``[ap]from`` renamed to ``start``
 * ``categorymembers`` is implemented as ``Category.members``
 * ``deletedrevs`` is ``deletedrevisions``
@@ -48,7 +51,8 @@ To use https, specify the host as a tuple in the form of ``('https', hostname)``
 Example
 -------
 
-For more information, see `REFERENCE.md <REFERENCE.md>`_.
+For more information, see the
+`REFERENCE.md <//github.com/btongminh/mwclient/blob/master/REFERENCE.md>`_ file.
 
 .. code-block:: python
 
@@ -76,10 +80,3 @@ For more information, see `REFERENCE.md <REFERENCE.md>`_.
 	# Listing all categories (don't do this in reality)
 	for category in site.allcategories():
 		print category
-
-
-.. _`MediaWiki API`: http://mediawiki.org/wiki/API
-.. _SimpleJSON: //github.com/simplejson/simplejson
-.. _`version 0.6.5`: //github.com/btongminh/mwclient/archive/REL_0_6_5.zip
-.. _`development version`: //github.com/btongminh/mwclient
-.. _`release notes`: //github.com/btongminh/mwclient/blob/master/RELEASE-NOTES.md
