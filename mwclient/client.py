@@ -7,6 +7,7 @@ import random
 import sys
 import weakref
 import socket
+import base64
 
 try:
     import json
@@ -50,14 +51,15 @@ class Site(object):
 
     def __init__(self, host, path='/w/', ext='.php', pool=None, retry_timeout=30,
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
-                 max_lag=3, compress=True, force_login=True, do_init=True):
+                 max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None):
         # Setup member variables
         self.host = host
         self.path = path
         self.ext = ext
         self.credentials = None
         self.compress = compress
-
+        if httpauth:
+            self.httpauth = httpauth
         self.retry_timeout = retry_timeout
         self.max_retries = max_retries
         self.wait_callback = wait_callback
@@ -220,7 +222,9 @@ class Site(object):
             headers['Content-Type'] = 'application/x-www-form-urlencoded'
         if self.compress and gzip:
             headers['Accept-Encoding'] = 'gzip'
-
+        if self.httpauth:
+            credentials = base64.encodestring('%s:%s' % self.httpauth).replace('\n', '')
+            headers['Authorization']  = "Basic %s" % credentials
         token = self.wait_token((script, data))
         while True:
             try:
