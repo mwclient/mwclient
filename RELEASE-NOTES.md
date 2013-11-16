@@ -1,6 +1,9 @@
 # Release Notes for mwclient
 
 ## Changes in version 0.7
+* [2013-11-15] Ask a query against Semantic MediaWiki.
+  (by [@kyv](https://github.com/kyv))
+  [0a16afc](https://github.com/kyv/mwclient/commit/0a16afc)
 * [2012-08-30] Allow setting both the upload description and the page content separately
   (by [@btongminh](https://github.com/btongminh))
   [0aa748f](https://github.com/btongminh/mwclient/commit/0aa748f) 
