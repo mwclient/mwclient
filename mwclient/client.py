@@ -58,8 +58,7 @@ class Site(object):
         self.ext = ext
         self.credentials = None
         self.compress = compress
-        if httpauth:
-            self.httpauth = httpauth
+        self.httpauth = httpauth
         self.retry_timeout = retry_timeout
         self.max_retries = max_retries
         self.wait_callback = wait_callback
@@ -222,9 +221,9 @@ class Site(object):
             headers['Content-Type'] = 'application/x-www-form-urlencoded'
         if self.compress and gzip:
             headers['Accept-Encoding'] = 'gzip'
-        if self.httpauth:
+        if self.httpauth is not None:
             credentials = base64.encodestring('%s:%s' % self.httpauth).replace('\n', '')
-            headers['Authorization']  = "Basic %s" % credentials
+            headers['Authorization'] = 'Basic %s' % credentials
         token = self.wait_token((script, data))
         while True:
             try:
@@ -624,8 +623,10 @@ class Site(object):
         else:
             return result['expandtemplates']['*']
 
-    def ask(self, query, title = None):
+    def ask(self, query, title=None):
+        """Ask a query against Semantic MediaWiki."""
         kwargs = {}
-        if title is None: kwargs['title'] = title
-        result = self.raw_api('ask', query = query, **kwargs)
+        if title is None:
+            kwargs['title'] = title
+        result = self.raw_api('ask', query=query, **kwargs)
         return result['query']['results']
