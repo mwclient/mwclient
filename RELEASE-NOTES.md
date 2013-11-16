@@ -1,9 +1,6 @@
 # Release Notes for mwclient
 
 ## Changes in version 0.7
-* [2013-11-15] Ask a query against Semantic MediaWiki.
-  (by [@kyv](https://github.com/kyv))
-  [0a16afc](https://github.com/kyv/mwclient/commit/0a16afc)
 * [2012-08-30] Allow setting both the upload description and the page content separately
   (by [@btongminh](https://github.com/btongminh))
   [0aa748f](https://github.com/btongminh/mwclient/commit/0aa748f) 
@@ -45,6 +42,10 @@
   (by [@danmichaelo](https://github.com/danmichaelo))
   [223aa0](https://github.com/danmichaelo/mwclient/commit/223aa0),
   [#19](https://github.com/btongminh/mwclient/pull/19)
+* [2013-11-15] Add support for the `ask` API action
+  [provided by Semantic MediaWiki](http://semantic-mediawiki.org/wiki/Ask_API).
+  (by [@kyv](https://github.com/kyv))
+  [0a16afc](https://github.com/kyv/mwclient/commit/0a16afc)
 
 ## Changes in version 0.6.5
 Mwclient 0.6.5 was released on 6 May 2011
