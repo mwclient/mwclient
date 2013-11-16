@@ -58,7 +58,8 @@ Mwclient 0.6.3 was released on 7 April 2010
 * Properly fix detection of alpha versions
 * Added support for built-in JSON library
 * Handle badtoken once
-* Bug 2690034: Fix revision iteration
+* [Bug 2690034](https://github.com/mwclient/mwclient/issues/3):
+  Fix revision iteration
 * Fix module conflict with simplejson-1.x
   by inserting mwclient path at the beginning of `sys.path`
   instead of the end
