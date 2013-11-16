@@ -623,3 +623,9 @@ class Site(object):
             return result['expandtemplates']['*'], result['parsetree']['*']
         else:
             return result['expandtemplates']['*']
+
+    def ask(self, query, title = None):
+        kwargs = {}
+        if title is None: kwargs['title'] = title
+        result = self.raw_api('ask', query = query, **kwargs)
+        return result['query']['results']
