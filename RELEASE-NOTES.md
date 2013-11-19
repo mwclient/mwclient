@@ -42,6 +42,10 @@
   (by [@danmichaelo](https://github.com/danmichaelo))
   [223aa0](https://github.com/danmichaelo/mwclient/commit/223aa0),
   [#19](https://github.com/btongminh/mwclient/pull/19)
+* [2013-11-14] Allow setting HTTP 'Authorization' header.
+  [HTTP headers](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.8).
+  (by [@kyv](https://github.com/kyv))
+  [72fc49a](https://github.com/kyv/mwclient/commit/72fc49a)
 * [2013-11-15] Add support for the `ask` API action
   [provided by Semantic MediaWiki](http://semantic-mediawiki.org/wiki/Ask_API).
   (by [@kyv](https://github.com/kyv))
