@@ -65,7 +65,7 @@ class HTTPPersistentConnection(object):
         clients_useragent = clients_useragent or ""
         if clients_useragent != "":
             clients_useragent += " "
-        self.useragent = clients_useragent + 'MwClient/' + __ver__
+        self.useragent = clients_useragent + 'MwClient/' + __ver__ + ' (https://github.com/mwclient/mwclient)'
 
     def request(self, method, host, path, headers, data,
                 raise_on_not_ok=True, auto_redirect=True):
