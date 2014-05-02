@@ -20,7 +20,7 @@ class CookieJar(dict):
             self.parse_cookie(cookie.strip())
         if response.getheader('set-cookie2', None):
             # ...
-            raise RuntimeError, 'Set-Cookie2', value
+            raise RuntimeError('Set-Cookie2', value)
 
     def parse_cookie(self, cookie):
         if not cookie:
