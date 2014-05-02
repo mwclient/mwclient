@@ -50,6 +50,8 @@
   [provided by Semantic MediaWiki](http://semantic-mediawiki.org/wiki/Ask_API).
   (by [@kyv](https://github.com/kyv))
   [0a16afc](https://github.com/kyv/mwclient/commit/0a16afc)
+* [2014-05-02] Quickfix for [https://github.com/mwclient/mwclient/issues/38 #38]
+  (by [@danmichaelo](https://github.com/danmichaelo))
 
 ## Changes in version 0.6.5
 Mwclient 0.6.5 was released on 6 May 2011

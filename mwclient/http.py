@@ -27,9 +27,19 @@ class CookieJar(dict):
             return
         value, attrs = cookie.split(': ', 1)[1].split(';', 1)
         i = value.strip().split('=')
-        if len(i) == 1 and i[0] in self:
+
+        # This CookieJar class doesn't care about the `expires` attribute,
+        # but remove cookies when they are emptied. At some point, the
+        # mediawiki API started setting the value of cookies to-be-removed
+        # to 'deleted' instead of emptying them. As a quick fix for
+        # <https://github.com/mwclient/mwclient/issues/38>, we will remove
+        # cookies with the value 'deleted' as well, but we should eventually
+        # replace this class, and probably the whole http class, by something
+        # more robust. The `requests` library looks like a promising candidate.
+
+        if (len(i) == 1 and i[0] in self) or (len(i) == 2 and i[0] in self and i[1] == 'deleted'):
             del self[i[0]]
-        else:
+        elif len(i) == 2 and i[1] != 'deleted':
             self[i[0]] = i[1]
 
     def get_cookie_header(self):
