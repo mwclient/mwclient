@@ -104,8 +104,5 @@ to limit the amount of items returned.
 Default chunk size is generally the maximum chunk size.
 
 ## Links ##
-* SourceForge.net project: http://sourceforge.net/projects/mwclient
-* Project website: http://mwclient.sourceforge.net/
-* Subversion: https://mwclient.svn.sourceforge.net/svnroot/mwclient
-* Browseable repository: http://mwclient.svn.sourceforge.net/viewvc/mwclient/
-* MediaWiki API documentation: http://mediawiki.org/wiki/API
+* Project page at GitHub: https://github.com/mwclient/mwclient
+* MediaWiki API documentation: https://mediawiki.org/wiki/API
