@@ -1,7 +1,7 @@
 mwclient
 ========
 
-Mwclient is a Python client to the `MediaWiki API <//mediawiki.org/wiki/API>`_
+mwclient is a Python client to the `MediaWiki API <//mediawiki.org/wiki/API>`_
 which provides access to most API functionality.
 It depends heavily on Bob Ippolito's `SimpleJSON <//github.com/simplejson/simplejson>`_,
 requires Python 2.4 and supports MediaWiki 1.11 and above.
