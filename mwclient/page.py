@@ -201,8 +201,8 @@ class Page(object):
             else:
                 self.handle_edit_error(e, summary)
 
-        if result['edit'] == 'Success':
-            self.last_rev_time = client.parse_timestamp(result['newtimestamp'])
+        if result['edit'].get('result') == 'Success':
+            self.last_rev_time = client.parse_timestamp(result['edit'].get('newtimestamp'))
         return result['edit']
 
     def handle_edit_error(self, e, summary):
