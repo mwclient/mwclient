@@ -53,6 +53,9 @@
 * [2014-05-02] Quickfix for [#38](https://github.com/mwclient/mwclient/issues/38)
   (by [@danmichaelo](https://github.com/danmichaelo))
   [98b850b](https://github.com/mwclient/mwclient/commit/98b850b)
+* [2014-06-13] Fix updating of Page.last_rev_time upon save(), [#41](https://github.com/mwclient/mwclient/issues/41)
+  (by [@tuffnatty](https://github.com/tuffnatty))
+  [d0cc7db](https://github.com/mwclient/mwclient/commit/d0cc7db)
 
 ## Changes in version 0.6.5
 Mwclient 0.6.5 was released on 6 May 2011
