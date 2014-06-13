@@ -57,6 +57,10 @@
   (by [@tuffnatty](https://github.com/tuffnatty))
   [d0cc7db](https://github.com/mwclient/mwclient/commit/d0cc7db)
 
+* [2014-06-13] Support more arguments to `list=allusers`, [#8](https://github.com/mwclient/mwclient/issues/8)
+  (by [@jimt](https://github.com/jimt) [@danmichaelo](https://github.com/danmichaelo))
+  [7cb4383](https://github.com/mwclient/mwclient/commit/7cb4383)
+
 ## Changes in version 0.6.5
 Mwclient 0.6.5 was released on 6 May 2011
 * Explicitly convert the `Content-Length` header to `str`,

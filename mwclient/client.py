@@ -481,12 +481,17 @@ class Site(object):
         kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), prefix=prefix, dir=dir))
         return listing.List.get_list(generator)(self, 'allcategories', 'ac', limit=limit, **kwargs)
 
-    def allusers(self, start=None, prefix=None, group=None, prop=None, limit=None):
+    def allusers(self, start=None, prefix=None, group=None, prop=None, limit=None,
+                 witheditsonly=False, activeusers=False, rights=None):
         """Retrieve all users on the wiki as a generator."""
         self.require(1, 11)
 
         kwargs = dict(listing.List.generate_kwargs('au', ('from', start), prefix=prefix,
-                                                   group=group, prop=prop))
+                                                   group=group, prop=prop,
+                                                   rights=rights,
+                                                   witheditsonly=witheditsonly,
+                                                   activeusers=activeusers))
+        print kwargs
         return listing.List(self, 'allusers', 'au', limit=limit, **kwargs)
 
     def blocks(self, start=None, end=None, dir='older', ids=None, users=None, limit=None,
