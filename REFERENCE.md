@@ -110,4 +110,6 @@ Default chunk size is generally the maximum chunk size.
 
 ## Links ##
 * Project page at GitHub: https://github.com/mwclient/mwclient
+* More in-depth documentation on the GitHub wiki: 
+https://github.com/mwclient/mwclient/wiki
 * MediaWiki API documentation: https://mediawiki.org/wiki/API

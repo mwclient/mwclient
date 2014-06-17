@@ -52,7 +52,9 @@ Example
 -------
 
 For more information, see the
-`REFERENCE.md <//github.com/mwclient/mwclient/blob/master/REFERENCE.md>`_ file.
+`REFERENCE.md <//github.com/mwclient/mwclient/blob/master/REFERENCE.md>`_ file
+or the 
+`documentation on the wiki <//github.com/mwclient/mwclient/wiki.`_
 
 .. code-block:: python
 
