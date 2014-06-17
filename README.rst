@@ -16,6 +16,7 @@ on 6 May 2011. Version 0.6.5 is also
 
     $ pip install mwclient
 
+Note that 0.6.5 might not work with the latest MediaWiki versions.
 The current `development version <//github.com/mwclient/mwclient>`_
 can be installed directly off github:
 
@@ -62,7 +63,7 @@ Example
 For more information, see the
 `REFERENCE.md <//github.com/mwclient/mwclient/blob/master/REFERENCE.md>`_ file
 or the 
-`documentation on the wiki <//github.com/mwclient/mwclient/wiki.`_
+`documentation on the wiki <//github.com/mwclient/mwclient/wiki>`_.
 
 .. code-block:: python
 
