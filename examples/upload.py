@@ -1,26 +1,27 @@
-import sys, os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '../trunk')))
+import sys
+import os
+import pprint
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '../')))
+import mwclient
+
 
 if len(sys.argv) < 3:
-	print sys.argv[0], 'username', 'password', '[host=test.wikipedia.org]', '[path=/w/]' 
-	sys.exit()
+    print sys.argv[0], 'username', 'password', '[host=test.wikipedia.org]', '[path=/w/]'
+    sys.exit()
 if len(sys.argv) > 3:
-	host = sys.argv[3]
+    host = sys.argv[3]
 else:
-	host = 'test.wikipedia.org'
+    host = 'test.wikipedia.org'
 if len(sys.argv) > 4:
-	path = sys.argv[4]
+    path = sys.argv[4]
 else:
-	path = '/w/'	
+    path = '/w/'
 
 
-import mwclient
 site = mwclient.Site(host, path)
-site.version = (1, 17, 'alpha') # Force upload api
 site.login(sys.argv[1], sys.argv[2])
 
-
-f = open('test-image.png', 'rb')
 
 import random
 name = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(8)) + '.png'
@@ -28,25 +29,26 @@ name = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(8)) +
 print 'Using http://%s%sindex.php?title=File:' % (host, path) + name
 print 'Regular upload test'
 
-import pprint
-res = site.upload(f, name, 'Regular upload test', ignore = True)
+res = site.upload(open('test-image.png', 'rb'), name, 'Regular upload test', ignore=True)
 pprint.pprint(res)
 assert res['result'] == 'Success'
+assert 'exists' not in res['warnings']
 
 print 'Overwriting; should give a warning'
-res = site.upload(f, name, 'Overwrite upload test')
+res = site.upload(open('test-image.png', 'rb'), name, 'Overwrite upload test')
 pprint.pprint(res)
 assert res['result'] == 'Warning'
+assert 'exists' in res['warnings']
+
 ses = res['sessionkey']
 
 print 'Overwriting with stashed file'
-res = site.api('upload', token = site.tokens['edit'], filename = name, sessionkey = ses)
+res = site.upload(filename=name, session_key=ses)
 pprint.pprint(res)
-assert res['upload']['result'] == 'Warning'
-assert 'duplicate' in res['upload']['warnings']
-assert 'exists' in res['upload']['warnings']
+assert res['result'] == 'Warning'
+assert 'duplicate' in res['warnings']
+assert 'exists' in res['warnings']
 
 print 'Uploading empty file; error expected'
 from StringIO import StringIO
 res = site.upload(StringIO(), name, 'Empty upload test')
-pprint.pprint(res)

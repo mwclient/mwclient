@@ -1,20 +1,19 @@
 __ver__ = '0.6.6'
 
+import warnings
 import urllib
-import urlparse
 import time
 import random
 import sys
 import weakref
-import socket
 import base64
+from collections import OrderedDict
 
 try:
     import json
 except ImportError:
     import simplejson as json
-import http
-import upload
+import requests
 
 import errors
 import listing
@@ -81,7 +80,10 @@ class Site(object):
 
         # Setup connection
         if pool is None:
-            self.connection = http.HTTPPool(clients_useragent)
+            self.connection = requests.Session()
+            self.connection.headers['User-Agent'] = 'MwClient/' + __ver__ + ' (https://github.com/mwclient/mwclient)'
+            if clients_useragent:
+                self.connection.headers['User-Agent'] = clients_useragent + ' - ' + self.connection.headers['User-Agent']
         else:
             self.connection = pool
 
@@ -200,25 +202,15 @@ class Site(object):
         return True
 
     @staticmethod
-    def _to_str(data):
-        if type(data) is unicode:
-            return data.encode('utf-8')
-        return str(data)
-
-    @staticmethod
     def _query_string(*args, **kwargs):
         kwargs.update(args)
-        qs = urllib.urlencode([(k, Site._to_str(v)) for k, v in kwargs.iteritems()
-                               if k != 'wpEditToken'])
-        if 'wpEditToken' in kwargs:
-            qs += '&wpEditToken=' + urllib.quote(Site._to_str(kwargs['wpEditToken']))
-        return qs
+        qs1 = [(k, v) for k, v in kwargs.iteritems() if k not in ('wpEditToken', 'token')]
+        qs2 = [(k, v) for k, v in kwargs.iteritems() if k in ('wpEditToken', 'token')]
+        return OrderedDict(qs1 + qs2)
 
-    def raw_call(self, script, data):
+    def raw_call(self, script, data, files=None):
         url = self.path + script + self.ext
         headers = {}
-        if not issubclass(data.__class__, upload.Upload):
-            headers['Content-Type'] = 'application/x-www-form-urlencoded'
         if self.compress and gzip:
             headers['Accept-Encoding'] = 'gzip'
         if self.httpauth is not None:
@@ -226,25 +218,30 @@ class Site(object):
             headers['Authorization'] = 'Basic %s' % credentials
         token = self.wait_token((script, data))
         while True:
-            try:
-                stream = self.connection.post(self.host,
-                                              url, data=data, headers=headers)
-                if stream.getheader('Content-Encoding') == 'gzip':
-                    # BAD.
-                    seekable_stream = StringIO(stream.read())
-                    stream = gzip.GzipFile(fileobj=seekable_stream)
-                return stream
+            scheme = 'http'  # Should we move to 'https' as default?
+            host = self.host
+            if type(host) is tuple:
+                scheme, host = host
 
-            except errors.HTTPStatusError, e:
+            fullurl = '{scheme}://{host}{url}'.format(scheme=scheme, host=host, url=url)
+
+            try:
+                stream = self.connection.post(fullurl, data=data, files=files, headers=headers)
+                return stream.text
+
+            except requests.exceptions.HTTPError, e:
+                print 'http error'
+                print e
                 if e[0] == 503 and e[1].getheader('X-Database-Lag'):
                     self.wait(token, int(e[1].getheader('Retry-After')))
                 elif e[0] < 500 or e[0] > 599:
                     raise
                 else:
                     self.wait(token)
-            except errors.HTTPRedirectError:
+            except requests.exceptions.TooManyRedirects:
                 raise
-            except errors.HTTPError:
+            except requests.exceptions.ConnectionError:
+                print 'connection error'
                 self.wait(token)
             except ValueError:
                 self.wait(token)
@@ -254,11 +251,12 @@ class Site(object):
         kwargs['action'] = action
         kwargs['format'] = 'json'
         data = self._query_string(*args, **kwargs)
-        json_data = self.raw_call('api', data).read()
+        res = self.raw_call('api', data)
+
         try:
-            return json.loads(json_data)
+            return json.loads(res)
         except ValueError:
-            if json_data.startswith('MediaWiki API is not enabled for this site.'):
+            if res.startswith('MediaWiki API is not enabled for this site.'):
                 raise errors.APIDisabledError
             raise
 
@@ -267,7 +265,7 @@ class Site(object):
         kwargs['action'] = action
         kwargs['maxlag'] = self.max_lag
         data = self._query_string(*args, **kwargs)
-        return self.raw_call('index', data).read().decode('utf-8', 'ignore')
+        return self.raw_call('index', data)
 
     def wait_token(self, args=None):
         token = WaitToken()
@@ -396,38 +394,29 @@ class Site(object):
         if session_key:
             predata['session_key'] = session_key
 
-        if file is None:
-            postdata = self._query_string(predata)
-        else:
-            if type(file) is str:
-                file_size = len(file)
-                file = StringIO(file)
-            if file_size is None:
-                file.seek(0, 2)
-                file_size = file.tell()
-                file.seek(0, 0)
-
-            postdata = upload.UploadFile('file', filename, file_size, file, predata)
+        postdata = predata
+        files = None
+        if file is not None:
+            files = {'file': file}
 
         wait_token = self.wait_token()
         while True:
             try:
-                data = self.raw_call('api', postdata).read()
+                data = self.raw_call('api', postdata, files)
                 info = json.loads(data)
                 if not info:
                     info = {}
                 if self.handle_api_result(info, kwargs=predata):
                     return info.get('upload', {})
-            except errors.HTTPStatusError, e:
+            except requests.exceptions.HTTPError, e:
                 if e[0] == 503 and e[1].getheader('X-Database-Lag'):
                     self.wait(wait_token, int(e[1].getheader('Retry-After')))
                 elif e[0] < 500 or e[0] > 599:
                     raise
                 else:
                     self.wait(wait_token)
-            except errors.HTTPError:
+            except requests.exceptions.ConnectionError:
                 self.wait(wait_token)
-            file.seek(0, 0)
 
     def parse(self, text=None, title=None, page=None):
         kwargs = {}

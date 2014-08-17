@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#encoding=utf-8
+# encoding=utf-8
 
 # Bootstrap setuptools
 from ez_setup import use_setuptools
@@ -26,5 +26,5 @@ setup(name='mwclient',
       url='https://github.com/btongminh/mwclient',
       license='MIT',
       packages=['mwclient'],
-      install_requires=['simplejson']
+      install_requires=['simplejson', 'requests']
       )

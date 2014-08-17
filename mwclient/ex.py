@@ -1,5 +1,5 @@
 import client
-import http
+import requests
 
 
 def read_config(config_files, **predata):
@@ -62,7 +62,7 @@ class ConfiguredPool(list):
 
     def __init__(self, *config_files):
         self.config = read_config(config_files, sites=SiteList())
-        self.pool = http.HTTPPool()
+        self.pool = requests.Session()
 
         config = dict([(k, v) for k, v in self.config.iteritems()
                        if k != 'sites'])
