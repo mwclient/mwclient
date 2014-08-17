@@ -7,11 +7,10 @@ python:
   - "2.7"
 
 install: 
-  - pip install -r requirements.txt --use-mirrors
-  #- python setup.py install
+  - python setup.py install
 
 before_script:
-  - pip install -r requirements-dev.txt --use-mirrors
+  - pip install -r requirements-dev.txt
 
 script: 
   - py.test --pep8 mwclient -v tests/client_test.py
