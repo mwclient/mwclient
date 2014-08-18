@@ -364,12 +364,50 @@ class Site(object):
             self.site_init()
 
     def upload(self, file=None, filename=None, description='', ignore=False, file_size=None,
-               url=None, session_key=None, comment=None):
-        """Upload a file to the wiki."""
+               url=None, filekey=None, comment=None):
+        """
+        Uploads a file to the site. Returns JSON result from the API.
+        Can raise `errors.InsufficientPermission` and `requests.exceptions.HTTPError`.
+
+        : Parameters :
+          - file         : File object or stream to upload.
+          - filename     : Destination filename, don't include namespace
+                           prefix like 'File:'
+          - description  : Wikitext for the file description page.
+          - ignore       : True to upload despite any warnings.
+          - file_size    : Deprecated in mwclient 0.7
+          - url          : URL to fetch the file from.
+          - filekey      : Key that identifies a previous upload that was
+                           stashed temporarily.
+          - comment      : Upload comment. Also used as the initial page text
+                           for new files if `description` is not specified.
+
+        Note that one of `file`, `filekey` and `url` must be specified, but not more
+        than one. For normal uploads, you specify `file`.
+
+        Example:
+
+        >>> client.upload(open('somefile', 'rb'), filename='somefile.jpg',
+                          description='Some description')
+        """
         if self.version[:2] < (1, 16):
             return compatibility.old_upload(self, file=file, filename=filename,
                                             description=description, ignore=ignore,
                                             file_size=file_size)
+
+        if file_size is not None:
+            # Note that DeprecationWarning is hidden by default since Python 2.7
+            warnings.warn(
+                'file_size is deprecated since mwclient 0.7',
+                DeprecationWarning
+            )
+            file_size = None
+
+        if filename is None:
+            raise TypeError('filename must be specified')
+
+        if len([x for x in [file, filekey, url] if x is not None]) != 1:
+            raise TypeError("exactly one of 'file', 'filekey' and 'url' must be specified")
 
         image = self.Images[filename]
         if not image.can('upload'):
@@ -391,8 +429,13 @@ class Site(object):
         predata['filename'] = filename
         if url:
             predata['url'] = url
-        if session_key:
-            predata['session_key'] = session_key
+
+        # Renamed from sessionkey to filekey
+        # https://git.wikimedia.org/commit/mediawiki%2Fcore.git/5f13517e
+        if self.version[:2] < (1, 18):
+            predata['sessionkey'] = filekey
+        else:
+            predata['filekey'] = filekey
 
         postdata = predata
         files = None
