@@ -26,5 +26,5 @@ setup(name='mwclient',
       url='https://github.com/btongminh/mwclient',
       license='MIT',
       packages=['mwclient'],
-      install_requires=['simplejson', 'requests']
+      install_requires=['simplejson', 'requests', 'ordereddict']
       )

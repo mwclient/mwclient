@@ -7,7 +7,7 @@ import random
 import sys
 import weakref
 import base64
-from collections import OrderedDict
+from ordereddict import OrderedDict
 
 try:
     import json
