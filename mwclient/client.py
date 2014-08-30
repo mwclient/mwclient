@@ -191,7 +191,7 @@ class Site(object):
         self.hasmsg = 'message' in userinfo
         self.logged_in = 'anon' not in userinfo
         if 'error' in info:
-            if info['error']['code'] in (u'internal_api_error_DBConnectionError', ):
+            if info['error']['code'] in (u'internal_api_error_DBConnectionError', u'internal_api_error_DBQueryError'):
                 self.wait(token)
                 return False
             if '*' in info['error']:
