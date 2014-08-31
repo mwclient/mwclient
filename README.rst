@@ -19,6 +19,29 @@ can be installed directly off github:
 Please see the `release notes <//github.com/mwclient/mwclient/blob/master/RELEASE-NOTES.md>`_
 for a list of changes.
 
+Contributing
+--------------------
+
+mwclient ships with a test suite based on [pytest](http://pytest.org/).
+Only a small part of mwclient is currently tested, but hopefilly coverage
+will improve in the future.
+
+The easiest way to run tests is:
+
+.. code-block:: console
+
+    $ python setup.py test
+
+This will make an in-place build and download test dependencies locally
+if needed. To make tests run faster, you can use pip to do an
+["editable" install](http://pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs):
+
+.. code-block:: console
+
+    $ pip install pytest pytest-pep8 responses
+    $ pip install -e .
+    $ py.test
+
 Implementation notes
 --------------------
 

@@ -8,8 +8,5 @@ python:
 install: 
   - python setup.py install
 
-before_script:
-  - pip install -r requirements-dev.txt
-
 script: 
-  - py.test --pep8 mwclient -v tests/client_test.py
+  - python setup.py test
