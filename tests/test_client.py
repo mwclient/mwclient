@@ -79,7 +79,8 @@ class TestClient(unittest.TestCase):
 
         site = mwclient.Site('test.wikipedia.org')
 
-        assert 'action=query&meta=siteinfo%7Cuserinfo' in responses.calls[0].request.body
+        assert 'action=query' in responses.calls[0].request.body
+        assert 'meta=siteinfo%7Cuserinfo' in responses.calls[0].request.body
 
     @responses.activate
     def test_version(self):

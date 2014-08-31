@@ -42,6 +42,14 @@ if needed. To make tests run faster, you can use pip to do an
     $ pip install -e .
     $ py.test
 
+To run tests with different Python versions in isolated virtualenvs, you
+can use [Tox](https://testrun.org/tox/latest/):
+
+.. code-block:: console
+
+    $ pip install tox
+    $ tox
+
 Implementation notes
 --------------------
 
