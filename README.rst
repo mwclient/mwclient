@@ -23,7 +23,7 @@ Contributing
 --------------------
 
 mwclient ships with a test suite based on `pytest <//pytest.org>`_.
-Only a small part of mwclient is currently tested, but hopefilly coverage
+Only a small part of mwclient is currently tested, but hopefully coverage
 will improve in the future.
 
 The easiest way to run tests is:
