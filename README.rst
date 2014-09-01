@@ -22,7 +22,7 @@ for a list of changes.
 Contributing
 --------------------
 
-mwclient ships with a test suite based on [pytest](http://pytest.org/).
+mwclient ships with a test suite based on `pytest <//pytest.org>`_.
 Only a small part of mwclient is currently tested, but hopefilly coverage
 will improve in the future.
 
@@ -34,7 +34,7 @@ The easiest way to run tests is:
 
 This will make an in-place build and download test dependencies locally
 if needed. To make tests run faster, you can use pip to do an
-["editable" install](http://pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs):
+`"editable" install <//pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs>`_:
 
 .. code-block:: console
 
@@ -43,7 +43,7 @@ if needed. To make tests run faster, you can use pip to do an
     $ py.test
 
 To run tests with different Python versions in isolated virtualenvs, you
-can use [Tox](https://testrun.org/tox/latest/):
+can use `Tox <//testrun.org/tox/latest/>`_:
 
 .. code-block:: console
 
