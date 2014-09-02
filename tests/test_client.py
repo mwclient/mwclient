@@ -5,8 +5,12 @@ import mwclient
 import logging
 import requests
 import responses
-import simplejson as json
 import pkg_resources  # part of setuptools
+
+try:
+    import json
+except ImportError:
+    import simplejson as json
 
 
 class TestClient(unittest.TestCase):

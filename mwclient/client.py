@@ -7,7 +7,13 @@ import random
 import sys
 import weakref
 import base64
-from ordereddict import OrderedDict
+
+try:
+    # Python 2.7+
+    from collections import OrderedDict
+except ImportError:
+    # Python 2.6
+    from ordereddict import OrderedDict
 
 try:
     import json

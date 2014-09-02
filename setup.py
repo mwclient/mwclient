@@ -34,6 +34,10 @@ class PyTest(TestCommand):
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 
+requirements = ['requests']
+if sys.version_info < (2, 7):
+    requirements.append('ordereddict')
+
 setup(name='mwclient',
       version='0.7.0dev',  # Rember to also update __ver__ in client.py
       description='MediaWiki API client',
@@ -51,5 +55,5 @@ setup(name='mwclient',
       packages=['mwclient'],
       cmdclass={'test': PyTest},
       tests_require=['pytest-pep8', 'pytest-cache', 'pytest', 'responses'],
-      install_requires=['simplejson', 'requests', 'ordereddict']
+      install_requires=requirements
       )
