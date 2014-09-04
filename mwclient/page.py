@@ -201,10 +201,9 @@ class Page(object):
             else:
                 self.handle_edit_error(e, summary)
 
-        if result['edit'].get('result') == 'Success':
-            lrt = result['edit'].get('newtimestamp')
-            if lrt:  # It's not included if no change was made
-                self.last_rev_time = client.parse_timestamp(lrt)
+        # 'newtimestamp' is not included if no change was made
+        if 'newtimestamp' in result['edit'].keys():
+            self.last_rev_time = client.parse_timestamp(result['edit'].get('newtimestamp'))
         return result['edit']
 
     def handle_edit_error(self, e, summary):
