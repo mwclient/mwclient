@@ -1,10 +1,10 @@
 # encoding=utf-8
 
 if __name__ == "__main__":
-    print 
+    print
     print "Note: Running in stand-alone mode. Consult the README"
     print "      (section 'Contributing') for advice on running tests."
-    print 
+    print
 
 import unittest
 import pytest
