@@ -1,7 +1,7 @@
 This file is intended to be a reference to mwclient.
-The current version is mwclient 0.6.6.
+The current version is mwclient 0.6.5.
 
-The mwclient framework provides an access to the MediaWiki API.
+The mwclient framework provides access to the MediaWiki API.
 It provides the functions of the MediaWiki API in a Pythonic manner.
 
 ## Sites ##
@@ -13,10 +13,14 @@ They represent respectively
 the hostname without protocol
 and the root directory where `api.php` is located.
 The path parameter should end with a slash, /.
-Protocols other than HTTP are currently not supported.
+Protocols other than HTTP and HTTPS are currently not supported.
 
 ```python
+#http
 site = mwclient.Site(host, path = '/w/', ...)
+
+#https
+site = mwclient.Site(('https', host), path = '/w/', ...)
 ```
 
 ### Pages ###
@@ -44,15 +48,16 @@ In addition to the page properties listed in the API documentation,
 also the lists backlinks and embedded in are members of the Page object. For more information about using generators
 see the section on generators below.
 
-`Category` objects provide an extra property members
+`Category` objects provide an extra function, `members`
 to list all members of a category.
 The Category object can also be used itself
 as an iterator yielding all its members.
 
 ```python
+#list pages in Category:Help by name
 category = site.Pages['Category:Help']
 for page in category:
-	print category
+	print page.name
 ```
 
 `Image` objects have additional functions `imagehistory` and `imageusage`
@@ -70,7 +75,7 @@ fr.close() # Always close those file objects !!!
 fw.close()
 ```
 
-#### Editting pages ####
+#### Editing pages ####
 Call `Page.edit()` to retrieve the page content.
 Use `Page.save(text, summary = u'', ...)` to save the page.
 If available, `Page.save` uses the API to edit,
@@ -82,7 +87,7 @@ but falls back to the old way if the write API is not available.
 
 ## Implementation notes ##
 Most properties and generators accept the same parameters as the API,
-without their two letter prefix.
+without their two-letter prefix.
 Exceptions:
 * `Image.imageinfo` is the `imageinfo` of the *latest* image.
 Earlier versions can be fetched using `imagehistory()`
@@ -105,4 +110,6 @@ Default chunk size is generally the maximum chunk size.
 
 ## Links ##
 * Project page at GitHub: https://github.com/mwclient/mwclient
+* More in-depth documentation on the GitHub wiki: 
+https://github.com/mwclient/mwclient/wiki
 * MediaWiki API documentation: https://mediawiki.org/wiki/API

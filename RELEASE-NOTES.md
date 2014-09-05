@@ -1,90 +1,110 @@
 # Release Notes for mwclient
 
 ## Changes in version 0.7
-* [2012-08-30] Allow setting both the upload description and the page content separately
-  (by [@btongminh](https://github.com/btongminh))
-  [0aa748f](https://github.com/btongminh/mwclient/commit/0aa748f) 
-* [2012-08-30] Improve documentation
-  (by [@tommorris](https://github.com/tommorris))
-  [a2723e7](https://github.com/btongminh/mwclient/commit/a2723e7)
-* [2013-02-15] Converted the repository to git and moved from sourceforge to github
-  (by [@waldir](https://github.com/waldir))
+This is the development version of mwclient.
+* [2012-08-30] [@btongminh](https://github.com/btongminh):
+  Allow setting both the upload description and the page content separately.
+  [0aa748f](https://github.com/btongminh/mwclient/commit/0aa748f).
+* [2012-08-30] [@tommorris](https://github.com/tommorris):
+  Improve documentation.
+  [a2723e7](https://github.com/btongminh/mwclient/commit/a2723e7).
+* [2013-02-15] [@waldir](https://github.com/waldir):
+  Converted the repository to git and moved from sourceforge to github.
   [#1](https://github.com/btongminh/mwclient/issues/1) (also
   [#11](https://github.com/btongminh/mwclient/issues/11),
   [#13](https://github.com/btongminh/mwclient/issues/13) and
-  [#15](https://github.com/btongminh/mwclient/issues/15))
-* [2013-03-20] Support for customising the useragent
-  (by [@eug48](https://github.com/eug48))
+  [#15](https://github.com/btongminh/mwclient/issues/15)).
+* [2013-03-20] [@eug48](https://github.com/eug48):
+  Support for customising the useragent.
   [773adf9](https://github.com/btongminh/mwclient/commit/773adf9),
-  [#16](https://github.com/btongminh/mwclient/pull/16)
-* [2013-03-20] Removed unused 'Request' class 
-  (by [@eug48](https://github.com/eug48))
+  [#16](https://github.com/btongminh/mwclient/pull/16).
+* [2013-03-20] [@eug48](https://github.com/eug48):
+  Removed unused 'Request' class.
   [99e786d](https://github.com/btongminh/mwclient/commit/99e786d),
-  [#16](https://github.com/btongminh/mwclient/pull/16)
-* [2013-05-13] Support for requesting pages by their page id (`site.pages[page_id]`)
-  (by [@danmichaelo](https://github.com/danmichaelo))
+  [#16](https://github.com/btongminh/mwclient/pull/16).
+* [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
+  Support for requesting pages by their page id (`site.pages[page_id]`).
   [a1a2ced](https://github.com/danmichaelo/mwclient/commit/a1a2ced),
-  [#19](https://github.com/btongminh/mwclient/pull/19)
-* [2013-05-13] Support for editing sections
-  (by [@danmichaelo](https://github.com/danmichaelo))
+  [#19](https://github.com/btongminh/mwclient/pull/19).
+* [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
+  Support for editing sections.
   [546f77d](https://github.com/danmichaelo/mwclient/commit/546f77d),
-  [#19](https://github.com/btongminh/mwclient/pull/19)
-* [2013-05-13] New method `Page.redirects_to()` and helper method `Page.resolve_redirect()`
-  (by [@danmichaelo](https://github.com/danmichaelo))
+  [#19](https://github.com/btongminh/mwclient/pull/19).
+* [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
+  New method `Page.redirects_to()` and helper method `Page.resolve_redirect()`.
   [3b851cb](https://github.com/danmichaelo/mwclient/commit/3b851cb),
   [36e8dcc](https://github.com/danmichaelo/mwclient/commit/36e8dcc),
-  [#19](https://github.com/btongminh/mwclient/pull/19)
-* [2013-05-13] Support argument `action` with `logevents()`
-  (by [@danmichaelo](https://github.com/danmichaelo))
+  [#19](https://github.com/btongminh/mwclient/pull/19).
+* [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
+  Support argument `action` with `logevents()`.
   [241ed37](https://github.com/danmichaelo/mwclient/commit/241ed37),
-  [#19](https://github.com/btongminh/mwclient/pull/19)
-* [2013-05-13] Support argument `page` with `parse()`
-  (by [@danmichaelo](https://github.com/danmichaelo))
+  [#19](https://github.com/btongminh/mwclient/pull/19).
+* [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
+  Support argument `page` with `parse()`.
   [223aa0](https://github.com/danmichaelo/mwclient/commit/223aa0),
-  [#19](https://github.com/btongminh/mwclient/pull/19)
-* [2013-11-14] Allow setting HTTP 'Authorization' header.
+  [#19](https://github.com/btongminh/mwclient/pull/19).
+* [2013-11-14] [@kyv](https://github.com/kyv):
+  Allow setting HTTP 'Authorization' header.
   [HTTP headers](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.8).
-  (by [@kyv](https://github.com/kyv))
-  [72fc49a](https://github.com/kyv/mwclient/commit/72fc49a)
-* [2013-11-15] Add support for the `ask` API action
+  [72fc49a](https://github.com/kyv/mwclient/commit/72fc49a).
+* [2013-11-15] [@kyv](https://github.com/kyv):
+  Add support for the `ask` API action
   [provided by Semantic MediaWiki](http://semantic-mediawiki.org/wiki/Ask_API).
-  (by [@kyv](https://github.com/kyv))
-  [0a16afc](https://github.com/kyv/mwclient/commit/0a16afc)
-* [2014-05-02] Quickfix for [#38](https://github.com/mwclient/mwclient/issues/38)
-  (by [@danmichaelo](https://github.com/danmichaelo))
-  [98b850b](https://github.com/mwclient/mwclient/commit/98b850b)
-* [2014-06-13] Fix updating of Page.last_rev_time upon save(), [#41](https://github.com/mwclient/mwclient/issues/41)
-  (by [@tuffnatty](https://github.com/tuffnatty))
-  [d0cc7db](https://github.com/mwclient/mwclient/commit/d0cc7db)
-
-* [2014-06-13] Support more arguments to `list=allusers`, [#8](https://github.com/mwclient/mwclient/issues/8)
-  (by [@jimt](https://github.com/jimt) [@danmichaelo](https://github.com/danmichaelo))
-  [7cb4383](https://github.com/mwclient/mwclient/commit/7cb4383)
+  [0a16afc](https://github.com/kyv/mwclient/commit/0a16afc).
+* [2014-05-02] [@danmichaelo](https://github.com/danmichaelo):
+  Quickfix for [#38](https://github.com/mwclient/mwclient/issues/38).
+  [98b850b](https://github.com/mwclient/mwclient/commit/98b850b).
+* [2014-06-13] [@tuffnatty](https://github.com/tuffnatty):
+  Fix updating of Page.last_rev_time upon save().
+  [d0cc7db](https://github.com/mwclient/mwclient/commit/d0cc7db),
+  [#41](https://github.com/mwclient/mwclient/issues/41).
+* [2014-06-13] [@jimt](https://github.com/jimt), [@danmichaelo](https://github.com/danmichaelo):
+  Support more arguments to `list=allusers`.
+  [7cb4383](https://github.com/mwclient/mwclient/commit/7cb4383),
+  [#8](https://github.com/mwclient/mwclient/issues/8).
 
 ## Changes in version 0.6.5
-Mwclient 0.6.5 was released on 6 May 2011
-* Explicitly convert the `Content-Length` header to `str`,
+Mwclient 0.6.5 was released on 6 May 2011.
+* [2011-02-16] Fix for upload by URL.
+  [7ceb14b](https://github.com/mwclient/mwclient/commit/7ceb14b).
+* [2011-05-06] Explicitly convert the `Content-Length` header to `str`,
   avoiding a `TypeError` on some versions of Python.
-* Fix for upload by URL
-* Handle `readapidenied` error in site init
-* Fix version parsing for almost any sane version string
+  [4a829bc](https://github.com/mwclient/mwclient/commit/4a829bc),
+  [2ca1fbd](https://github.com/mwclient/mwclient/commit/2ca1fbd).
+* [2011-05-06] Handle `readapidenied` error in site init.
+  [c513396](https://github.com/mwclient/mwclient/commit/c513396).
+* [2011-05-06] Fix version parsing for almost any sane version string.
+  [9f5339f](https://github.com/mwclient/mwclient/commit/9f5339f).
 
 ## Changes in version 0.6.4
-Mwclient 0.6.3 was released on 7 April 2010
-* Added support for upload API
-* Added `prop=duplicatefiles`
-* Properly fix detection of alpha versions
-* Added support for built-in JSON library
-* Handle badtoken once
-* [Bug 2690034](https://github.com/mwclient/mwclient/issues/3):
-  Fix revision iteration
-* Fix module conflict with simplejson-1.x
+Mwclient 0.6.3 was released on 7 April 2010.
+* [2009-08-27] Added support for upload API.
+  [56eeb9b](https://github.com/mwclient/mwclient/commit/56eeb9b),
+  [0d7caab](https://github.com/mwclient/mwclient/commit/0d7caab) (see also
+  [610411a](https://github.com/mwclient/mwclient/commit/610411a)).
+* [2009-11-02] Added `prop=duplicatefiles`.
+  [241e5d6](https://github.com/mwclient/mwclient/commit/241e5d6)
+* [2009-11-02] Properly fix detection of alpha versions.
+  [241e5d6](https://github.com/mwclient/mwclient/commit/241e5d6)
+* [2009-11-14] Added support for built-in JSON library.
+  [73e9cd6](https://github.com/mwclient/mwclient/commit/73e9cd6)
+* [2009-11-15] Handle badtoken once.
+  [4b384e1](https://github.com/mwclient/mwclient/commit/4b384e1)
+* [2010-02-23] Fix module conflict with simplejson-1.x
   by inserting mwclient path at the beginning of `sys.path`
-  instead of the end
-* Supply token on login if necessary
+  instead of the end.
+  [cd37ef0](https://github.com/mwclient/mwclient/commit/cd37ef0)
+* [2010-02-23] Fix revision iteration.
+  [09b68e9](https://github.com/mwclient/mwclient/commit/09b68e9),
+  [2ad32f1](https://github.com/mwclient/mwclient/commit/2ad32f1),
+  [afdd5e8](https://github.com/mwclient/mwclient/commit/afdd5e8),
+  [993b346](https://github.com/mwclient/mwclient/commit/993b346),
+  [#3](https://github.com/mwclient/mwclient/issues/3).
+* [2010-04-07] Supply token on login if necessary.
+  [3731de5](https://github.com/mwclient/mwclient/commit/3731de5)
 
 ## Changes in version 0.6.3
-Mwclient 0.6.3 was released on 16 July 2009
+Mwclient 0.6.3 was released on 16 July 2009.
 * Added domain parameter to login.
 * Applied edit fix to `page_nowriteapi`
 * Allow arbitrary data to be passed to `page.save`

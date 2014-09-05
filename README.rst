@@ -8,7 +8,15 @@ requires Python 2.4 and supports MediaWiki 1.11 and above.
 For functions not available in the current MediaWiki, a ``MediaWikiVersionError`` is raised.
 
 This framework was written by Bryan Tong Minh, who released the latest stable 
-`version 0.6.5 <//github.com/mwclient/mwclient/archive/REL_0_6_5.zip>`_ on 6 May 2011.
+`version 0.6.5 <//github.com/mwclient/mwclient/archive/REL_0_6_5.zip>`_ 
+on 6 May 2011. Version 0.6.5 is also 
+`available through PyPI <//pypi.python.org/pypi/mwclient/0.6.5>`_:
+
+.. code-block:: console
+
+    $ pip install mwclient
+
+Note that 0.6.5 might not work with the latest MediaWiki versions.
 The current `development version <//github.com/mwclient/mwclient>`_
 can be installed directly off github:
 
@@ -16,7 +24,8 @@ can be installed directly off github:
 
     $ pip install git+git://github.com/mwclient/mwclient.git
 
-Please see the `release notes <//github.com/mwclient/mwclient/blob/master/RELEASE-NOTES.md>`_
+Please see the 
+`release notes <//github.com/mwclient/mwclient/blob/master/RELEASE-NOTES.md>`_
 for a list of changes.
 
 Contributing
@@ -83,7 +92,9 @@ Example
 -------
 
 For more information, see the
-`REFERENCE.md <//github.com/mwclient/mwclient/blob/master/REFERENCE.md>`_ file.
+`REFERENCE.md <//github.com/mwclient/mwclient/blob/master/REFERENCE.md>`_ file
+or the 
+`documentation on the wiki <//github.com/mwclient/mwclient/wiki>`_.
 
 .. code-block:: python
 
