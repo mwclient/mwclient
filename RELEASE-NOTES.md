@@ -2,6 +2,10 @@
 
 ## Changes in version 0.7
 This is the development version of mwclient.
+
+*Dropped support for Python 2.4–2.5 and MediaWiki 1.11–1.15.
+This version requires minimum Python 2.6 and MediaWiki 1.16.*
+
 * [2012-08-30] [@btongminh](https://github.com/btongminh):
   Allow setting both the upload description and the page content separately.
   [0aa748f](https://github.com/btongminh/mwclient/commit/0aa748f).
@@ -62,6 +66,18 @@ This is the development version of mwclient.
   Support more arguments to `list=allusers`.
   [7cb4383](https://github.com/mwclient/mwclient/commit/7cb4383),
   [#8](https://github.com/mwclient/mwclient/issues/8).
+* [2014-08-18] [@danmichaelo](https://github.com/danmichaelo):
+  Replace http.py with the Requests library.
+  [593cb44](https://github.com/mwclient/mwclient/commit/593cb44),
+  [#45](https://github.com/mwclient/mwclient/issues/45).
+* [2014-08-18] [@jaloren](https://github.com/jaloren), [@danmichaelo](https://github.com/danmichaelo):
+  Don't crash if edit response does not contain timestamp.
+  [bd7bc3b](https://github.com/mwclient/mwclient/commit/bd7bc3b),
+  [0ef9a17](https://github.com/mwclient/mwclient/commit/0ef9a17),
+  [#57](https://github.com/mwclient/mwclient/issues/57).
+* [2014-08-31] [@danmichaelo](https://github.com/danmichaelo):
+  Retry on internal_api_error_DBQueryError.
+  [d0ce831](https://github.com/mwclient/mwclient/commit/d0ce831).
 
 ## Changes in version 0.6.5
 Mwclient 0.6.5 was released on 6 May 2011.
@@ -137,7 +153,7 @@ This version removed some Pywikipedia influences added in 0.4.
 ## Changes in versions 0.5
 Mwclient 0.5 was an architectural redesign
 which accomplished easy extendability
-and added proper support for continuations. 
+and added proper support for continuations.
 
 ## Changes in version 0.4
 Mwclient 0.4 was somewhat the basis for future releases

@@ -3,8 +3,8 @@ mwclient
 
 mwclient is a Python client to the `MediaWiki API <//mediawiki.org/wiki/API>`_
 which provides access to most API functionality.
-It depends heavily on Bob Ippolito's `SimpleJSON <//github.com/simplejson/simplejson>`_,
-requires Python 2.4 and supports MediaWiki 1.11 and above.
+It requires Python 2.6 or 2.7 (Python 3.x support planned) and supports MediaWiki 1.16
+and above.
 For functions not available in the current MediaWiki, a ``MediaWikiVersionError`` is raised.
 
 This framework was written by Bryan Tong Minh, who released the latest stable 
