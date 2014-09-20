@@ -101,7 +101,7 @@ or the
 	# Initialize Site object
 	import mwclient
 	site = mwclient.Site('commons.wikimedia.org')
-	site.login(username, password)  # Optional
+	site.login(username, password)
 
 	# Edit page
 	page = site.Pages['Commons:Sandbox']
