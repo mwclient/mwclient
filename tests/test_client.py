@@ -26,6 +26,7 @@ class TestClient(unittest.TestCase):
         pass
 
     def testVersion(self):
+        # The version specified in setup.py should equal the one specified in client.py
         version = pkg_resources.require("mwclient")[0].version
 
         assert version == mwclient.__ver__
@@ -46,6 +47,7 @@ class TestClient(unittest.TestCase):
 
     @responses.activate
     def test_http_as_default(self):
+        # 'http' should be the default scheme (for historical reasons)
 
         self.httpShouldReturn(self.makeMetaResponse(), scheme='http')
 
@@ -56,6 +58,7 @@ class TestClient(unittest.TestCase):
 
     @responses.activate
     def test_headers(self):
+        # Content-type should be 'application/x-www-form-urlencoded'
 
         self.httpShouldReturn(self.makeMetaResponse(), scheme='http')
 
@@ -67,6 +70,7 @@ class TestClient(unittest.TestCase):
 
     @responses.activate
     def test_force_https(self):
+        # Setting https should work
 
         self.httpShouldReturn(self.makeMetaResponse(), scheme='https')
 
@@ -76,6 +80,7 @@ class TestClient(unittest.TestCase):
 
     @responses.activate
     def test_user_agent_is_sent(self):
+        # User specified user agent should be sent sent to server
 
         self.httpShouldReturn(self.makeMetaResponse())
 
