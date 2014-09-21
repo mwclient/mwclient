@@ -94,7 +94,17 @@ class TestClient(unittest.TestCase):
         assert 'meta=siteinfo%7Cuserinfo' in responses.calls[0].request.body
 
     @responses.activate
+    def test_api_disabled(self):
+        # Should raise APIDisabledError if API is not enabled
+
+        self.httpShouldReturn('MediaWiki API is not enabled for this site.')
+
+        with pytest.raises(mwclient.errors.APIDisabledError):
+            site = mwclient.Site('test.wikipedia.org')
+
+    @responses.activate
     def test_version(self):
+        # Should parse the MediaWiki version number correctly
 
         self.httpShouldReturn(self.makeMetaResponse(version='1.16'))
 
@@ -104,17 +114,10 @@ class TestClient(unittest.TestCase):
         assert site.version == (1, 16)
 
     @responses.activate
-    def test_api_disabled(self):
-
-        self.httpShouldReturn('MediaWiki API is not enabled for this site.')
-
-        with pytest.raises(mwclient.errors.APIDisabledError):
-            site = mwclient.Site('test.wikipedia.org')
-
-    @responses.activate
     def test_min_version(self):
+        # Should raise MediaWikiVersionError if API version is < 1.16
 
-        self.httpShouldReturn(self.makeMetaResponse(version='1.10'))
+        self.httpShouldReturn(self.makeMetaResponse(version='1.15'))
 
         with pytest.raises(mwclient.errors.MediaWikiVersionError):
             site = mwclient.Site('test.wikipedia.org')
@@ -129,6 +132,7 @@ class TestClient(unittest.TestCase):
 
     @responses.activate
     def test_raw_index(self):
+        # Initializing the client should result in one request
 
         site = self.stdSetup()
 

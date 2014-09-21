@@ -24,7 +24,6 @@ import requests
 import errors
 import listing
 import page
-import compatibility
 
 try:
     import gzip
@@ -143,11 +142,12 @@ class Site(object):
                 raise errors.MediaWikiVersionError('Unknown MediaWiki %s' % '.'.join(version))
         else:
             raise errors.MediaWikiVersionError('Unknown generator %s' % self.site['generator'])
-        # Require 1.11 until some compatibility issues are fixed
-        self.require(1, 11)
+
+        # Require 1.16
+        self.require(1, 16)
 
         # User info
-        userinfo = compatibility.userinfo(meta, self.require(1, 12, raise_error=False))
+        userinfo = meta['query']['userinfo']
         self.username = userinfo['name']
         self.groups = userinfo.get('groups', [])
         self.rights = userinfo.get('rights', [])
@@ -187,7 +187,7 @@ class Site(object):
             token = self.wait_token()
 
         try:
-            userinfo = compatibility.userinfo(info, self.require(1, 12, raise_error=None))
+            userinfo = info['query']['userinfo']
         except KeyError:
             userinfo = ()
         if 'blockedby' in userinfo:
@@ -361,7 +361,7 @@ class Site(object):
 
         if self.initialized:
             info = self.api('query', meta='userinfo', uiprop='groups|rights')
-            userinfo = compatibility.userinfo(info, self.require(1, 12, raise_error=False))
+            userinfo = info['query']['userinfo']
             self.username = userinfo['name']
             self.groups = userinfo.get('groups', [])
             self.rights = userinfo.get('rights', [])
@@ -396,10 +396,6 @@ class Site(object):
         >>> client.upload(open('somefile', 'rb'), filename='somefile.jpg',
                           description='Some description')
         """
-        if self.version[:2] < (1, 16):
-            return compatibility.old_upload(self, file=file, filename=filename,
-                                            description=description, ignore=ignore,
-                                            file_size=file_size)
 
         if file_size is not None:
             # Note that DeprecationWarning is hidden by default since Python 2.7

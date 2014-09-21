@@ -1,7 +1,6 @@
 import client
 import errors
 import listing
-import compatibility
 from page_nowriteapi import OldPage
 
 import urllib
@@ -97,7 +96,7 @@ class Page(object):
     def can(self, action):
         level = self.protection.get(action, (action, ))[0]
         if level == 'sysop':
-            level = compatibility.protectright(self.site.version)
+            level = 'editprotected'
 
         return level in self.site.rights
 
@@ -293,7 +292,7 @@ class Page(object):
                                                    namespace=namespace, filterredir=filterredir))
         if redirect:
             kwargs['%sredirect' % prefix] = '1'
-        kwargs[compatibility.title(prefix, self.site.require(1, 11, raise_error=False))] = self.name
+        kwargs[prefix + 'title'] = self.name
 
         return listing.List.get_list(generator)(self.site, 'backlinks', 'bl', limit=limit, return_values='title', **kwargs)
 
@@ -313,7 +312,7 @@ class Page(object):
                                                    namespace=namespace, filterredir=filterredir))
         if redirect:
             kwargs['%sredirect' % prefix] = '1'
-        kwargs[compatibility.title(prefix, self.site.require(1, 11, raise_error=False))] = self.name
+        kwargs[prefix + 'title'] = self.name
 
         return listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit=limit, return_values='title', **kwargs)
 
@@ -375,14 +374,15 @@ class Image(Page):
     def __init__(self, site, name, info=None):
         site.require(1, 11)
         Page.__init__(self, site, name, info,
-                      extra_properties={'imageinfo': (('iiprop',
-                                                       compatibility.iiprop(site.version)), )})
+                      extra_properties={'imageinfo':
+                                        (('iiprop', 'timestamp|user|comment|url|size|sha1|metadata|archivename'))
+                                        })
         self.imagerepository = self._info.get('imagerepository', '')
         self.imageinfo = self._info.get('imageinfo', ({}, ))[0]
 
     def imagehistory(self):
         return listing.PageProperty(self, 'imageinfo', 'ii',
-                                    iiprop=compatibility.iiprop(self.site.version))
+                                    iiprop='timestamp|user|comment|url|size|sha1|metadata|archivename')
 
     def imageusage(self, namespace=None, filterredir='all', redirect=False,
                    limit=None, generator=True):
