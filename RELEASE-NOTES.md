@@ -4,7 +4,9 @@
 This is the development version of mwclient.
 
 *Dropped support for Python 2.4–2.5 and MediaWiki 1.11–1.15.
-This version requires minimum Python 2.6 and MediaWiki 1.16.*
+This version requires minimum Python 2.6 and MediaWiki 1.16.
+Compability methods for working with MediaWiki < 1.16 have been
+removed.*
 
 * [2012-08-30] [@btongminh](https://github.com/btongminh):
   Allow setting both the upload description and the page content separately.

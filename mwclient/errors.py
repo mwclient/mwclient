@@ -52,3 +52,7 @@ class EmailError(MwClientError):
 
 class NoSpecifiedEmail(EmailError):
     pass
+
+
+class NoWriteApi(MwClientError):
+    pass

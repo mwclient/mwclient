@@ -1,7 +1,6 @@
 import client
 import errors
 import listing
-from page_nowriteapi import OldPage
 
 import urllib
 import urlparse
@@ -171,7 +170,7 @@ class Page(object):
             section = self.section
 
         if not self.site.writeapi:
-            return OldPage.save(self, text=text, summary=summary, minor=False)
+            raise errors.NoWriteApi(self)
 
         data = {}
         if minor:
@@ -246,8 +245,7 @@ class Page(object):
             raise errors.InsufficientPermission(self)
 
         if not self.site.writeapi:
-            return OldPage.move(self, new_title=new_title,
-                                reason=reason, move_talk=move_talk)
+            raise errors.NoWriteApi(self)
 
         data = {}
         if move_talk:
@@ -269,7 +267,7 @@ class Page(object):
             raise errors.InsufficientPermission(self)
 
         if not self.site.writeapi:
-            return OldPage.delete(self, reason=reason)
+            raise errors.NoWriteApi(self)
 
         data = {}
         if watch:
