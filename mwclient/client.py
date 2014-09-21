@@ -1,20 +1,25 @@
-__ver__ = '0.6.6'
+__ver__ = '0.7.0dev'
 
+import warnings
 import urllib
-import urlparse
 import time
 import random
 import sys
 import weakref
-import socket
 import base64
+
+try:
+    # Python 2.7+
+    from collections import OrderedDict
+except ImportError:
+    # Python 2.6
+    from ordereddict import OrderedDict
 
 try:
     import json
 except ImportError:
     import simplejson as json
-import http
-import upload
+import requests
 
 import errors
 import listing
@@ -81,7 +86,10 @@ class Site(object):
 
         # Setup connection
         if pool is None:
-            self.connection = http.HTTPPool(clients_useragent)
+            self.connection = requests.Session()
+            self.connection.headers['User-Agent'] = 'MwClient/' + __ver__ + ' (https://github.com/mwclient/mwclient)'
+            if clients_useragent:
+                self.connection.headers['User-Agent'] = clients_useragent + ' - ' + self.connection.headers['User-Agent']
         else:
             self.connection = pool
 
@@ -189,7 +197,7 @@ class Site(object):
         self.hasmsg = 'message' in userinfo
         self.logged_in = 'anon' not in userinfo
         if 'error' in info:
-            if info['error']['code'] in (u'internal_api_error_DBConnectionError', ):
+            if info['error']['code'] in (u'internal_api_error_DBConnectionError', u'internal_api_error_DBQueryError'):
                 self.wait(token)
                 return False
             if '*' in info['error']:
@@ -200,25 +208,15 @@ class Site(object):
         return True
 
     @staticmethod
-    def _to_str(data):
-        if type(data) is unicode:
-            return data.encode('utf-8')
-        return str(data)
-
-    @staticmethod
     def _query_string(*args, **kwargs):
         kwargs.update(args)
-        qs = urllib.urlencode([(k, Site._to_str(v)) for k, v in kwargs.iteritems()
-                               if k != 'wpEditToken'])
-        if 'wpEditToken' in kwargs:
-            qs += '&wpEditToken=' + urllib.quote(Site._to_str(kwargs['wpEditToken']))
-        return qs
+        qs1 = [(k, v) for k, v in kwargs.iteritems() if k not in ('wpEditToken', 'token')]
+        qs2 = [(k, v) for k, v in kwargs.iteritems() if k in ('wpEditToken', 'token')]
+        return OrderedDict(qs1 + qs2)
 
-    def raw_call(self, script, data):
+    def raw_call(self, script, data, files=None):
         url = self.path + script + self.ext
         headers = {}
-        if not issubclass(data.__class__, upload.Upload):
-            headers['Content-Type'] = 'application/x-www-form-urlencoded'
         if self.compress and gzip:
             headers['Accept-Encoding'] = 'gzip'
         if self.httpauth is not None:
@@ -226,25 +224,30 @@ class Site(object):
             headers['Authorization'] = 'Basic %s' % credentials
         token = self.wait_token((script, data))
         while True:
-            try:
-                stream = self.connection.post(self.host,
-                                              url, data=data, headers=headers)
-                if stream.getheader('Content-Encoding') == 'gzip':
-                    # BAD.
-                    seekable_stream = StringIO(stream.read())
-                    stream = gzip.GzipFile(fileobj=seekable_stream)
-                return stream
+            scheme = 'http'  # Should we move to 'https' as default?
+            host = self.host
+            if type(host) is tuple:
+                scheme, host = host
 
-            except errors.HTTPStatusError, e:
+            fullurl = '{scheme}://{host}{url}'.format(scheme=scheme, host=host, url=url)
+
+            try:
+                stream = self.connection.post(fullurl, data=data, files=files, headers=headers)
+                return stream.text
+
+            except requests.exceptions.HTTPError, e:
+                print 'http error'
+                print e
                 if e[0] == 503 and e[1].getheader('X-Database-Lag'):
                     self.wait(token, int(e[1].getheader('Retry-After')))
                 elif e[0] < 500 or e[0] > 599:
                     raise
                 else:
                     self.wait(token)
-            except errors.HTTPRedirectError:
+            except requests.exceptions.TooManyRedirects:
                 raise
-            except errors.HTTPError:
+            except requests.exceptions.ConnectionError:
+                print 'connection error'
                 self.wait(token)
             except ValueError:
                 self.wait(token)
@@ -254,11 +257,12 @@ class Site(object):
         kwargs['action'] = action
         kwargs['format'] = 'json'
         data = self._query_string(*args, **kwargs)
-        json_data = self.raw_call('api', data).read()
+        res = self.raw_call('api', data)
+
         try:
-            return json.loads(json_data)
+            return json.loads(res)
         except ValueError:
-            if json_data.startswith('MediaWiki API is not enabled for this site.'):
+            if res.startswith('MediaWiki API is not enabled for this site.'):
                 raise errors.APIDisabledError
             raise
 
@@ -267,7 +271,7 @@ class Site(object):
         kwargs['action'] = action
         kwargs['maxlag'] = self.max_lag
         data = self._query_string(*args, **kwargs)
-        return self.raw_call('index', data).read().decode('utf-8', 'ignore')
+        return self.raw_call('index', data)
 
     def wait_token(self, args=None):
         token = WaitToken()
@@ -366,12 +370,50 @@ class Site(object):
             self.site_init()
 
     def upload(self, file=None, filename=None, description='', ignore=False, file_size=None,
-               url=None, session_key=None, comment=None):
-        """Upload a file to the wiki."""
+               url=None, filekey=None, comment=None):
+        """
+        Uploads a file to the site. Returns JSON result from the API.
+        Can raise `errors.InsufficientPermission` and `requests.exceptions.HTTPError`.
+
+        : Parameters :
+          - file         : File object or stream to upload.
+          - filename     : Destination filename, don't include namespace
+                           prefix like 'File:'
+          - description  : Wikitext for the file description page.
+          - ignore       : True to upload despite any warnings.
+          - file_size    : Deprecated in mwclient 0.7
+          - url          : URL to fetch the file from.
+          - filekey      : Key that identifies a previous upload that was
+                           stashed temporarily.
+          - comment      : Upload comment. Also used as the initial page text
+                           for new files if `description` is not specified.
+
+        Note that one of `file`, `filekey` and `url` must be specified, but not more
+        than one. For normal uploads, you specify `file`.
+
+        Example:
+
+        >>> client.upload(open('somefile', 'rb'), filename='somefile.jpg',
+                          description='Some description')
+        """
         if self.version[:2] < (1, 16):
             return compatibility.old_upload(self, file=file, filename=filename,
                                             description=description, ignore=ignore,
                                             file_size=file_size)
+
+        if file_size is not None:
+            # Note that DeprecationWarning is hidden by default since Python 2.7
+            warnings.warn(
+                'file_size is deprecated since mwclient 0.7',
+                DeprecationWarning
+            )
+            file_size = None
+
+        if filename is None:
+            raise TypeError('filename must be specified')
+
+        if len([x for x in [file, filekey, url] if x is not None]) != 1:
+            raise TypeError("exactly one of 'file', 'filekey' and 'url' must be specified")
 
         image = self.Images[filename]
         if not image.can('upload'):
@@ -393,41 +435,37 @@ class Site(object):
         predata['filename'] = filename
         if url:
             predata['url'] = url
-        if session_key:
-            predata['session_key'] = session_key
 
-        if file is None:
-            postdata = self._query_string(predata)
+        # Renamed from sessionkey to filekey
+        # https://git.wikimedia.org/commit/mediawiki%2Fcore.git/5f13517e
+        if self.version[:2] < (1, 18):
+            predata['sessionkey'] = filekey
         else:
-            if type(file) is str:
-                file_size = len(file)
-                file = StringIO(file)
-            if file_size is None:
-                file.seek(0, 2)
-                file_size = file.tell()
-                file.seek(0, 0)
+            predata['filekey'] = filekey
 
-            postdata = upload.UploadFile('file', filename, file_size, file, predata)
+        postdata = predata
+        files = None
+        if file is not None:
+            files = {'file': file}
 
         wait_token = self.wait_token()
         while True:
             try:
-                data = self.raw_call('api', postdata).read()
+                data = self.raw_call('api', postdata, files)
                 info = json.loads(data)
                 if not info:
                     info = {}
                 if self.handle_api_result(info, kwargs=predata):
                     return info.get('upload', {})
-            except errors.HTTPStatusError, e:
+            except requests.exceptions.HTTPError, e:
                 if e[0] == 503 and e[1].getheader('X-Database-Lag'):
                     self.wait(wait_token, int(e[1].getheader('Retry-After')))
                 elif e[0] < 500 or e[0] > 599:
                     raise
                 else:
                     self.wait(wait_token)
-            except errors.HTTPError:
+            except requests.exceptions.ConnectionError:
                 self.wait(wait_token)
-            file.seek(0, 0)
 
     def parse(self, text=None, title=None, page=None):
         kwargs = {}

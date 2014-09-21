@@ -3,8 +3,8 @@ mwclient
 
 mwclient is a Python client to the `MediaWiki API <//mediawiki.org/wiki/API>`_
 which provides access to most API functionality.
-It depends heavily on Bob Ippolito's `SimpleJSON <//github.com/simplejson/simplejson>`_,
-requires Python 2.4 and supports MediaWiki 1.11 and above.
+It requires Python 2.6 or 2.7 (Python 3.x support planned) and supports MediaWiki 1.16
+and above.
 For functions not available in the current MediaWiki, a ``MediaWikiVersionError`` is raised.
 
 This framework was written by Bryan Tong Minh, who released the latest stable 
@@ -27,6 +27,37 @@ can be installed directly off github:
 Please see the 
 `release notes <//github.com/mwclient/mwclient/blob/master/RELEASE-NOTES.md>`_
 for a list of changes.
+
+Contributing
+--------------------
+
+mwclient ships with a test suite based on `pytest <//pytest.org>`_.
+Only a small part of mwclient is currently tested, but hopefully coverage
+will improve in the future.
+
+The easiest way to run tests is:
+
+.. code-block:: console
+
+    $ python setup.py test
+
+This will make an in-place build and download test dependencies locally
+if needed. To make tests run faster, you can use pip to do an
+`"editable" install <//pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs>`_:
+
+.. code-block:: console
+
+    $ pip install pytest pytest-pep8 responses
+    $ pip install -e .
+    $ py.test
+
+To run tests with different Python versions in isolated virtualenvs, you
+can use `Tox <//testrun.org/tox/latest/>`_:
+
+.. code-block:: console
+
+    $ pip install tox
+    $ tox
 
 Implementation notes
 --------------------
@@ -70,7 +101,7 @@ or the
 	# Initialize Site object
 	import mwclient
 	site = mwclient.Site('commons.wikimedia.org')
-	site.login(username, password)  # Optional
+	site.login(username, password)
 
 	# Edit page
 	page = site.Pages['Commons:Sandbox']
