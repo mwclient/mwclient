@@ -6,6 +6,7 @@ from page_nowriteapi import OldPage
 import urllib
 import urlparse
 import time
+import warnings
 
 
 class Page(object):
@@ -122,32 +123,42 @@ class Page(object):
         except StopIteration:
             return u''
 
-    def edit(self, section=None, readonly=False):
-        """Returns wikitext for a specified section or for the whole page.
+    def edit(self, *args, **kwargs):
+        """Deprecated. Use page.text() instead"""
+        warnings.warn("page.edit() was deprecated in mwclient 0.7.0, please use page.text() instead.",
+                      category=DeprecationWarning, stacklevel=2)
+        return self.text(*args, **kwargs)
 
-        Retrieves the latest edit.
-
+    def text(self, section=None):
         """
+        Returns the current wikitext for a specified section or for the whole page.
+        If the page does not exist, an empty string is returned.
+        """
+
         if not self.can('read'):
             raise errors.InsufficientPermission(self)
         if not self.exists:
             return u''
+        if section is not None:
+            section = str(section)
 
         revs = self.revisions(prop='content|timestamp', limit=1, section=section)
         try:
             rev = revs.next()
-            self.text = rev['*']
+            self._text = rev['*']
             self.section = section
             self.last_rev_time = rev['timestamp']
         except StopIteration:
-            self.text = u''
+            self._text = u''
             self.section = None
             self.edit_time = None
         self.edit_time = time.gmtime()
-        return self.text
+        return self._text
 
-    def save(self, text=u'', summary=u'', minor=False, bot=True, section=None, **kwargs):
-        """Save text of page."""
+    def save(self, text, summary=u'', minor=False, bot=True, section=None, **kwargs):
+        """
+        Update the text of a section or the whole page by performing an edit operation.
+        """
         if not self.site.logged_in and self.site.force_login:
             # Should we really check for this?
             raise errors.LoginError(self.site)
@@ -156,8 +167,6 @@ class Page(object):
         if not self.can('edit'):
             raise errors.ProtectedPageError(self)
 
-        if not text:
-            text = self.text
         if not section:
             section = self.section
 
@@ -355,7 +364,7 @@ class Page(object):
         kwargs['rvprop'] = prop
         if expandtemplates:
             kwargs['rvexpandtemplates'] = '1'
-        if section:
+        if section is not None:
             kwargs['rvsection'] = section
 
         return listing.RevisionsIterator(self, 'revisions', 'rv', limit=limit, **kwargs)

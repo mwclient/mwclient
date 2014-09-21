@@ -76,7 +76,7 @@ fw.close()
 ```
 
 #### Editing pages ####
-Call `Page.edit()` to retrieve the page content.
+Call `Page.text()` to retrieve the page content.
 Use `Page.save(text, summary = u'', ...)` to save the page.
 If available, `Page.save` uses the API to edit,
 but falls back to the old way if the write API is not available.

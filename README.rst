@@ -105,7 +105,7 @@ or the
 
 	# Edit page
 	page = site.Pages['Commons:Sandbox']
-	text = page.edit()
+	text = page.text()
 	print 'Text in sandbox:', text.encode('utf-8')
 	page.save(text + u'\nExtra data', summary = 'Test edit')
 
