@@ -1,6 +1,6 @@
 # Release Notes for mwclient
 
-## Changes in version 0.7
+## Changes in version 0.7.0
 This is the development version of mwclient.
 
 *Dropped support for Python 2.4–2.5 and MediaWiki 1.11–1.15.
@@ -78,6 +78,11 @@ This version requires minimum Python 2.6 and MediaWiki 1.16.*
 * [2014-08-31] [@danmichaelo](https://github.com/danmichaelo):
   Retry on internal_api_error_DBQueryError.
   [d0ce831](https://github.com/mwclient/mwclient/commit/d0ce831).
+* [2014-09-22] [@danmichaelo](https://github.com/danmichaelo):
+  Rename `Page.edit()` to `Page.text()`. Note that `text` is now a required
+  parameter to `Page.save()`.
+  [61155f1](https://github.com/mwclient/mwclient/commit/61155f1),
+  [#51](https://github.com/mwclient/mwclient/issues/51).
 
 ## Changes in version 0.6.5
 Mwclient 0.6.5 was released on 6 May 2011.
