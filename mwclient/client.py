@@ -143,7 +143,7 @@ class Site(object):
         else:
             raise errors.MediaWikiVersionError('Unknown generator %s' % self.site['generator'])
 
-        # Require 1.16
+        # Require MediaWiki version >= 1.16
         self.require(1, 16)
 
         # User info
@@ -330,8 +330,6 @@ class Site(object):
 
     def login(self, username=None, password=None, cookies=None, domain=None):
         """Login to the wiki."""
-        if self.initialized:
-            self.require(1, 10)
 
         if username and password:
             self.credentials = (username, password, domain)
@@ -474,17 +472,16 @@ class Site(object):
         result = self.api('parse', **kwargs)
         return result['parse']
 
-    # def block: requires 1.12
-    # def unblock: requires 1.12
-    # def patrol: requires 1.14
-    # def import: requires 1.15
+    # def block(self): TODO?
+    # def unblock: TODO?
+    # def patrol: TODO?
+    # def import: TODO?
 
     # Lists
     def allpages(self, start=None, prefix=None, namespace='0', filterredir='all',
                  minsize=None, maxsize=None, prtype=None, prlevel=None,
                  limit=None, dir='ascending', filterlanglinks='all', generator=True):
         """Retrieve all pages on the wiki as a generator."""
-        self.require(1, 9)
 
         pfx = listing.List.get_prefix('ap', generator)
         kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), prefix=prefix,
@@ -492,13 +489,13 @@ class Site(object):
                                                    namespace=namespace, filterredir=filterredir, dir=dir,
                                                    filterlanglinks=filterlanglinks))
         return listing.List.get_list(generator)(self, 'allpages', 'ap', limit=limit, return_values='title', **kwargs)
-    # def allimages(self): requires 1.12
+
+    # def allimages(self):
     # TODO!
 
     def alllinks(self, start=None, prefix=None, unique=False, prop='title',
                  namespace='0', limit=None, generator=True):
         """Retrieve a list of all links on the wiki as a generator."""
-        self.require(1, 11)
 
         pfx = listing.List.get_prefix('al', generator)
         kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), prefix=prefix,
@@ -509,7 +506,6 @@ class Site(object):
 
     def allcategories(self, start=None, prefix=None, dir='ascending', limit=None, generator=True):
         """Retrieve all categories on the wiki as a generator."""
-        self.require(1, 12)
 
         pfx = listing.List.get_prefix('ac', generator)
         kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), prefix=prefix, dir=dir))
@@ -518,7 +514,6 @@ class Site(object):
     def allusers(self, start=None, prefix=None, group=None, prop=None, limit=None,
                  witheditsonly=False, activeusers=False, rights=None):
         """Retrieve all users on the wiki as a generator."""
-        self.require(1, 11)
 
         kwargs = dict(listing.List.generate_kwargs('au', ('from', start), prefix=prefix,
                                                    group=group, prop=prop,
@@ -544,7 +539,6 @@ class Site(object):
 
         """
 
-        self.require(1, 12)
         # TODO: Fix. Fix what?
         kwargs = dict(listing.List.generate_kwargs('bk', start=start, end=end, dir=dir,
                                                    users=users, prop=prop))
@@ -553,7 +547,6 @@ class Site(object):
     def deletedrevisions(self, start=None, end=None, dir='older', namespace=None,
                          limit=None, prop='user|comment'):
         # TODO: Fix
-        self.require(1, 12)
 
         kwargs = dict(listing.List.generate_kwargs('dr', start=start, end=end, dir=dir,
                                                    namespace=namespace, prop=prop))
@@ -577,7 +570,6 @@ class Site(object):
         - title: the page title.
 
         """
-        self.require(1, 11)
 
         kwargs = dict(listing.List.generate_kwargs('eu', query=query, prop=prop,
                                                    protocol=protocol, namespace=namespace))
@@ -585,7 +577,6 @@ class Site(object):
 
     def logevents(self, type=None, prop=None, start=None, end=None,
                   dir='older', user=None, title=None, limit=None, action=None):
-        self.require(1, 10)
 
         kwargs = dict(listing.List.generate_kwargs('le', prop=prop, type=type, start=start,
                                                    end=end, dir=dir, user=user, title=title, action=action))
@@ -601,21 +592,18 @@ class Site(object):
         Generator contains dictionary with namespace, page ID and title.
 
         """
-        self.require(1, 12)
 
         kwargs = dict(listing.List.generate_kwargs('rn', namespace=namespace))
         return listing.List(self, 'random', 'rn', limit=limit, **kwargs)
 
     def recentchanges(self, start=None, end=None, dir='older', namespace=None,
                       prop=None, show=None, limit=None, type=None):
-        self.require(1, 9)
 
         kwargs = dict(listing.List.generate_kwargs('rc', start=start, end=end, dir=dir,
                                                    namespace=namespace, prop=prop, show=show, type=type))
         return listing.List(self, 'recentchanges', 'rc', limit=limit, **kwargs)
 
     def search(self, search, namespace='0', what='title', redirects=False, limit=None):
-        self.require(1, 11)
 
         kwargs = dict(listing.List.generate_kwargs('sr', search=search, namespace=namespace, what=what))
         if redirects:
@@ -624,20 +612,17 @@ class Site(object):
 
     def usercontributions(self, user, start=None, end=None, dir='older', namespace=None,
                           prop=None, show=None, limit=None):
-        self.require(1, 9)
 
         kwargs = dict(listing.List.generate_kwargs('uc', user=user, start=start, end=end,
                                                    dir=dir, namespace=namespace, prop=prop, show=show))
         return listing.List(self, 'usercontribs', 'uc', limit=limit, **kwargs)
 
     def users(self, users, prop='blockinfo|groups|editcount'):
-        self.require(1, 12)
 
         return listing.List(self, 'users', 'us', ususers='|'.join(users), usprop=prop)
 
     def watchlist(self, allrev=False, start=None, end=None, namespace=None, dir='older',
                   prop=None, show=None, limit=None):
-        self.require(1, 9)
 
         kwargs = dict(listing.List.generate_kwargs('wl', start=start, end=end,
                                                    namespace=namespace, dir=dir, prop=prop, show=show))
@@ -647,7 +632,6 @@ class Site(object):
 
     def expandtemplates(self, text, title=None, generatexml=False):
         """Takes wikitext (text) and expands templates."""
-        self.require(1, 11)
 
         kwargs = {}
         if title is None:

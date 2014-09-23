@@ -101,7 +101,6 @@ class Page(object):
         return level in self.site.rights
 
     def get_token(self, type, force=False):
-        self.site.require(1, 11)
 
         if type not in self.site.tokens:
             self.site.tokens[type] = '0'
@@ -114,7 +113,6 @@ class Page(object):
         return self.site.tokens[type]
 
     def get_expanded(self):
-        self.site.require(1, 12)
 
         revs = self.revisions(prop='content', limit=1, expandtemplates=True)
         try:
@@ -223,7 +221,6 @@ class Page(object):
             raise
 
     def get_expanded(self):
-        self.site.require(1, 12)
 
         revs = self.revisions(prop='content', limit=1, expandtemplates=True)
         try:
@@ -292,8 +289,6 @@ class Page(object):
 
     # Properties
     def backlinks(self, namespace=None, filterredir='all', redirect=False, limit=None, generator=True):
-        self.site.require(1, 9)
-        # Fix title for < 1.11 !!
         prefix = listing.List.get_prefix('bl', generator)
         kwargs = dict(listing.List.generate_kwargs(prefix,
                                                    namespace=namespace, filterredir=filterredir))
@@ -304,7 +299,6 @@ class Page(object):
         return listing.List.get_list(generator)(self.site, 'backlinks', 'bl', limit=limit, return_values='title', **kwargs)
 
     def categories(self, generator=True):
-        self.site.require(1, 11)
         if generator:
             return listing.PagePropertyGenerator(self, 'categories', 'cl')
         else:
@@ -312,8 +306,6 @@ class Page(object):
             return listing.PageProperty(self, 'categories', 'cl', return_values='title')
 
     def embeddedin(self, namespace=None, filterredir='all', redirect=False, limit=None, generator=True):
-        self.site.require(1, 9)
-        # Fix title for < 1.11 !!
         prefix = listing.List.get_prefix('ei', generator)
         kwargs = dict(listing.List.generate_kwargs(prefix,
                                                    namespace=namespace, filterredir=filterredir))
@@ -324,26 +316,21 @@ class Page(object):
         return listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit=limit, return_values='title', **kwargs)
 
     def extlinks(self):
-        self.site.require(1, 11)
         return listing.PageProperty(self, 'extlinks', 'el', return_values='*')
 
     def images(self, generator=True):
-        self.site.require(1, 9)
         if generator:
             return listing.PagePropertyGenerator(self, 'images', '')
         else:
             return listing.PageProperty(self, 'images', '', return_values='title')
 
     def iwlinks(self):
-        self.site.require(1, 9)  # guessing...
         return listing.PageProperty(self, 'iwlinks', 'iw', return_values=('prefix', '*'))
 
     def langlinks(self, **kwargs):
-        self.site.require(1, 9)
         return listing.PageProperty(self, 'langlinks', 'll', return_values=('lang', '*'), **kwargs)
 
     def links(self, namespace=None, generator=True, redirects=False):
-        self.site.require(1, 9)
         kwargs = dict(listing.List.generate_kwargs('pl', namespace=namespace))
         if redirects:
             kwargs['redirects'] = '1'
@@ -355,7 +342,6 @@ class Page(object):
     def revisions(self, startid=None, endid=None, start=None, end=None,
                   dir='older', user=None, excludeuser=None, limit=50,
                   prop='ids|timestamp|flags|comment|user', expandtemplates=False, section=None):
-        self.site.require(1, 8)
         kwargs = dict(listing.List.generate_kwargs('rv', startid=startid, endid=endid,
                                                    start=start, end=end, user=user, excludeuser=excludeuser))
         kwargs['rvdir'] = dir
@@ -368,7 +354,6 @@ class Page(object):
         return listing.RevisionsIterator(self, 'revisions', 'rv', limit=limit, **kwargs)
 
     def templates(self, namespace=None, generator=True):
-        self.site.require(1, 8)
         kwargs = dict(listing.List.generate_kwargs('tl', namespace=namespace))
         if generator:
             return listing.PagePropertyGenerator(self, 'templates', 'tl')
@@ -379,7 +364,6 @@ class Page(object):
 class Image(Page):
 
     def __init__(self, site, name, info=None):
-        site.require(1, 11)
         Page.__init__(self, site, name, info,
                       extra_properties={'imageinfo':
                                         (('iiprop', 'timestamp|user|comment|url|size|sha1|metadata|archivename'), )
@@ -393,8 +377,6 @@ class Image(Page):
 
     def imageusage(self, namespace=None, filterredir='all', redirect=False,
                    limit=None, generator=True):
-        self.site.require(1, 11)
-        # TODO: Fix for versions < 1.11
         prefix = listing.List.get_prefix('iu', generator)
         kwargs = dict(listing.List.generate_kwargs(prefix, title=self.name,
                                                    namespace=namespace, filterredir=filterredir))
@@ -404,7 +386,6 @@ class Image(Page):
                                                 limit=limit, return_values='title', **kwargs)
 
     def duplicatefiles(self, limit=None):
-        self.require(1, 14)
         return listing.PageProperty(self, 'duplicatefiles', 'df',
                                     dflimit=limit)
 
