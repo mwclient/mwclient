@@ -1,13 +1,22 @@
 # Release Notes for mwclient
 
-## Changes in version 0.7.0
+## Changes in version 0.7.1
+
 This is the development version of mwclient.
 
-*Dropped support for Python 2.4–2.5 and MediaWiki 1.11–1.15.
-This version requires minimum Python 2.6 and MediaWiki 1.16.
-Compability methods for working with MediaWiki < 1.16 have been
-removed.*
+## Changes in version 0.7.0
 
+Upgrade notices:
+ - This version requires minimum Python 2.6 and MediaWiki 1.16.
+   Support for Python 2.4–2.5 and MediaWiki 1.11–1.15 has been dropped.
+ - The `Page.edit()` method has been renamed to `Page.text()`.
+   While `Page.edit()` is deprecated, it will be available for a long time.
+   The old `Page.text` attribute, that used to store a copy of the wikitext
+   from the last `Page.edit()` call, has been removed entirely.
+ - The `Page.get_expanded()` method has been deprecated in favour of
+   calling `Page.text(expandtemplates=True)`
+
+Detailed changelog:
 * [2012-08-30] [@btongminh](https://github.com/btongminh):
   Allow setting both the upload description and the page content separately.
   [0aa748f](https://github.com/btongminh/mwclient/commit/0aa748f).
@@ -85,6 +94,9 @@ removed.*
   parameter to `Page.save()`.
   [61155f1](https://github.com/mwclient/mwclient/commit/61155f1),
   [#51](https://github.com/mwclient/mwclient/issues/51).
+* [2014-09-27] [@danmichaelo](https://github.com/danmichaelo):
+  Add `expandtemplates` arugment to `Page.text()` and deprecate `Page.get_expanded()`
+  [57df5f4](https://github.com/mwclient/mwclient/commit/57df5f4).
 
 ## Changes in version 0.6.5
 Mwclient 0.6.5 was released on 6 May 2011.
