@@ -1,3 +1,14 @@
+
+.. image:: http://img.shields.io/travis/mwclient/mwclient.svg?style=flat
+   :target: https://ptravis-ci.org/mwclient/mwclient
+
+.. image:: http://img.shields.io/pypi/v/mwclient.svg?style=flat
+   :target: https://pypi.python.org/pypi/mwclient
+
+.. image:: http://img.shields.io/pypi/dw/mwclient.svg?style=flat
+   :target: https://pypi.python.org/pypi/mwclient
+
+   
 mwclient
 ========
 
