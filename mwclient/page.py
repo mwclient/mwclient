@@ -220,14 +220,6 @@ class Page(object):
         else:
             raise
 
-    def get_expanded(self):
-
-        revs = self.revisions(prop='content', limit=1, expandtemplates=True)
-        try:
-            return revs.next()['*']
-        except StopIteration:
-            return u''
-
     def move(self, new_title, reason='', move_talk=True, no_redirect=False):
         """Move (rename) page to new_title.
 
