@@ -168,79 +168,69 @@ class TestPage(unittest.TestCase):
         assert page.exists is True
         assert page.redirect is True
 
-    @mock.patch('mwclient.client.Site')
-    def test_page_get_text(self, mock_site):
+
+class TestPageApiArgs(unittest.TestCase):
+
+    def setUp(self):
+        title = 'Some page'
+        self.page_text = 'Hello world'
+
+        MockSite = mock.patch('mwclient.client.Site').start()
+        self.site = MockSite()
+
+        self.site.api.return_value = {'query': {'pages': {'1': {'title': title}}}}
+        self.site.rights = ['read']
+
+        self.page = Page(self.site, title)
+
+        self.site.api.return_value = {'query': {'pages': {'2': {
+            'ns': 0, 'pageid': 2, 'revisions': [{'*': 'Hello world', 'timestamp': '2014-08-29T22:25:15Z'}], 'title': title
+        }}}}
+
+    def get_last_api_call_args(self):
+        args, kwargs = self.site.api.call_args
+        action = args[0]
+        args = args[1:]
+        kwargs.update(args)
+        return kwargs
+
+    def tearDown(self):
+        mock.patch.stopall()
+
+    def test_get_page_text(self):
         # Check that page.text() works, and that a correct API call is made
+        text = self.page.text()
+        args = self.get_last_api_call_args()
 
-        title = 'Some page'
-        some_text = 'Hello world'
-        mock_site.api.return_value = {'query': {'pages': {'1': {'title': title}}}}
-        mock_site.rights = ['read']
-
-        page = Page(mock_site, title)
-
-        mock_site.api.return_value = {
-            'query': {
-                'pages': {
-                    '796917': {
-                        'ns': 0,
-                        'pageid': 796917,
-                        'revisions': [
-                            {
-                                '*': some_text,
-                                'contentformat': 'text/x-wiki',
-                                'contentmodel': 'wikitext',
-                                'timestamp': '2011-09-12T12:36:08Z'
-                            }
-                        ],
-                        'title': title
-                    }
-                }
-            }
+        assert text == self.page_text
+        assert args == {
+            'prop': 'revisions',
+            'rvdir': 'older',
+            'titles': self.page.page_title,
+            'rvprop': 'content|timestamp',
+            'rvlimit': '1'
         }
 
-        text = page.text()
-
-        # test that Page called site.api with the right parameters
-        mock_site.api.assert_called_with('query', ('prop', 'revisions'), ('rvdir', 'older'), ('titles', title), ('rvprop', 'content|timestamp'), ('rvlimit', '1'))
-
-        assert text == some_text
-
-    @mock.patch('mwclient.client.Site')
-    def test_section_get_text(self, mock_site):
+    def test_get_section_text(self):
         # Check that the 'rvsection' parameter is sent to the API
+        text = self.page.text(section=0)
+        args = self.get_last_api_call_args()
 
-        title = 'Some page'
-        some_text = 'Hello world'
-        mock_site.api.return_value = {'query': {'pages': {'1': {'title': title}}}}
-        mock_site.rights = ['read']
+        assert args['rvsection'] == '0'
 
-        page = Page(mock_site, title)
+    def test_get_text_expanded(self):
+        # Check that the 'rvexpandtemplates' parameter is sent to the API
+        text = self.page.text(expandtemplates=True)
+        args = self.get_last_api_call_args()
 
-        mock_site.api.return_value = {
-            'query': {
-                'pages': {
-                    '796917': {
-                        'ns': 0,
-                        'pageid': 796917,
-                        'revisions': [
-                            {
-                                '*': some_text,
-                                'contentformat': 'text/x-wiki',
-                                'contentmodel': 'wikitext',
-                                'timestamp': '2011-09-12T12:36:08Z'
-                            }
-                        ],
-                        'title': title
-                    }
-                }
-            }
-        }
+        assert args['rvexpandtemplates'] == '1'
 
-        text = page.text(section=0)
+    def test_get_text_expanded_deprecated(self):
+        # Check that the 'rvexpandtemplates' parameter is sent to the API
+        text = self.page.get_expanded()
+        args = self.get_last_api_call_args()
 
-        # test that Page called site.api with the right parameters
-        mock_site.api.assert_called_with('query', ('prop', 'revisions'), ('rvdir', 'older'), ('titles', title), ('rvsection', '0'), ('rvprop', 'content|timestamp'), ('rvlimit', '1'))
+        assert args['rvexpandtemplates'] == '1'
 
 
 if __name__ == '__main__':

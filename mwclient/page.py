@@ -113,12 +113,11 @@ class Page(object):
         return self.site.tokens[type]
 
     def get_expanded(self):
+        """Deprecated. Use page.text(expandtemplates=True) instead"""
+        warnings.warn("page.get_expanded() was deprecated in mwclient 0.7.0, use page.text(expandtemplates=True) instead.",
+                      category=DeprecationWarning, stacklevel=2)
 
-        revs = self.revisions(prop='content', limit=1, expandtemplates=True)
-        try:
-            return revs.next()['*']
-        except StopIteration:
-            return u''
+        return self.text(expandtemplates=True)
 
     def edit(self, *args, **kwargs):
         """Deprecated. Use page.text() instead"""
@@ -126,10 +125,14 @@ class Page(object):
                       category=DeprecationWarning, stacklevel=2)
         return self.text(*args, **kwargs)
 
-    def text(self, section=None):
+    def text(self, section=None, expandtemplates=False):
         """
-        Returns the current wikitext for a specified section or for the whole page.
+        Returns the current wikitext of the page, or of a specific section.
         If the page does not exist, an empty string is returned.
+
+        :Arguments:
+          - `section` : numbered section or `None` to get the whole page (default: `None`)
+          - `expandtemplates` : set to `True` to expand templates (default: `False`)
         """
 
         if not self.can('read'):
@@ -139,18 +142,19 @@ class Page(object):
         if section is not None:
             section = str(section)
 
-        revs = self.revisions(prop='content|timestamp', limit=1, section=section)
+        revs = self.revisions(prop='content|timestamp', limit=1, section=section, expandtemplates=expandtemplates)
         try:
             rev = revs.next()
-            self._text = rev['*']
+            text = rev['*']
             self.section = section
             self.last_rev_time = rev['timestamp']
         except StopIteration:
-            self._text = u''
+            text = u''
             self.section = None
-            self.edit_time = None
-        self.edit_time = time.gmtime()
-        return self._text
+            self.last_rev_time = None
+        if not expandtemplates:
+            self.edit_time = time.gmtime()
+        return text
 
     def save(self, text, summary=u'', minor=False, bot=True, section=None, **kwargs):
         """
