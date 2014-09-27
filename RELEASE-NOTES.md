@@ -95,7 +95,7 @@ Detailed changelog:
   [61155f1](https://github.com/mwclient/mwclient/commit/61155f1),
   [#51](https://github.com/mwclient/mwclient/issues/51).
 * [2014-09-27] [@danmichaelo](https://github.com/danmichaelo):
-  Add `expandtemplates` arugment to `Page.text()` and deprecate `Page.get_expanded()`
+  Add `expandtemplates` argument to `Page.text()` and deprecate `Page.get_expanded()`
   [57df5f4](https://github.com/mwclient/mwclient/commit/57df5f4).
 
 ## Changes in version 0.6.5
