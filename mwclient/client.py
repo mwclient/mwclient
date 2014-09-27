@@ -490,8 +490,16 @@ class Site(object):
                                                    filterlanglinks=filterlanglinks))
         return listing.List.get_list(generator)(self, 'allpages', 'ap', limit=limit, return_values='title', **kwargs)
 
-    # def allimages(self):
-    # TODO!
+    def allimages(self, start=None, prefix=None, minsize=None, maxsize=None, limit=None,
+                  dir='ascending', sha1=None, sha1base36=None, prop='timestamp|url',
+                  generator=True):
+        """Retrieve all images on the wiki as a generator."""
+
+        pfx = listing.List.get_prefix('ai', generator)
+        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), prefix=prefix,
+                                                   minsize=minsize, maxsize=maxsize,
+                                                   dir=dir, sha1=sha1, sha1base36=sha1base36))
+        return listing.List.get_list(generator)(self, 'allimages', 'ai', limit=limit, return_values='timestamp|url', **kwargs)
 
     def alllinks(self, start=None, prefix=None, unique=False, prop='title',
                  namespace='0', limit=None, generator=True):
