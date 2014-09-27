@@ -4,6 +4,11 @@
 
 This is the development version of mwclient.
 
+* [2014-09-27] [@jimt](https://github.com/jimt):
+  Implement `Site.allimages()`
+  [f9b92de](https://github.com/mwclient/mwclient/commit/f9b92de),
+  [#62](https://github.com/mwclient/mwclient/issues/62).
+
 ## Changes in version 0.7.0
 
 Upgrade notices:
