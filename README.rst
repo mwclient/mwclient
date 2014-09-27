@@ -1,37 +1,36 @@
 mwclient
 ========
 
-mwclient is a Python client to the `MediaWiki API <//mediawiki.org/wiki/API>`_
+mwclient is a lightweight Python client library to the `MediaWiki API <https://mediawiki.org/wiki/API>`_
 which provides access to most API functionality.
 It requires Python 2.6 or 2.7 (Python 3.x support planned) and supports MediaWiki 1.16
 and above.
 For functions not available in the current MediaWiki, a ``MediaWikiVersionError`` is raised.
 
-This framework was written by Bryan Tong Minh, who released the latest stable 
-`version 0.6.5 <//github.com/mwclient/mwclient/archive/REL_0_6_5.zip>`_ 
-on 6 May 2011. Version 0.6.5 is also 
-`available through PyPI <//pypi.python.org/pypi/mwclient/0.6.5>`_:
+This framework was written by Bryan Tong Minh, who maintained the project until
+version 0.6.5, released on 6 May 2011. The current stable
+`version 0.7.0 <https://github.com/mwclient/mwclient/archive/v0.7.0.zip>`_
+was released on 27 September 2014, and is `available through PyPI <https://pypi.python.org/pypi/mwclient>`_:
 
 .. code-block:: console
 
     $ pip install mwclient
 
-Note that 0.6.5 might not work with the latest MediaWiki versions.
-The current `development version <//github.com/mwclient/mwclient>`_
-can be installed directly off github:
+The current `development version <https://github.com/mwclient/mwclient>`_
+can be installed from GitHub:
 
 .. code-block:: console
 
     $ pip install git+git://github.com/mwclient/mwclient.git
 
 Please see the 
-`release notes <//github.com/mwclient/mwclient/blob/master/RELEASE-NOTES.md>`_
+`release notes <https://github.com/mwclient/mwclient/blob/master/RELEASE-NOTES.md>`_
 for a list of changes.
 
 Contributing
 --------------------
 
-mwclient ships with a test suite based on `pytest <//pytest.org>`_.
+mwclient ships with a test suite based on `pytest <https://pytest.org>`_.
 Only a small part of mwclient is currently tested, but hopefully coverage
 will improve in the future.
 
@@ -43,7 +42,7 @@ The easiest way to run tests is:
 
 This will make an in-place build and download test dependencies locally
 if needed. To make tests run faster, you can use pip to do an
-`"editable" install <//pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs>`_:
+`"editable" install <https://pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs>`_:
 
 .. code-block:: console
 
@@ -52,7 +51,7 @@ if needed. To make tests run faster, you can use pip to do an
     $ py.test
 
 To run tests with different Python versions in isolated virtualenvs, you
-can use `Tox <//testrun.org/tox/latest/>`_:
+can use `Tox <https://testrun.org/tox/latest/>`_:
 
 .. code-block:: console
 
@@ -92,9 +91,9 @@ Example
 -------
 
 For more information, see the
-`REFERENCE.md <//github.com/mwclient/mwclient/blob/master/REFERENCE.md>`_ file
+`REFERENCE.md <https://github.com/mwclient/mwclient/blob/master/REFERENCE.md>`_ file
 or the 
-`documentation on the wiki <//github.com/mwclient/mwclient/wiki>`_.
+`documentation on the wiki <https://github.com/mwclient/mwclient/wiki>`_.
 
 .. code-block:: python
 

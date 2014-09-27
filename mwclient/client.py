@@ -1,4 +1,4 @@
-__ver__ = '0.7.0dev'
+__ver__ = '0.7.0'
 
 import warnings
 import urllib
