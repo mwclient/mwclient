@@ -18,6 +18,8 @@ Upgrade notices:
    While `Page.edit()` is deprecated, it will be available for a long time.
    The old `Page.text` attribute, that used to store a copy of the wikitext
    from the last `Page.edit()` call, has been removed entirely.
+   The `readonly` argument has also been removed (it was never really
+   implemented, so it acted only as a dummy argument before the removal).
  - The `Page.get_expanded()` method has been deprecated in favour of
    calling `Page.text(expandtemplates=True)`
 
