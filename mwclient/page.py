@@ -162,7 +162,9 @@ class Page(object):
         """
         if not self.site.logged_in and self.site.force_login:
             # Should we really check for this?
-            raise errors.LoginError(self.site)
+            raise errors.LoginError(self.site, 'By default, mwclient protects you from accidentally ' +
+                                    'editing without being logged in. If you actually want to edit without '
+                                    'logging in, you can set force_login on the Site object to False.')
         if self.site.blocked:
             raise errors.UserBlocked(self.site.blocked)
         if not self.can('edit'):
