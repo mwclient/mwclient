@@ -367,6 +367,35 @@ class Site(object):
         else:
             self.site_init()
 
+    def get_token(self, type, force=False, title=None):
+
+        if self.version[:2] >= (1, 24):
+            # The 'csrf' (cross-site request forgery) token introduced in 1.24 replaces
+            # the majority of older tokens, like edittoken and movetoken.
+            if type not in ['watch', 'patrol', 'rollback', 'userrights']:
+                type = 'csrf'
+
+        if type not in self.tokens:
+            self.tokens[type] = '0'
+
+        if self.tokens.get(type, '0') == '0' or force:
+
+            if self.version[:2] >= (1, 24):
+                info = self.api('query', meta='tokens', type=type)
+                self.tokens[type] = info['query']['tokens']['%stoken' % type]
+
+            else:
+                if title is None:
+                    # Some dummy title was needed to get a token prior to 1.24
+                    title = 'Test'
+                info = self.api('query', titles=title,
+                                prop='info', intoken=type)
+                for i in info['query']['pages'].itervalues():
+                    if i['title'] == title:
+                        self.tokens[type] = i['%stoken' % type]
+
+        return self.tokens[type]
+
     def upload(self, file=None, filename=None, description='', ignore=False, file_size=None,
                url=None, filekey=None, comment=None):
         """

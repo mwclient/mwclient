@@ -101,16 +101,7 @@ class Page(object):
         return level in self.site.rights
 
     def get_token(self, type, force=False):
-
-        if type not in self.site.tokens:
-            self.site.tokens[type] = '0'
-        if self.site.tokens.get(type, '0') == '0' or force:
-            info = self.site.api('query', titles=self.name,
-                                 prop='info', intoken=type)
-            for i in info['query']['pages'].itervalues():
-                if i['title'] == self.name:
-                    self.site.tokens[type] = i['%stoken' % type]
-        return self.site.tokens[type]
+        return self.site.get_token(type, force, title=self.name)
 
     def get_expanded(self):
         """Deprecated. Use page.text(expandtemplates=True) instead"""

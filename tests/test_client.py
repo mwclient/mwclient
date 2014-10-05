@@ -13,6 +13,7 @@ import logging
 import requests
 import responses
 import pkg_resources  # part of setuptools
+import mock
 
 try:
     import json
@@ -180,6 +181,66 @@ class TestClient(TestCase):
 
         assert len(responses.calls) == 1
 
+
+
+class TestClientGetTokens(TestCase):
+
+    def setUp(self):
+        self.raw_call = mock.patch('mwclient.client.Site.raw_call').start()
+
+    def configure(self, version='1.24'):
+        self.raw_call.return_value = self.makeMetaResponse(version=version)
+        self.site = mwclient.Site('test.wikipedia.org')
+        responses.reset()
+
+    def tearDown(self):
+        mock.patch.stopall()
+
+    def test_token_new_system(self):
+        # Test get_token for MW >= 1.24
+        self.configure(version='1.24')
+
+        self.raw_call.return_value = json.dumps({
+            'query': {'tokens': {'csrftoken': 'sometoken'}}
+        })
+        self.site.get_token('edit')
+
+        args, kwargs = self.raw_call.call_args
+        data = args[1]
+
+        assert 'intoken' not in data
+        assert data.get('type') == 'csrf'
+        assert 'csrf' in self.site.tokens
+        assert self.site.tokens['csrf'] == 'sometoken'
+        assert 'edit' not in self.site.tokens
+
+    def test_token_old_system_without_specifying_title(self):
+        # Test get_token for MW < 1.24
+        self.configure(version='1.23')
+
+        self.raw_call.return_value = self.makePageResponse(edittoken='sometoken', title='Test')
+        self.site.get_token('edit')
+
+        args, kwargs = self.raw_call.call_args
+        data = args[1]
+
+        assert 'type' not in data
+        assert data.get('intoken') == 'edit'
+        assert 'edit' in self.site.tokens
+        assert self.site.tokens['edit'] == 'sometoken'
+        assert 'csrf' not in self.site.tokens
+
+    def test_token_old_system_with_specifying_title(self):
+        # Test get_token for MW < 1.24
+        self.configure(version='1.23')
+
+        self.raw_call.return_value = self.makePageResponse(edittoken='sometoken', title='Some page')
+        self.site.get_token('edit', title='Some page')
+
+        args, kwargs = self.raw_call.call_args
+        data = args[1]
+
+        assert self.site.tokens['edit'] == 'sometoken'
 
 if __name__ == '__main__':
     unittest.main()
