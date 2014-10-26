@@ -6,6 +6,7 @@ if __name__ == "__main__":
     print "      (section 'Contributing') for advice on running tests."
     print
 
+import StringIO
 import unittest
 import pytest
 import mwclient
@@ -181,6 +182,86 @@ class TestClient(TestCase):
 
         assert len(responses.calls) == 1
 
+
+class TestClientUploadArgs(TestCase):
+
+    def setUp(self):
+        self.raw_call = mock.patch('mwclient.client.Site.raw_call').start()
+
+    def configure(self, rights=['read', 'upload']):
+
+        self.raw_call.side_effect = [self.makeMetaResponse(rights=rights)]
+        self.site = mwclient.Site('test.wikipedia.org')
+
+        self.vars = {
+            'fname': u'Some "ßeta" æøå.jpg',
+            'comment': u'Some slightly complex comment<br> π ≈ 3, © Me.jpg',
+            'token': u'abc+\\'
+        }
+
+        self.raw_call.side_effect = [
+
+            # 1st response:
+            self.makePageResponse(title='File:Test.jpg', imagerepository='local', imageinfo=[{
+                "comment": "",
+                "height": 1440,
+                "metadata": [],
+                "sha1": "69a764a9cf8307ea4130831a0aa0b9b7f9585726",
+                "size": 123,
+                "timestamp": "2013-12-22T07:11:07Z",
+                "user": "TestUser",
+                "width": 2160
+            }]),
+
+            # 2nd response:
+            json.dumps({'query': {'tokens': {'csrftoken': self.vars['token']}}}),
+
+            # 3rd response:
+            json.dumps({
+                "upload": {
+                    "result": "Success",
+                    "filename": self.vars['fname'],
+                    "imageinfo": []
+                }
+            })
+        ]
+
+    def tearDown(self):
+        mock.patch.stopall()
+
+    def test_upload_args(self):
+        # Test that methods are called, and arguments sent as expected
+        self.configure()
+
+        self.site.upload(file=StringIO.StringIO('test'), filename=self.vars['fname'], comment=self.vars['comment'])
+
+        args, kwargs = self.raw_call.call_args
+        data = args[1]
+        files = args[2]
+
+        assert data.get('action') == 'upload'
+        assert data.get('filename') == self.vars['fname']
+        assert data.get('comment') == self.vars['comment']
+        assert data.get('token') == self.vars['token']
+        assert 'file' in files
+
+    def test_upload_missing_filename(self):
+        self.configure()
+
+        with pytest.raises(TypeError):
+            self.site.upload(file=StringIO.StringIO('test'))
+
+    def test_upload_ambigitious_args(self):
+        self.configure()
+
+        with pytest.raises(TypeError):
+            self.site.upload(filename='Test', file=StringIO.StringIO('test'), filekey='abc')
+
+    def test_upload_missing_upload_permission(self):
+        self.configure(rights=['read'])
+
+        with pytest.raises(mwclient.errors.InsufficientPermission):
+            self.site.upload(filename='Test', file=StringIO.StringIO('test'))
 
 
 class TestClientGetTokens(TestCase):
