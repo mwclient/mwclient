@@ -17,6 +17,8 @@ class List(object):
         if limit is None:
             limit = site.api_limit
         self.args[self.prefix + 'limit'] = str(limit)
+        if 'continue' not in self.args:
+            self.args['continue'] = ''
 
         self.count = 0
         self.max_items = max_items
@@ -62,8 +64,14 @@ class List(object):
             raise StopIteration
         self.set_iter(data)
 
-        if self.list_name in data.get('query-continue', ()):
+        if data.get('continue'):
+            # New style continuation, added in MediaWiki 1.21
+            self.args.update(data['continue'])
+
+        elif self.list_name in data.get('query-continue', ()):
+            # Old style continuation
             self.args.update(data['query-continue'][self.list_name])
+
         else:
             self.last = True
 
