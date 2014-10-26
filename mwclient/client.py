@@ -310,23 +310,39 @@ class Site(object):
 
     # Actions
     def email(self, user, text, subject, cc=False):
-        """Sends email to a specified user on the wiki."""
-        # TODO: Use api!
-        postdata = {}
-        postdata['wpSubject'] = subject
-        postdata['wpText'] = text
-        if cc:
-            postdata['wpCCMe'] = '1'
-        postdata['wpEditToken'] = self.tokens['edit']
-        postdata['uselang'] = 'en'
-        postdata['title'] = u'Special:Emailuser/' + user
+        """
+        Send email to a specified user on the wiki.
 
-        data = self.raw_index('submit', **postdata)
-        if 'var wgAction = "success";' not in data:
-            if 'This user has not specified a valid e-mail address' in data:
-                # Dirty hack
-                raise errors.NoSpecifiedEmailError, user
-            raise errors.EmailError, data
+            >>> try:
+            ...     site.email('SomeUser', 'Some message', 'Some subject')
+            ... except mwclient.errors.NoSpecifiedEmailError, e:
+            ...     print 'The user does not accept email, or has not specified an email address.'
+
+        Args:
+            user (str): User name of the recipient
+            text (str): Body of the email
+            subject (str): Subject of the email
+            cc (bool): True to send a copy of the email to yourself (default is False)
+
+        Returns:
+            Dictionary of the JSON response
+
+        Raises:
+            NoSpecifiedEmailError (mwclient.errors.NoSpecifiedEmailError): if recipient does not accept email
+            EmailError (mwclient.errors.EmailError): on other errors
+        """
+
+        token = self.get_token('email')
+
+        try:
+            info = self.api('emailuser', target=user, subject=subject,
+                            text=text, ccme=cc, token=token)
+        except errors.APIError, e:
+            if e[0] == u'noemail':
+                raise errors.NoSpecifiedEmail(user, e[1])
+            raise errors.EmailError(*e)
+
+        return info
 
     def login(self, username=None, password=None, cookies=None, domain=None):
         """Login to the wiki."""
