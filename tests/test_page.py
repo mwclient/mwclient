@@ -208,7 +208,8 @@ class TestPageApiArgs(unittest.TestCase):
             'rvdir': 'older',
             'titles': self.page.page_title,
             'rvprop': 'content|timestamp',
-            'rvlimit': '1'
+            'rvlimit': '1',
+            'continue': ''
         }
 
     def test_get_section_text(self):
