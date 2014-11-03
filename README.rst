@@ -98,6 +98,19 @@ HTTPS
 To use https, specify the host as a tuple in the form of ``('https', hostname)``.
 
 
+User-agents
+-----------
+Bots that run on Wikimedia wikis `require an informative user-agent for all
+API requests <https://meta.wikimedia.org/wiki/User-Agent_policy>`. To change
+the user-agent, you will need to include an appropriate parameter for 
+``clients_useragent`` when you initialize your ``Site``, as shown in the
+following example:
+
+.. code-block:: python
+    useragent = 'YourBot, based on mwclient v0.6.5. Run by User:You, you@gmail.com'
+    site = mwclient.Site(('https', 'en.wikipedia.org'), clients_useragent=useragent)
+
+
 Example
 -------
 
