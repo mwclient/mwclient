@@ -107,6 +107,7 @@ the user-agent, you will need to include an appropriate parameter for
 following example:
 
 .. code-block:: python
+
     useragent = 'YourBot, based on mwclient v0.6.5. Run by User:You, you@gmail.com'
     site = mwclient.Site(('https', 'en.wikipedia.org'), clients_useragent=useragent)
 
