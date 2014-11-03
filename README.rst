@@ -101,7 +101,7 @@ To use https, specify the host as a tuple in the form of ``('https', hostname)``
 User-agents
 -----------
 Bots that run on Wikimedia wikis `require an informative user-agent for all
-API requests <https://meta.wikimedia.org/wiki/User-Agent_policy>`. To change
+API requests <https://meta.wikimedia.org/wiki/User-Agent_policy>`_. To change
 the user-agent, you will need to include an appropriate parameter for 
 ``clients_useragent`` when you initialize your ``Site``, as shown in the
 following example:
