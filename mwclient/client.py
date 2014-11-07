@@ -161,7 +161,23 @@ class Site(object):
         return "<Site object '%s%s'>" % (self.host, self.path)
 
     def api(self, action, *args, **kwargs):
-        """ An API call. Handles errors and returns dict object. """
+        """
+        Perform a generic API call and handle errors. All arguments will be passed on.
+
+        Example:
+            To get coordinates from the GeoData MediaWiki extension at English Wikipedia:
+
+            >>> site = Site('en.wikipedia.org')
+            >>> result = site.api('query', prop='coordinates', titles='Oslo|Copenhagen')
+            >>> for page in result['query']['pages'].values():
+            ...     if 'coordinates' in page:
+            ...         print page['title'], page['coordinates'][0]['lat'], page['coordinates'][0]['lon']
+            Oslo 59.95 10.75
+            Copenhagen 55.6761 12.5683
+
+        Returns:
+            The raw response from the API call, as a dictionary.
+        """
         kwargs.update(args)
         if action == 'query':
             if 'meta' in kwargs:
