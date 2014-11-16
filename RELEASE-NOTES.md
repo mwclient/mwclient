@@ -20,6 +20,8 @@ This is the development version of mwclient.
   [4262786](https://github.com/mwclient/mwclient/commit/4262786),
   [#66](https://github.com/mwclient/mwclient/issues/66).
 * [2014-11-16] Use Basic/Digest Auth from Requests
+* [2014-11-16] Fix so [maxlag](https://www.mediawiki.org/wiki/Manual:Maxlag_parameter)
+  is handled correctly
 
 ## Changes in version 0.7.0
 

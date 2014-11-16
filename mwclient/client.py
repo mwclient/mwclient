@@ -5,6 +5,7 @@ import time
 import random
 import sys
 import weakref
+import logging
 
 try:
     # Python 2.7+
@@ -28,6 +29,8 @@ try:
     import gzip
 except ImportError:
     gzip = None
+
+log = logging.getLogger(__name__)
 
 
 def parse_timestamp(t):
@@ -248,24 +251,30 @@ class Site(object):
 
             try:
                 stream = self.connection.post(fullurl, data=data, files=files, headers=headers)
-                return stream.text
+                if stream.headers.get('x-database-lag'):
+                    wait_time = int(stream.headers.get('retry-after'))
+                    log.warn('Database lag exceeds max lag. Waiting for %d seconds', wait_time)
+                    self.wait(token, wait_time)
+                elif stream.status_code == 200:
+                    return stream.text
+                elif stream.status_code < 500 or stream.status_code > 599:
+                    stream.raise_for_status()
+                else:
+                    log.warn('Received %d response: %d. Retrying in a moment.', stream.status_code, stream.text)
+                    self.wait(token)
+
+            except requests.exceptions.ConnectionError:
+                # In the event of a network problem (e.g. DNS failure, refused connection, etc),
+                # Requests will raise a ConnectionError exception.
+                log.warn('Connection error. Retrying in a moment.')
+                self.wait(token)
 
             except requests.exceptions.HTTPError, e:
-                print 'http error'
-                print e
-                if e[0] == 503 and e[1].getheader('X-Database-Lag'):
-                    self.wait(token, int(e[1].getheader('Retry-After')))
-                elif e[0] < 500 or e[0] > 599:
-                    raise
-                else:
-                    self.wait(token)
+                log.warn('HTTP error: %s', e.message)
+                raise
+
             except requests.exceptions.TooManyRedirects:
                 raise
-            except requests.exceptions.ConnectionError:
-                print 'connection error'
-                self.wait(token)
-            except ValueError:
-                self.wait(token)
 
     def raw_api(self, action, *args, **kwargs):
         """Sends a call to the API."""
@@ -279,7 +288,7 @@ class Site(object):
         except ValueError:
             if res.startswith('MediaWiki API is not enabled for this site.'):
                 raise errors.APIDisabledError
-            raise
+            raise ValueError('Could not decode JSON: %s' % res)
 
     def raw_index(self, action, *args, **kwargs):
         """Sends a call to index.php rather than the API."""
@@ -303,6 +312,7 @@ class Site(object):
         timeout = self.retry_timeout * retry
         if timeout < min_wait:
             timeout = min_wait
+        log.debug('Sleeping for %d seconds', timeout)
         time.sleep(timeout)
         return self.wait_tokens[token]
 

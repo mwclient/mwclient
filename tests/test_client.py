@@ -16,6 +16,8 @@ import responses
 import pkg_resources  # part of setuptools
 import mock
 
+logging.basicConfig(level=logging.DEBUG)
+
 try:
     import json
 except ImportError:
@@ -37,12 +39,13 @@ class TestCase(unittest.TestCase):
         return json.dumps(res)
 
     def httpShouldReturn(self, body=None, callback=None, scheme='http', host='test.wikipedia.org', path='/w/',
-                         script='api'):
+                         script='api', headers=None, status=200):
         url = '{scheme}://{host}{path}{script}.php'.format(scheme=scheme, host=host, path=path, script=script)
         if body is None:
-            responses.add_callback(responses.POST, url, callback=callback, content_type='application/json')
+            responses.add_callback(responses.POST, url, callback=callback)
         else:
-            responses.add(responses.POST, url, body=body, content_type='application/json')
+            responses.add(responses.POST, url, body=body, content_type='application/json',
+                          adding_headers=headers, status=status)
 
     def stdSetup(self):
         self.httpShouldReturn(self.makeMetaResponse())
@@ -97,6 +100,33 @@ class TestClient(TestCase):
 
         assert len(responses.calls) == 1
         assert responses.calls[0].request.method == 'POST'
+
+    @responses.activate
+    def test_max_lag(self):
+        # Client should wait and retry if lag exceeds max-lag
+
+        def request_callback(request):
+            if len(responses.calls) == 0:
+                return (200, {'x-database-lag': '0', 'retry-after': '0'}, '')
+            else:
+                return (200, {}, self.makeMetaResponse())
+
+        self.httpShouldReturn(callback=request_callback, scheme='http')
+
+        site = mwclient.Site('test.wikipedia.org')
+
+        assert len(responses.calls) == 2
+        assert 'retry-after' in responses.calls[0].response.headers
+        assert 'retry-after' not in responses.calls[1].response.headers
+
+    @responses.activate
+    def test_http_error(self):
+        # Client should raise HTTPError
+
+        self.httpShouldReturn('Uh oh', scheme='http', status=400)
+
+        with pytest.raises(requests.exceptions.HTTPError):
+            site = mwclient.Site('test.wikipedia.org')
 
     @responses.activate
     def test_headers(self):
