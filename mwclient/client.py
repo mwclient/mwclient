@@ -6,7 +6,6 @@ import time
 import random
 import sys
 import weakref
-import base64
 
 try:
     # Python 2.7+
@@ -20,6 +19,7 @@ try:
 except ImportError:
     import simplejson as json
 import requests
+from requests.auth import HTTPBasicAuth, AuthBase
 
 import errors
 import listing
@@ -62,12 +62,18 @@ class Site(object):
         self.ext = ext
         self.credentials = None
         self.compress = compress
-        self.httpauth = httpauth
         self.retry_timeout = retry_timeout
         self.max_retries = max_retries
         self.wait_callback = wait_callback
         self.max_lag = str(max_lag)
         self.force_login = force_login
+
+        if isinstance(httpauth, (list, tuple)):
+            self.httpauth = HTTPBasicAuth(*httpauth)
+        elif httpauth is None or isinstance(httpauth, (AuthBase,)):
+            self.httpauth = httpauth
+        else:
+            raise RuntimeError('Authentication is not a tuple or an instance of AuthBase')
 
         # The token string => token object mapping
         self.wait_tokens = weakref.WeakKeyDictionary()
@@ -86,6 +92,7 @@ class Site(object):
         # Setup connection
         if pool is None:
             self.connection = requests.Session()
+            self.connection.auth = self.httpauth
             self.connection.headers['User-Agent'] = 'MwClient/' + __ver__ + ' (https://github.com/mwclient/mwclient)'
             if clients_useragent:
                 self.connection.headers['User-Agent'] = clients_useragent + ' - ' + self.connection.headers['User-Agent']
@@ -235,9 +242,6 @@ class Site(object):
         headers = {}
         if self.compress and gzip:
             headers['Accept-Encoding'] = 'gzip'
-        if self.httpauth is not None:
-            credentials = base64.encodestring('%s:%s' % self.httpauth).replace('\n', '')
-            headers['Authorization'] = 'Basic %s' % credentials
         token = self.wait_token((script, data))
         while True:
             scheme = 'http'  # Should we move to 'https' as default?

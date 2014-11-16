@@ -141,6 +141,23 @@ class TestClient(TestCase):
         assert 'meta=siteinfo%7Cuserinfo' in responses.calls[0].request.body
 
     @responses.activate
+    def test_httpauth_defaults_to_basic_auth(self):
+
+        self.httpShouldReturn(self.makeMetaResponse())
+
+        site = mwclient.Site('test.wikipedia.org', httpauth=('me', 'verysecret'))
+
+        assert isinstance(site.httpauth, requests.auth.HTTPBasicAuth)
+
+    @responses.activate
+    def test_httpauth_raise_error_on_invalid_type(self):
+
+        self.httpShouldReturn(self.makeMetaResponse())
+
+        with pytest.raises(RuntimeError):
+            site = mwclient.Site('test.wikipedia.org', httpauth=1)
+
+    @responses.activate
     def test_api_disabled(self):
         # Should raise APIDisabledError if API is not enabled
 

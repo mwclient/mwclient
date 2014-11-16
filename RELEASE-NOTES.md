@@ -19,6 +19,7 @@ This is the development version of mwclient.
   Use 'simplified' continuation
   [4262786](https://github.com/mwclient/mwclient/commit/4262786),
   [#66](https://github.com/mwclient/mwclient/issues/66).
+* [2014-11-16] Use Basic/Digest Auth from Requests
 
 ## Changes in version 0.7.0
 
