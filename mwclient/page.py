@@ -191,13 +191,13 @@ class Page(object):
             return result
         try:
             result = do_edit()
-        except errors.APIError, e:
+        except errors.APIError as e:
             if e.code == 'badtoken':
                 # Retry, but only once to avoid an infinite loop
                 self.get_token('edit', force=True)
                 try:
                     result = do_edit()
-                except errors.APIError, e:
+                except errors.APIError as e:
                     self.handle_edit_error(e, summary)
             else:
                 self.handle_edit_error(e, summary)

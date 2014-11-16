@@ -12,6 +12,7 @@ import logging
 import requests
 import responses
 import mock
+import mwclient
 from mwclient.page import Page
 
 try:
@@ -167,6 +168,31 @@ class TestPage(unittest.TestCase):
 
         assert page.exists is True
         assert page.redirect is True
+
+    @mock.patch('mwclient.client.Site')
+    def test_captcha(self, mock_site):
+        # Check that Captcha results in EditError
+        mock_site.blocked = False
+        mock_site.rights = ['read', 'edit']
+
+        title = 'Norge'
+        mock_site.api.return_value = {
+            'query': {'pages': {'728': {'protection': []}}}
+        }
+        page = Page(mock_site, title)
+        mock_site.api.return_value = {
+            'edit': {'result': 'Failure', 'captcha': {
+                'type': 'math',
+                'mime': 'text/tex',
+                'id': '509895952',
+                'question': '36 + 4 = '
+            }}
+        }
+
+        # For now, mwclient will just raise an EditError.
+        # <https://github.com/mwclient/mwclient/issues/33>
+        with pytest.raises(mwclient.errors.EditError):
+            page.save('Some text')
 
 
 class TestPageApiArgs(unittest.TestCase):

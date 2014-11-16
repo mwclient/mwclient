@@ -113,9 +113,9 @@ class Site(object):
         if do_init:
             try:
                 self.site_init()
-            except errors.APIError, e:
+            except errors.APIError as e:
                 # Private wiki, do init after login
-                if e[0] not in (u'unknown_action', u'readapidenied'):
+                if e.args[0] not in (u'unknown_action', u'readapidenied'):
                     raise
 
     def site_init(self):
@@ -269,7 +269,7 @@ class Site(object):
                 log.warn('Connection error. Retrying in a moment.')
                 self.wait(token)
 
-            except requests.exceptions.HTTPError, e:
+            except requests.exceptions.HTTPError as e:
                 log.warn('HTTP error: %s', e.message)
                 raise
 
@@ -340,7 +340,7 @@ class Site(object):
 
             >>> try:
             ...     site.email('SomeUser', 'Some message', 'Some subject')
-            ... except mwclient.errors.NoSpecifiedEmailError, e:
+            ... except mwclient.errors.NoSpecifiedEmailError as e:
             ...     print 'The user does not accept email, or has not specified an email address.'
 
         Args:
@@ -362,9 +362,9 @@ class Site(object):
         try:
             info = self.api('emailuser', target=user, subject=subject,
                             text=text, ccme=cc, token=token)
-        except errors.APIError, e:
-            if e[0] == u'noemail':
-                raise errors.NoSpecifiedEmail(user, e[1])
+        except errors.APIError as e:
+            if e.args[0] == u'noemail':
+                raise errors.NoSpecifiedEmail(user, e.args[1])
             raise errors.EmailError(*e)
 
         return info
@@ -521,10 +521,10 @@ class Site(object):
                     info = {}
                 if self.handle_api_result(info, kwargs=predata):
                     return info.get('upload', {})
-            except requests.exceptions.HTTPError, e:
-                if e[0] == 503 and e[1].getheader('X-Database-Lag'):
-                    self.wait(wait_token, int(e[1].getheader('Retry-After')))
-                elif e[0] < 500 or e[0] > 599:
+            except requests.exceptions.HTTPError as e:
+                if e.args[0] == 503 and e.args[1].getheader('X-Database-Lag'):
+                    self.wait(wait_token, int(e.args[1].getheader('Retry-After')))
+                elif e.args[0] < 500 or e.args[0] > 599:
                     raise
                 else:
                     self.wait(wait_token)
