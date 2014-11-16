@@ -8,6 +8,17 @@ This is the development version of mwclient.
   Implement `Site.allimages()`
   [f9b92de](https://github.com/mwclient/mwclient/commit/f9b92de),
   [#62](https://github.com/mwclient/mwclient/issues/62).
+* [2014-10-06]
+  Support new token handling system
+  [2f0f739](https://github.com/mwclient/mwclient/commit/2f0f739),
+  [#64](https://github.com/mwclient/mwclient/issues/64).
+* [2014-10-27]
+  Update email method to use API
+  [e9572e1](https://github.com/mwclient/mwclient/commit/e9572e1).
+* [2014-10-27]
+  Use 'simplified' continuation
+  [4262786](https://github.com/mwclient/mwclient/commit/4262786),
+  [#66](https://github.com/mwclient/mwclient/issues/66).
 
 ## Changes in version 0.7.0
 
