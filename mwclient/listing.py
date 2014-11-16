@@ -1,5 +1,6 @@
 import client
 import page
+from six import text_type
 
 
 class List(object):
@@ -16,7 +17,7 @@ class List(object):
 
         if limit is None:
             limit = site.api_limit
-        self.args[self.prefix + 'limit'] = str(limit)
+        self.args[self.prefix + 'limit'] = text_type(limit)
         if 'continue' not in self.args:
             self.args['continue'] = ''
 
@@ -58,7 +59,7 @@ class List(object):
             return List.next(self, full=full)
 
     def load_chunk(self):
-        data = self.site.api('query', (self.generator, self.list_name), *[(str(k), v) for k, v in self.args.iteritems()])
+        data = self.site.api('query', (self.generator, self.list_name), *[(text_type(k), v) for k, v in self.args.iteritems()])
         if not data:
             # Non existent page
             raise StopIteration
@@ -172,7 +173,7 @@ class PageList(GeneratorList):
             kwargs['apfrom'] = start
 
         GeneratorList.__init__(self, site, 'allpages', 'ap',
-                               apnamespace=str(namespace), apfilterredir=redirects, **kwargs)
+                               apnamespace=text_type(namespace), apfilterredir=redirects, **kwargs)
 
     def __getitem__(self, name):
         return self.get(name, None)

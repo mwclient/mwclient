@@ -6,6 +6,7 @@ import random
 import sys
 import weakref
 import logging
+from six import text_type
 
 try:
     # Python 2.7+
@@ -63,7 +64,7 @@ class Site(object):
         self.retry_timeout = retry_timeout
         self.max_retries = max_retries
         self.wait_callback = wait_callback
-        self.max_lag = str(max_lag)
+        self.max_lag = text_type(max_lag)
         self.force_login = force_login
 
         if isinstance(httpauth, (list, tuple)):
@@ -244,7 +245,7 @@ class Site(object):
         while True:
             scheme = 'http'  # Should we move to 'https' as default?
             host = self.host
-            if type(host) is tuple:
+            if isinstance(host, (list, tuple)):
                 scheme, host = host
 
             fullurl = '{scheme}://{host}{url}'.format(scheme=scheme, host=host, url=url)

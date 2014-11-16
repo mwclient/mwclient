@@ -1,12 +1,13 @@
 # encoding=utf-8
+from __future__ import print_function
 
 if __name__ == "__main__":
-    print
-    print "Note: Running in stand-alone mode. Consult the README"
-    print "      (section 'Contributing') for advice on running tests."
-    print
+    print()
+    print("Note: Running in stand-alone mode. Consult the README")
+    print("      (section 'Contributing') for advice on running tests.")
+    print()
 
-import StringIO
+from six import StringIO
 import unittest
 import pytest
 import mwclient
@@ -280,7 +281,7 @@ class TestClientUploadArgs(TestCase):
         # Test that methods are called, and arguments sent as expected
         self.configure()
 
-        self.site.upload(file=StringIO.StringIO('test'), filename=self.vars['fname'], comment=self.vars['comment'])
+        self.site.upload(file=StringIO('test'), filename=self.vars['fname'], comment=self.vars['comment'])
 
         args, kwargs = self.raw_call.call_args
         data = args[1]
@@ -296,19 +297,19 @@ class TestClientUploadArgs(TestCase):
         self.configure()
 
         with pytest.raises(TypeError):
-            self.site.upload(file=StringIO.StringIO('test'))
+            self.site.upload(file=StringIO('test'))
 
     def test_upload_ambigitious_args(self):
         self.configure()
 
         with pytest.raises(TypeError):
-            self.site.upload(filename='Test', file=StringIO.StringIO('test'), filekey='abc')
+            self.site.upload(filename='Test', file=StringIO('test'), filekey='abc')
 
     def test_upload_missing_upload_permission(self):
         self.configure(rights=['read'])
 
         with pytest.raises(mwclient.errors.InsufficientPermission):
-            self.site.upload(filename='Test', file=StringIO.StringIO('test'))
+            self.site.upload(filename='Test', file=StringIO('test'))
 
 
 class TestClientGetTokens(TestCase):

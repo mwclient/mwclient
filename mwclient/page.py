@@ -2,7 +2,8 @@ import client
 import errors
 import listing
 
-import urlparse
+from six.moves import urllib
+from six import text_type
 import time
 import warnings
 
@@ -130,7 +131,7 @@ class Page(object):
         if not self.exists:
             return u''
         if section is not None:
-            section = str(section)
+            section = text_type(section)
 
         revs = self.revisions(prop='content|timestamp', limit=1, section=section, expandtemplates=expandtemplates)
         try:
@@ -383,7 +384,7 @@ class Image(Page):
         url = self.imageinfo['url']
         if not url.startswith('http://'):
             url = 'http://' + self.site.host + url
-        url = urlparse.urlparse(url)
+        url = urllib.parse.urlparse(url)
         # TODO: query string
         return self.site.connection.get(url[1], url[2])
 
