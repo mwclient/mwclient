@@ -1,7 +1,6 @@
 __ver__ = '0.7.1dev'
 
 import warnings
-import urllib
 import time
 import random
 import sys
@@ -29,10 +28,6 @@ try:
     import gzip
 except ImportError:
     gzip = None
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
 
 
 def parse_timestamp(t):

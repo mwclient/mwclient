@@ -2,7 +2,6 @@ import client
 import errors
 import listing
 
-import urllib
 import urlparse
 import time
 import warnings
