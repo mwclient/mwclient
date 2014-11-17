@@ -26,6 +26,8 @@ This is the development version of mwclient.
 
 ## Changes in version 0.7.0
 
+Mwclient 0.7.0 was released on 27 September 2014.
+
 Upgrade notices:
  - This version requires minimum Python 2.6 and MediaWiki 1.16.
    Support for Python 2.4–2.5 and MediaWiki 1.11–1.15 has been dropped.
