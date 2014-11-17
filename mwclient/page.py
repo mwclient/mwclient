@@ -320,7 +320,9 @@ class Page(object):
         return listing.PageProperty(self, 'langlinks', 'll', return_values=('lang', '*'), **kwargs)
 
     def links(self, namespace=None, generator=True, redirects=False):
-        kwargs = dict(listing.List.generate_kwargs('gpl', namespace=namespace))
+        prefix = listing.List.get_prefix('pl', generator)
+        kwargs = dict(listing.List.generate_kwargs(prefix, namespace=namespace))
+
         if redirects:
             kwargs['redirects'] = '1'
         if generator:
