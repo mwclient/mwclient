@@ -26,6 +26,10 @@ This is the development version of mwclient.
   Fix filtering of page links by namespace
   [65d9ee8](https://github.com/mwclient/mwclient/commit/65d9ee8),
   [#72](https://github.com/mwclient/mwclient/issues/72).
+* [2014-11-23]
+  Fix uploading files with non-ascii characters in filenames 
+  [#65](https://github.com/mwclient/mwclient/issues/65).
+
 
 ## Changes in version 0.7.0
 
