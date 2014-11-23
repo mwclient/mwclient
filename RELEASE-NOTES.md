@@ -22,8 +22,14 @@ This is the development version of mwclient.
 * [2014-11-16] Use Basic/Digest Auth from Requests
 * [2014-11-16] Fix so [maxlag](https://www.mediawiki.org/wiki/Manual:Maxlag_parameter)
   is handled correctly
+* [2014-11-17] [@c-martinez](https://github.com/c-martinez):
+  Fix filtering of page links by namespace
+  [65d9ee8](https://github.com/mwclient/mwclient/commit/65d9ee8),
+  [#72](https://github.com/mwclient/mwclient/issues/72).
 
 ## Changes in version 0.7.0
+
+Mwclient 0.7.0 was released on 27 September 2014.
 
 Upgrade notices:
  - This version requires minimum Python 2.6 and MediaWiki 1.16.
