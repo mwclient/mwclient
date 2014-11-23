@@ -514,15 +514,10 @@ class Site(object):
 
             # Workaround for https://github.com/mwclient/mwclient/issues/65
             # ----------------------------------------------------------------
-            # Since the filename in Content-Disposition is not used as the
-            # destination filename, we can pass in some ascii-only dummy name
-            # to make sure the server accepts it.
-            fname = 'upload'
-            name = getattr(file, 'name', None)
-            if name and name[0] != '<' and name[-1] != '>' and name.find('.') != -1:
-                ext = name[name.rfind('.') + 1:]
-                fname = 'upload.{}'.format(ext)
-            file = (fname, file)
+            # Since the filename in Content-Disposition is not interpreted,
+            # we can send some ascii-only dummy name rather than the real
+            # filename, which might contain non-ascii.
+            file = ('fake-filename', file)
             # End of workaround
             # ----------------------------------------------------------------
 
