@@ -1,4 +1,4 @@
-__ver__ = '0.7.1dev'
+__ver__ = '0.7.1'
 
 import warnings
 import time
