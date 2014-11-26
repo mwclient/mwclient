@@ -261,7 +261,7 @@ class Site(object):
                 elif stream.status_code < 500 or stream.status_code > 599:
                     stream.raise_for_status()
                 else:
-                    log.warn('Received %d response: %d. Retrying in a moment.', stream.status_code, stream.text)
+                    log.warn('Received %s response: %s. Retrying in a moment.', stream.status_code, stream.text)
                     self.wait(token)
 
             except requests.exceptions.ConnectionError:
