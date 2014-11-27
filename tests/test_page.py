@@ -203,13 +203,13 @@ class TestPageApiArgs(unittest.TestCase):
         args = self.get_last_api_call_args()
 
         assert text == self.page_text
+        print 'args', args
         assert args == {
             'prop': 'revisions',
             'rvdir': 'older',
             'titles': self.page.page_title,
             'rvprop': 'content|timestamp',
-            'rvlimit': '1',
-            'continue': ''
+            'rvlimit': '1'
         }
 
     def test_get_section_text(self):
