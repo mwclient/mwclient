@@ -1,8 +1,16 @@
 # Release Notes for mwclient
 
-## Changes in version 0.7.1
+## Changes in version 0.7.2
 
 This is the development version of mwclient.
+
+* [2014-11-28] [@c-martinez](https://github.com/c-martinez):
+  Add 'continue' parameter to all queries
+  [#73](https://github.com/mwclient/mwclient/issues/73).
+
+## Changes in version 0.7.1
+
+Mwclient 0.7.1 was released on 23 November 2014.
 
 * [2014-09-27] [@jimt](https://github.com/jimt):
   Implement `Site.allimages()`
