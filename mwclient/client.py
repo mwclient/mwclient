@@ -185,6 +185,9 @@ class Site(object):
             The raw response from the API call, as a dictionary.
         """
         kwargs.update(args)
+
+        if 'continue' not in kwargs:
+            kwargs['continue'] = ''
         if action == 'query':
             if 'meta' in kwargs:
                 kwargs['meta'] += '|userinfo'

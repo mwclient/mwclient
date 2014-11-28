@@ -18,8 +18,6 @@ class List(object):
         if limit is None:
             limit = site.api_limit
         self.args[self.prefix + 'limit'] = text_type(limit)
-        if 'continue' not in self.args:
-            self.args['continue'] = ''
 
         self.count = 0
         self.max_items = max_items
