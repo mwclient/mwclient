@@ -8,6 +8,10 @@ This is the development version of mwclient.
   Add 'continue' parameter to all queries
   [#73](https://github.com/mwclient/mwclient/issues/73).
 
+* [2014-12-18] [@AdamWill](https://github.com/AdamWill):
+  fix PageList API arg passing to GeneratorList
+  [059322e](https://github.com/mwclient/mwclient/commit/059322e)
+
 ## Changes in version 0.7.1
 
 Mwclient 0.7.1 was released on 23 November 2014.
