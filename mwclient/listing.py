@@ -166,12 +166,12 @@ class PageList(GeneratorList):
 
         kwargs = {}
         if prefix:
-            kwargs['apprefix'] = prefix
+            kwargs['gapprefix'] = prefix
         if start:
-            kwargs['apfrom'] = start
+            kwargs['gapfrom'] = start
 
         GeneratorList.__init__(self, site, 'allpages', 'ap',
-                               apnamespace=text_type(namespace), apfilterredir=redirects, **kwargs)
+                               gapnamespace=text_type(namespace), gapfilterredir=redirects, **kwargs)
 
     def __getitem__(self, name):
         return self.get(name, None)
