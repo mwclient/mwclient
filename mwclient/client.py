@@ -689,10 +689,11 @@ class Site(object):
         return listing.List(self, 'random', 'rn', limit=limit, **kwargs)
 
     def recentchanges(self, start=None, end=None, dir='older', namespace=None,
-                      prop=None, show=None, limit=None, type=None):
+                      prop=None, show=None, limit=None, type=None, toponly=None):
 
         kwargs = dict(listing.List.generate_kwargs('rc', start=start, end=end, dir=dir,
-                                                   namespace=namespace, prop=prop, show=show, type=type))
+                                                   namespace=namespace, prop=prop, show=show, type=type,
+                                                   toponly='1' if toponly else None))
         return listing.List(self, 'recentchanges', 'rc', limit=limit, **kwargs)
 
     def search(self, search, namespace='0', what='title', redirects=False, limit=None):
