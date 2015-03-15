@@ -1,5 +1,3 @@
-__ver__ = '0.7.2dev'
-
 import warnings
 import time
 import random
@@ -30,6 +28,8 @@ try:
     import gzip
 except ImportError:
     gzip = None
+
+__ver__ = '0.7.2.dev1'
 
 log = logging.getLogger(__name__)
 
