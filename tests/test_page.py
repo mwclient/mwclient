@@ -1,12 +1,6 @@
 # encoding=utf-8
 from __future__ import print_function
 
-if __name__ == "__main__":
-    print()
-    print("Note: Running in stand-alone mode. Consult the README")
-    print("      (section 'Contributing') for advice on running tests.")
-    print()
-
 import unittest
 import pytest
 import logging
@@ -20,6 +14,12 @@ try:
     import json
 except ImportError:
     import simplejson as json
+
+if __name__ == "__main__":
+    print()
+    print("Note: Running in stand-alone mode. Consult the README")
+    print("      (section 'Contributing') for advice on running tests.")
+    print()
 
 
 class TestPage(unittest.TestCase):
