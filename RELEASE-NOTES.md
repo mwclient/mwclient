@@ -8,8 +8,11 @@ This is the development version of mwclient.
   Add 'continue' parameter to all queries.
   [#73](https://github.com/mwclient/mwclient/issues/73).
 * [2014-12-18] [@AdamWill](https://github.com/AdamWill):
-  fix PageList API arg passing to GeneratorList.
+  Fix PageList API arg passing to GeneratorList.
   [059322e](https://github.com/mwclient/mwclient/commit/059322e).
+* [2015-03-15] [@itkach](https://github.com/itkach):
+  Add 'toponly' parameter for recentchanges.
+  [#78](https://github.com/mwclient/mwclient/issues/78).
 
 ## Changes in version 0.7.1
 
