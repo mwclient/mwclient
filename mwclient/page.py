@@ -14,6 +14,7 @@ class Page(object):
             return self.__dict__.update(name.__dict__)
         self.site = site
         self.name = name
+        self._textcache = {}
 
         if not info:
             if extra_properties:
@@ -125,14 +126,19 @@ class Page(object):
                       category=DeprecationWarning, stacklevel=2)
         return self.text(*args, **kwargs)
 
-    def text(self, section=None, expandtemplates=False):
+    def text(self, section=None, expandtemplates=False, cache=True):
         """
         Get the current wikitext of the page, or of a specific section.
-        If the page does not exist, an empty string is returned.
+        If the page does not exist, an empty string is returned. By
+        default, results will be cached and if you call text() again
+        with the same section and expandtemplates the result will come
+        from the cache. The cache is stored on the instance, so it
+        lives as long as the instance does.
 
         Args:
             section (int): numbered section or `None` to get the whole page (default: `None`)
             expandtemplates (bool): set to `True` to expand templates (default: `False`)
+            cache (bool): set to `False` to disable caching (default: `True`)
         """
 
         if not self.can('read'):
@@ -142,9 +148,13 @@ class Page(object):
         if section is not None:
             section = text_type(section)
 
+        key = hash((section, expandtemplates))
+        if cache and key in self._textcache:
+            return self._textcache[key]
+
         revs = self.revisions(prop='content|timestamp', limit=1, section=section, expandtemplates=expandtemplates)
         try:
-            rev = revs.next()
+            rev = next(revs)
             text = rev['*']
             self.last_rev_time = rev['timestamp']
         except StopIteration:
@@ -152,6 +162,9 @@ class Page(object):
             self.last_rev_time = None
         if not expandtemplates:
             self.edit_time = time.gmtime()
+
+        if cache:
+            self._textcache[key] = text
         return text
 
     def save(self, text, summary=u'', minor=False, bot=True, section=None, **kwargs):
@@ -211,6 +224,9 @@ class Page(object):
         # 'newtimestamp' is not included if no change was made
         if 'newtimestamp' in result['edit'].keys():
             self.last_rev_time = parse_timestamp(result['edit'].get('newtimestamp'))
+
+        # clear the page text cache
+        self._textcache = {}
         return result['edit']
 
     def handle_edit_error(self, e, summary):
