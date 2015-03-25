@@ -15,7 +15,6 @@ class Page(object):
             return self.__dict__.update(name.__dict__)
         self.site = site
         self.name = name
-        self.section = None
 
         if not info:
             if extra_properties:
@@ -137,11 +136,9 @@ class Page(object):
         try:
             rev = revs.next()
             text = rev['*']
-            self.section = section
             self.last_rev_time = rev['timestamp']
         except StopIteration:
             text = u''
-            self.section = None
             self.last_rev_time = None
         if not expandtemplates:
             self.edit_time = time.gmtime()
@@ -160,9 +157,6 @@ class Page(object):
             raise errors.UserBlocked(self.site.blocked)
         if not self.can('edit'):
             raise errors.ProtectedPageError(self)
-
-        if not section:
-            section = self.section
 
         if not self.site.writeapi:
             raise errors.NoWriteApi(self)
