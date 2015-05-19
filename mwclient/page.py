@@ -332,9 +332,9 @@ class Page(object):
 
     def revisions(self, startid=None, endid=None, start=None, end=None,
                   dir='older', user=None, excludeuser=None, limit=50,
-                  prop='ids|timestamp|flags|comment|user', expandtemplates=False, section=None):
+                  prop='ids|timestamp|flags|comment|user', expandtemplates=False, section=None, diffto = None):
         kwargs = dict(listing.List.generate_kwargs('rv', startid=startid, endid=endid,
-                                                   start=start, end=end, user=user, excludeuser=excludeuser))
+                                                   start=start, end=end, user=user, excludeuser=excludeuser, diffto=diffto))
         kwargs['rvdir'] = dir
         kwargs['rvprop'] = prop
         if expandtemplates:

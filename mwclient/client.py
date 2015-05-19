@@ -696,6 +696,25 @@ class Site(object):
                                                    toponly='1' if toponly else None))
         return listing.List(self, 'recentchanges', 'rc', limit=limit, **kwargs)
 
+    def revisions(self, revids, prop = 'ids|timestamp|flags|comment|user', 
+                  expandtemplates=False, diffto='prev'):
+            self.require(1, 12) # version?
+            if expandtemplates: expandtemplates = '1'
+            # http://en.wikipedia.org/w/api.php?rvexpandtemplates=False&format=json&list=&rvprop=ids|timestamp|flags|comment|user&rvdiffto=prev&revids=396240352|392544274|396332337&meta=userinfo&action=query&prop=revisions&uiprop=blockinfo|hasmsg
+            revids_s = '|'.join(map(str,revids))
+            kwargs = {'prop':'revisions','rvexpandtemplates':expandtemplates,'format':'json','rvprop':prop,
+                      'rvdiffto':diffto, 'revids':revids_s}
+            if (diffto is None) or (diffto == ''):
+                del kwargs['rvdiffto']
+            if (expandtemplates is None) or (expandtemplates == '') or (expandtemplates == 0):
+                del kwargs['rvexpandtemplates']
+            res = self.api('query', **kwargs)
+
+            if res.has_key('query'):
+                return res['query']
+            else:
+                return None
+                
     def search(self, search, namespace='0', what='title', redirects=False, limit=None):
 
         kwargs = dict(listing.List.generate_kwargs('sr', search=search, namespace=namespace, what=what))
