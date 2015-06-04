@@ -13,6 +13,9 @@ This is the development version of mwclient.
 * [2015-03-15] [@itkach](https://github.com/itkach):
   Add 'toponly' parameter for recentchanges.
   [#78](https://github.com/mwclient/mwclient/issues/78).
+* [2015-06-04] [Gui13](https://github.com/Gui13):
+  Configure default logger.
+  [#82](https://github.com/mwclient/mwclient/issues/82).
 
 ## Changes in version 0.7.1
 
