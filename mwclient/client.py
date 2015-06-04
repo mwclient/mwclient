@@ -203,8 +203,7 @@ class Site(object):
             info = self.raw_api(action, **kwargs)
             if not info:
                 info = {}
-            res = self.handle_api_result(info, token=token)
-            if res:
+            if self.handle_api_result(info, token=token):
                 return info
 
     def handle_api_result(self, info, kwargs=None, token=None):
@@ -528,22 +527,12 @@ class Site(object):
 
         wait_token = self.wait_token()
         while True:
-            try:
-                data = self.raw_call('api', postdata, files)
-                info = json.loads(data)
-                if not info:
-                    info = {}
-                if self.handle_api_result(info, kwargs=predata):
-                    return info.get('upload', {})
-            except requests.exceptions.HTTPError as e:
-                if e.args[0] == 503 and e.args[1].getheader('X-Database-Lag'):
-                    self.wait(wait_token, int(e.args[1].getheader('Retry-After')))
-                elif e.args[0] < 500 or e.args[0] > 599:
-                    raise
-                else:
-                    self.wait(wait_token)
-            except requests.exceptions.ConnectionError:
-                self.wait(wait_token)
+            data = self.raw_call('api', postdata, files)
+            info = json.loads(data)
+            if not info:
+                info = {}
+            if self.handle_api_result(info, kwargs=predata, token=wait_token):
+                return info.get('upload', {})
 
     def parse(self, text=None, title=None, page=None):
         kwargs = {}
