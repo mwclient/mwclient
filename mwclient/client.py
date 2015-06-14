@@ -601,7 +601,6 @@ class Site(object):
                                                    rights=rights,
                                                    witheditsonly=witheditsonly,
                                                    activeusers=activeusers))
-        print kwargs
         return listing.List(self, 'allusers', 'au', limit=limit, **kwargs)
 
     def blocks(self, start=None, end=None, dir='older', ids=None, users=None, limit=None,
