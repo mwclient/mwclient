@@ -16,6 +16,9 @@ This is the development version of mwclient.
 * [2015-06-04] [@Gui13](https://github.com/Gui13):
   Configure default logger.
   [#82](https://github.com/mwclient/mwclient/issues/82).
+* [2015-06-20] [@lfaraone](https://github.com/lfaraone):
+  Add support for querying the CheckUser log.
+  [#86](https://github.com/mwclient/mwclient/pull/86).
 
 ## Changes in version 0.7.1
 
