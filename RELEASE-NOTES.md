@@ -64,7 +64,7 @@ Upgrade notices:
    The `readonly` argument has also been removed (it was never really
    implemented, so it acted only as a dummy argument before the removal).
  - The `Page.get_expanded()` method has been deprecated in favour of
-   calling `Page.text(expandtemplates=True)`
+   calling `Page.text(expandtemplates=True)`.
 
 Detailed changelog:
 * [2012-08-30] [@btongminh](https://github.com/btongminh):
@@ -73,7 +73,7 @@ Detailed changelog:
 * [2012-08-30] [@tommorris](https://github.com/tommorris):
   Improve documentation.
   [a2723e7](https://github.com/btongminh/mwclient/commit/a2723e7).
-* [2013-02-15] [@waldir](https://github.com/waldir):
+* [2013-02-15] [@waldyrious](https://github.com/waldyrious):
   Converted the repository to git and moved from sourceforge to github.
   [#1](https://github.com/btongminh/mwclient/issues/1) (also
   [#11](https://github.com/btongminh/mwclient/issues/11),
@@ -168,17 +168,17 @@ Mwclient 0.6.3 was released on 7 April 2010.
   [0d7caab](https://github.com/mwclient/mwclient/commit/0d7caab) (see also
   [610411a](https://github.com/mwclient/mwclient/commit/610411a)).
 * [2009-11-02] Added `prop=duplicatefiles`.
-  [241e5d6](https://github.com/mwclient/mwclient/commit/241e5d6)
+  [241e5d6](https://github.com/mwclient/mwclient/commit/241e5d6).
 * [2009-11-02] Properly fix detection of alpha versions.
-  [241e5d6](https://github.com/mwclient/mwclient/commit/241e5d6)
+  [241e5d6](https://github.com/mwclient/mwclient/commit/241e5d6).
 * [2009-11-14] Added support for built-in JSON library.
-  [73e9cd6](https://github.com/mwclient/mwclient/commit/73e9cd6)
+  [73e9cd6](https://github.com/mwclient/mwclient/commit/73e9cd6).
 * [2009-11-15] Handle badtoken once.
-  [4b384e1](https://github.com/mwclient/mwclient/commit/4b384e1)
+  [4b384e1](https://github.com/mwclient/mwclient/commit/4b384e1).
 * [2010-02-23] Fix module conflict with simplejson-1.x
   by inserting mwclient path at the beginning of `sys.path`
   instead of the end.
-  [cd37ef0](https://github.com/mwclient/mwclient/commit/cd37ef0)
+  [cd37ef0](https://github.com/mwclient/mwclient/commit/cd37ef0).
 * [2010-02-23] Fix revision iteration.
   [09b68e9](https://github.com/mwclient/mwclient/commit/09b68e9),
   [2ad32f1](https://github.com/mwclient/mwclient/commit/2ad32f1),
@@ -186,11 +186,11 @@ Mwclient 0.6.3 was released on 7 April 2010.
   [993b346](https://github.com/mwclient/mwclient/commit/993b346),
   [#3](https://github.com/mwclient/mwclient/issues/3).
 * [2010-04-07] Supply token on login if necessary.
-  [3731de5](https://github.com/mwclient/mwclient/commit/3731de5)
+  [3731de5](https://github.com/mwclient/mwclient/commit/3731de5).
 
 ## Changes in version 0.6.3
 Mwclient 0.6.3 was released on 16 July 2009.
-* Added domain parameter to login.
+* Added domain parameter to login
 * Applied edit fix to `page_nowriteapi`
 * Allow arbitrary data to be passed to `page.save`
 * Fix mwclient on WMF wikis
