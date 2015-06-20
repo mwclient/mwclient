@@ -601,7 +601,6 @@ class Site(object):
                                                    rights=rights,
                                                    witheditsonly=witheditsonly,
                                                    activeusers=activeusers))
-        print kwargs
         return listing.List(self, 'allusers', 'au', limit=limit, **kwargs)
 
     def blocks(self, start=None, end=None, dir='older', ids=None, users=None, limit=None,
@@ -662,6 +661,12 @@ class Site(object):
         kwargs = dict(listing.List.generate_kwargs('le', prop=prop, type=type, start=start,
                                                    end=end, dir=dir, user=user, title=title, action=action))
         return listing.List(self, 'logevents', 'le', limit=limit, **kwargs)
+
+    def checkuserlog(self, user=None, target=None, limit=10, dir='older', start=None, end=None):
+
+        kwargs = dict(listing.List.generate_kwargs('cul', target=target, start=start,
+                                                   end=end, dir=dir, user=user))
+        return listing.NestedList('entries', self, 'checkuserlog', 'cul', limit=limit, **kwargs)
 
     # def protectedtitles requires 1.15
     def random(self, namespace, limit=20):

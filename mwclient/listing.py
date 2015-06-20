@@ -107,6 +107,15 @@ class List(object):
             return List
 
 
+class NestedList(List):
+    def __init__(self, nested_param, *args, **kwargs):
+        List.__init__(self, *args, **kwargs)
+        self.nested_param = nested_param
+
+    def set_iter(self, data):
+        self._iter = iter(data['query'][self.result_member][self.nested_param])
+
+
 class GeneratorList(List):
 
     def __init__(self, site, list_name, prefix, *args, **kwargs):
