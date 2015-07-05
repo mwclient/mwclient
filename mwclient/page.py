@@ -48,6 +48,7 @@ class Page(object):
         self.length = info.get('length')
         self.protection = dict([(i['type'], (i['level'], i['expiry'])) for i in info.get('protection', ()) if i])
         self.redirect = 'redirect' in info
+        self.pageid = info.get('pageid', None)
 
         self.last_rev_time = None
         self.edit_time = None
