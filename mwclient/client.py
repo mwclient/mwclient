@@ -218,7 +218,7 @@ class Site(object):
             self.blocked = (userinfo['blockedby'], userinfo.get('blockreason', u''))
         else:
             self.blocked = False
-        self.hasmsg = 'message' in userinfo
+        self.hasmsg = 'messages' in userinfo
         self.logged_in = 'anon' not in userinfo
         if 'error' in info:
             if info['error']['code'] in (u'internal_api_error_DBConnectionError', u'internal_api_error_DBQueryError'):
