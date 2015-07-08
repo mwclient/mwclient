@@ -22,6 +22,9 @@ This is the development version of mwclient.
 * [2015-07-06] [@PierreSelim](https://github.com/PierreSelim)
   Expose `pageid`, `contentmodel`, `pagelanguage`, `restrictiontypes` as attributes of `Page`.
   [#89](https://github.com/mwclient/mwclient/pull/89)
+* [2015-07-08] [@Pathoschild](https://github.com/Pathoschild)
+  Fix 'New messages' flag (`hasmsg`).
+  [#90](https://github.com/mwclient/mwclient/issues/90)
 
 ## Changes in version 0.7.1
 
