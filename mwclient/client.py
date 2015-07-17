@@ -5,6 +5,7 @@ import sys
 import weakref
 import logging
 from six import text_type
+import six
 
 try:
     # Python 2.7+
@@ -32,12 +33,6 @@ except ImportError:
 __ver__ = '0.7.2'
 
 log = logging.getLogger(__name__)
-
-
-def parse_timestamp(t):
-    if t == '0000-00-00T00:00:00Z':
-        return (0, 0, 0, 0, 0, 0, 0, 0)
-    return time.strptime(t, '%Y-%m-%dT%H:%M:%SZ')
 
 
 class WaitToken(object):
@@ -125,7 +120,7 @@ class Site(object):
 
         # Extract site info
         self.site = meta['query']['general']
-        self.namespaces = dict(((i['id'], i.get('*', '')) for i in meta['query']['namespaces'].itervalues()))
+        self.namespaces = dict(((i['id'], i.get('*', '')) for i in six.itervalues(meta['query']['namespaces'])))
         self.writeapi = 'writeapi' in self.site
 
         # Determine version
@@ -235,8 +230,8 @@ class Site(object):
     @staticmethod
     def _query_string(*args, **kwargs):
         kwargs.update(args)
-        qs1 = [(k, v) for k, v in kwargs.iteritems() if k not in ('wpEditToken', 'token')]
-        qs2 = [(k, v) for k, v in kwargs.iteritems() if k in ('wpEditToken', 'token')]
+        qs1 = [(k, v) for k, v in six.iteritems(kwargs) if k not in ('wpEditToken', 'token')]
+        qs2 = [(k, v) for k, v in six.iteritems(kwargs) if k in ('wpEditToken', 'token')]
         return OrderedDict(qs1 + qs2)
 
     def raw_call(self, script, data, files=None, retry_on_error=True):
@@ -456,7 +451,7 @@ class Site(object):
                     title = 'Test'
                 info = self.api('query', titles=title,
                                 prop='info', intoken=type)
-                for i in info['query']['pages'].itervalues():
+                for i in six.itervalues(info['query']['pages']):
                     if i['title'] == title:
                         self.tokens[type] = i['%stoken' % type]
 

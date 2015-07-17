@@ -1,6 +1,7 @@
-import client
 import page
+import six
 from six import text_type
+from mwclient.util import parse_timestamp
 
 
 class List(object):
@@ -31,15 +32,15 @@ class List(object):
     def __iter__(self):
         return self
 
-    def next(self, full=False):
+    def __next__(self, full=False):
         if self.max_items is not None:
             if self.count >= self.max_items:
                 raise StopIteration
         try:
-            item = self._iter.next()
+            item = six.next(self._iter)
             self.count += 1
             if 'timestamp' in item:
-                item['timestamp'] = client.parse_timestamp(item['timestamp'])
+                item['timestamp'] = parse_timestamp(item['timestamp'])
             if full:
                 return item
 
@@ -56,8 +57,12 @@ class List(object):
             self.load_chunk()
             return List.next(self, full=full)
 
+    def next(self, full=False):
+        """ For Python 2.x support """
+        return self.__next__(full)
+
     def load_chunk(self):
-        data = self.site.api('query', (self.generator, self.list_name), *[(text_type(k), v) for k, v in self.args.iteritems()])
+        data = self.site.api('query', (self.generator, self.list_name), *[(text_type(k), v) for k, v in six.iteritems(self.args)])
         if not data:
             # Non existent page
             raise StopIteration
@@ -80,7 +85,7 @@ class List(object):
         elif type(data['query'][self.result_member]) is list:
             self._iter = iter(data['query'][self.result_member])
         else:
-            self._iter = data['query'][self.result_member].itervalues()
+            self._iter = six.itervalues(data['query'][self.result_member])
 
     def __repr__(self):
         return "<List object '%s' for %s>" % (self.list_name, self.site)
@@ -88,7 +93,7 @@ class List(object):
     @staticmethod
     def generate_kwargs(_prefix, *args, **kwargs):
         kwargs.update(args)
-        for key, value in kwargs.iteritems():
+        for key, value in six.iteritems(kwargs):
             if value is not None and value is not False:
                 yield _prefix + key, value
 
@@ -223,7 +228,7 @@ class PageProperty(List):
         self.generator = 'prop'
 
     def set_iter(self, data):
-        for page in data['query']['pages'].itervalues():
+        for page in six.itervalues(data['query']['pages']):
             if page['title'] == self.page.name:
                 self._iter = iter(page.get(self.list_name, ()))
                 return

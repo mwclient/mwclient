@@ -1,11 +1,11 @@
-import client
 import errors
 import listing
-
+import six
 from six.moves import urllib
 from six import text_type
 import time
 import warnings
+from mwclient.util import parse_timestamp
 
 
 class Page(object):
@@ -19,9 +19,9 @@ class Page(object):
 
         if not info:
             if extra_properties:
-                prop = 'info|' + '|'.join(extra_properties.iterkeys())
+                prop = 'info|' + '|'.join(six.iterkeys(extra_properties))
                 extra_props = []
-                [extra_props.extend(extra_prop) for extra_prop in extra_properties.itervalues()]
+                [extra_props.extend(extra_prop) for extra_prop in six.itervalues(extra_properties)]
             else:
                 prop = 'info'
                 extra_props = ()
@@ -32,7 +32,7 @@ class Page(object):
             else:
                 info = self.site.api('query', prop=prop, titles=name,
                                      inprop='protection', *extra_props)
-            info = info['query']['pages'].itervalues().next()
+            info = six.next(six.itervalues(info['query']['pages']))
         self._info = info
 
         self.namespace = info.get('ns', 0)
@@ -42,7 +42,7 @@ class Page(object):
         else:
             self.page_title = self.name
 
-        self.touched = client.parse_timestamp(info.get('touched', '0000-00-00T00:00:00Z'))
+        self.touched = parse_timestamp(info.get('touched'))
         self.revision = info.get('lastrevid', 0)
         self.exists = 'missing' not in info
         self.length = info.get('length')
@@ -214,7 +214,7 @@ class Page(object):
 
         # 'newtimestamp' is not included if no change was made
         if 'newtimestamp' in result['edit'].keys():
-            self.last_rev_time = client.parse_timestamp(result['edit'].get('newtimestamp'))
+            self.last_rev_time = parse_timestamp(result['edit'].get('newtimestamp'))
         return result['edit']
 
     def handle_edit_error(self, e, summary):
