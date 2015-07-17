@@ -1,5 +1,6 @@
 import page
 import six
+import six.moves
 from six import text_type
 from mwclient.util import parse_timestamp
 
@@ -23,7 +24,7 @@ class List(object):
         self.count = 0
         self.max_items = max_items
 
-        self._iter = iter(xrange(0))
+        self._iter = iter(six.moves.range(0))
 
         self.last = False
         self.result_member = list_name
@@ -81,7 +82,7 @@ class List(object):
 
     def set_iter(self, data):
         if self.result_member not in data['query']:
-            self._iter = iter(xrange(0))
+            self._iter = iter(six.moves.range(0))
         elif type(data['query'][self.result_member]) is list:
             self._iter = iter(data['query'][self.result_member])
         else:
