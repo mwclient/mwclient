@@ -43,7 +43,7 @@ def parse_timestamp(t):
 class WaitToken(object):
 
     def __init__(self):
-        self.id = '%x' % random.randint(0, sys.maxint)
+        self.id = '%032x' % random.getrandbits(128)
 
     def __hash__(self):
         return hash(self.id)
