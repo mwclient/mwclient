@@ -121,7 +121,7 @@ class Site(object):
 
     def site_init(self):
         meta = self.api('query', meta='siteinfo|userinfo',
-                        siprop='general|namespaces', uiprop='groups|rights')
+                        siprop='general|namespaces', uiprop='groups|rights', retry_on_error=False)
 
         # Extract site info
         self.site = meta['query']['general']
@@ -199,6 +199,7 @@ class Site(object):
                 kwargs['uiprop'] = 'blockinfo|hasmsg'
 
         token = self.wait_token()
+
         while True:
             info = self.raw_api(action, **kwargs)
             if not info:
@@ -238,7 +239,27 @@ class Site(object):
         qs2 = [(k, v) for k, v in kwargs.iteritems() if k in ('wpEditToken', 'token')]
         return OrderedDict(qs1 + qs2)
 
-    def raw_call(self, script, data, files=None):
+    def raw_call(self, script, data, files=None, retry_on_error=True):
+        """
+        Perform a generic API call and return the raw text.
+
+        In the event of a network problem, or a HTTP response with status code 5XX,
+        we'll wait and retry the configured number of times before giving up
+        if `retry_on_error` is True.
+
+        `requests.exceptions.HTTPError` is still raised directly for
+        HTTP responses with status codes in the 4XX range, and invalid
+        HTTP responses.
+
+        Args:
+            script (str): Script name, usually 'api'.
+            data (dict): Post data
+            files (dict): Files to upload
+            retry_on_error (bool): Retry on connection error
+
+        Returns:
+            The raw text response.
+        """
         url = self.path + script + self.ext
         headers = {}
         if self.compress and gzip:
@@ -263,28 +284,29 @@ class Site(object):
                 elif stream.status_code < 500 or stream.status_code > 599:
                     stream.raise_for_status()
                 else:
+                    if not retry_on_error:
+                        stream.raise_for_status()
                     log.warn('Received %s response: %s. Retrying in a moment.', stream.status_code, stream.text)
                     self.wait(token)
 
             except requests.exceptions.ConnectionError:
                 # In the event of a network problem (e.g. DNS failure, refused connection, etc),
                 # Requests will raise a ConnectionError exception.
+                if not retry_on_error:
+                    raise
                 log.warn('Connection error. Retrying in a moment.')
                 self.wait(token)
 
-            except requests.exceptions.HTTPError as e:
-                log.warn('HTTP error: %s', e.message)
-                raise
-
-            except requests.exceptions.TooManyRedirects:
-                raise
-
     def raw_api(self, action, *args, **kwargs):
         """Sends a call to the API."""
+        try:
+            retry_on_error = kwargs.pop('retry_on_error')
+        except KeyError:
+            retry_on_error = True
         kwargs['action'] = action
         kwargs['format'] = 'json'
         data = self._query_string(*args, **kwargs)
-        res = self.raw_call('api', data)
+        res = self.raw_call('api', data, retry_on_error=retry_on_error)
 
         try:
             return json.loads(res)
