@@ -26,9 +26,13 @@
 from errors import *
 from client import Site, __ver__
 import ex
+import logging
+import warnings
+
+# Show DeprecationWarning
+warnings.simplefilter('always', DeprecationWarning)
 
 # Logging: Add a null handler to avoid "No handler found" warnings.
-import logging
 try:
     from logging import NullHandler
 except ImportError:
