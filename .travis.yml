@@ -7,7 +7,7 @@ python:
 
 install: 
   - python setup.py install
-  - pip install pytest-pep8 pytest-cov coveralls
+  - pip install pytest-pep8 pytest-cov coveralls responses
 
 script: 
   - py.test --pep8 mwclient -v --cov mwclient tests
