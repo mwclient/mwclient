@@ -1,14 +1,24 @@
 
-.. image:: http://img.shields.io/travis/mwclient/mwclient.svg?style=flat
+.. image:: http://img.shields.io/travis/mwclient/mwclient.svg
    :target: https://travis-ci.org/mwclient/mwclient
+   :alt: Build status
 
-.. image:: http://img.shields.io/pypi/v/mwclient.svg?style=flat
+.. image:: http://img.shields.io/coveralls/mwclient/mwclient.svg
+   :target: https://coveralls.io/r/mwclient/mwclient
+   :alt: Test coverage
+
+.. image:: http://img.shields.io/pypi/v/mwclient.svg
    :target: https://pypi.python.org/pypi/mwclient
+   :alt: Latest version
 
-.. image:: http://img.shields.io/pypi/dw/mwclient.svg?style=flat
+.. image:: http://img.shields.io/pypi/dw/mwclient.svg
    :target: https://pypi.python.org/pypi/mwclient
+   :alt: Downloads
 
-   
+.. image:: https://img.shields.io/github/license/mwclient/mwclient.svg
+   :target: http://opensource.org/licenses/MIT
+   :alt: MIT license
+
 mwclient
 ========
 
