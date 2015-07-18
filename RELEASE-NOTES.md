@@ -1,8 +1,12 @@
 # Release Notes for mwclient
 
-## Changes in version 0.7.2
+
+## Changes in version 0.8.0
 
 This is the development version of mwclient.
+
+## Changes in version 0.7.2
+
 
 * [2014-11-28] [@c-martinez](https://github.com/c-martinez):
   Add `continue` parameter to all queries.
