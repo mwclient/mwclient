@@ -109,14 +109,14 @@ class Page(object):
 
     def get_expanded(self):
         """Deprecated. Use page.text(expandtemplates=True) instead"""
-        warnings.warn("page.get_expanded() was deprecated in mwclient 0.7.0, use page.text(expandtemplates=True) instead.",
+        warnings.warn("page.get_expanded() was deprecated in mwclient 0.7.0 and will be removed in 0.8.0, use page.text(expandtemplates=True) instead.",
                       category=DeprecationWarning, stacklevel=2)
 
         return self.text(expandtemplates=True)
 
     def edit(self, *args, **kwargs):
         """Deprecated. Use page.text() instead"""
-        warnings.warn("page.edit() was deprecated in mwclient 0.7.0, please use page.text() instead.",
+        warnings.warn("page.edit() was deprecated in mwclient 0.7.0 and will be removed in 0.8.0, please use page.text() instead.",
                       category=DeprecationWarning, stacklevel=2)
         return self.text(*args, **kwargs)
 
@@ -165,7 +165,12 @@ class Page(object):
         if not self.can('edit'):
             raise errors.ProtectedPageError(self)
 
-        if not section:
+        if self.section is not None and section is None:
+            warnings.warn('From mwclient version 0.8.0, the `save()` method will no longer ' +
+                          'implicitly use the `section` parameter from the last `text()` or ' +
+                          '`edit()` call. Please pass the `section` parameter explicitly to ' +
+                          'the save() method to save only a single section.',
+                          category=DeprecationWarning, stacklevel=2)
             section = self.section
 
         if not self.site.writeapi:
