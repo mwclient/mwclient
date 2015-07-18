@@ -313,7 +313,7 @@ class Site(object):
         except ValueError:
             if res.startswith('MediaWiki API is not enabled for this site.'):
                 raise errors.APIDisabledError
-            raise ValueError('Could not decode JSON: %s' % res)
+            raise errors.InvalidResponse(res)
 
     def raw_index(self, action, *args, **kwargs):
         """Sends a call to index.php rather than the API."""
