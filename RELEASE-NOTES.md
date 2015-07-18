@@ -25,6 +25,15 @@ This is the development version of mwclient.
 * [2015-07-08] [@Pathoschild](https://github.com/Pathoschild)
   Fix 'New messages' flag (`hasmsg`).
   [#90](https://github.com/mwclient/mwclient/issues/90)
+* [2015-07-17] [@Danmichaelo](https://github.com/Danmichaelo)
+  Don't retry on connection error during site init.
+  [#85](https://github.com/mwclient/mwclient/issues/85)
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+  Deprecate implicit use of Page.section when saving, to prepare for
+  the merge of [#81](https://github.com/mwclient/mwclient/issues/81)
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+  More intuitive error message when an invalid JSON response is received.
+  [#79](https://github.com/mwclient/mwclient/issues/79)
 
 ## Changes in version 0.7.1
 
