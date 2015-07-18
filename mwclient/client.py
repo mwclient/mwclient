@@ -21,9 +21,8 @@ except ImportError:
 import requests
 from requests.auth import HTTPBasicAuth, AuthBase
 
-import errors
-import listing
-import page
+import mwclient.errors as errors
+import mwclient.listing as listing
 
 try:
     import gzip

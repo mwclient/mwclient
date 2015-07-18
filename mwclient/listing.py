@@ -1,8 +1,8 @@
-import page
 import six
 import six.moves
 from six import text_type
 from mwclient.util import parse_timestamp
+import mwclient.page
 
 
 class List(object):
@@ -136,15 +136,15 @@ class GeneratorList(List):
 
         self.result_member = 'pages'
 
-        self.page_class = page.Page
+        self.page_class = mwclient.page.Page
 
     def next(self):
         info = List.next(self, full=True)
         if info['ns'] == 14:
             return Category(self.site, u'', info)
         if info['ns'] == 6:
-            return page.Image(self.site, u'', info)
-        return page.Page(self.site, u'', info)
+            return mwclient.page.Image(self.site, u'', info)
+        return mwclient.page.Page(self.site, u'', info)
 
     def load_chunk(self):
         # Put this here so that the constructor does not fail
@@ -153,10 +153,10 @@ class GeneratorList(List):
         return List.load_chunk(self)
 
 
-class Category(page.Page, GeneratorList):
+class Category(mwclient.page.Page, GeneratorList):
 
     def __init__(self, site, name, info=None, namespace=None):
-        page.Page.__init__(self, site, name, info)
+        mwclient.page.Page.__init__(self, site, name, info)
         kwargs = {}
         kwargs['gcmtitle'] = self.name
         if namespace:
@@ -195,9 +195,9 @@ class PageList(GeneratorList):
         if self.namespace == 14:
             return Category(self.site, self.site.namespaces[14] + ':' + name, info)
         elif self.namespace == 6:
-            return page.Image(self.site, self.site.namespaces[6] + ':' + name, info)
+            return mwclient.page.Image(self.site, self.site.namespaces[6] + ':' + name, info)
         elif self.namespace != 0:
-            return page.Page(self.site, self.site.namespaces[self.namespace] + ':' + name, info)
+            return mwclient.page.Page(self.site, self.site.namespaces[self.namespace] + ':' + name, info)
         else:
             # Guessing page class
             if type(name) is not int:
@@ -205,11 +205,11 @@ class PageList(GeneratorList):
                 if namespace == 14:
                     return Category(self.site, name, info)
                 elif namespace == 6:
-                    return page.Image(self.site, name, info)
-            return page.Page(self.site, name, info)
+                    return mwclient.page.Image(self.site, name, info)
+            return mwclient.page.Page(self.site, name, info)
 
     def guess_namespace(self, name):
-        normal_name = page.Page.normalize_title(name)
+        normal_name = mwclient.page.Page.normalize_title(name)
         for ns in self.site.namespaces:
             if ns == 0:
                 continue
