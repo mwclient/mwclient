@@ -1,5 +1,6 @@
 # http://about.travis-ci.org/docs/user/languages/python/
 
+sudo: false
 language: python
 python:
   - "2.6"
