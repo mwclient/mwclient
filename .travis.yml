@@ -8,10 +8,10 @@ python:
 
 install: 
   - python setup.py install
-  - pip install pytest-pep8 pytest-cov coveralls responses
+  - pip install coverage coveralls
 
 script: 
-  - py.test --pep8 mwclient -v --cov mwclient tests
+  - coverage run --source=mwclient setup.py test
 
 after_success:
   - coveralls
