@@ -3,6 +3,7 @@ import six.moves
 from six import text_type
 from mwclient.util import parse_timestamp
 import mwclient.page
+import mwclient.image
 
 
 class List(object):
@@ -143,7 +144,7 @@ class GeneratorList(List):
         if info['ns'] == 14:
             return Category(self.site, u'', info)
         if info['ns'] == 6:
-            return mwclient.page.Image(self.site, u'', info)
+            return mwclient.image.Image(self.site, u'', info)
         return mwclient.page.Page(self.site, u'', info)
 
     def load_chunk(self):
@@ -195,7 +196,7 @@ class PageList(GeneratorList):
         if self.namespace == 14:
             return Category(self.site, self.site.namespaces[14] + ':' + name, info)
         elif self.namespace == 6:
-            return mwclient.page.Image(self.site, self.site.namespaces[6] + ':' + name, info)
+            return mwclient.image.Image(self.site, self.site.namespaces[6] + ':' + name, info)
         elif self.namespace != 0:
             return mwclient.page.Page(self.site, self.site.namespaces[self.namespace] + ':' + name, info)
         else:
@@ -205,7 +206,7 @@ class PageList(GeneratorList):
                 if namespace == 14:
                     return Category(self.site, name, info)
                 elif namespace == 6:
-                    return mwclient.page.Image(self.site, name, info)
+                    return mwclient.image.Image(self.site, name, info)
             return mwclient.page.Page(self.site, name, info)
 
     def guess_namespace(self, name):
