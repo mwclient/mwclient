@@ -5,6 +5,12 @@
 
 This is the development version of mwclient.
 
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+  Add support for Python 3.
+  [#52](https://github.com/mwclient/mwclient/issues/52)
+* [2015-07-19] [@Danmichaelo](https://github.com/Danmichaelo)
+  Fix broken `Image.download()` method.
+
 ## Changes in version 0.7.2
 
 
