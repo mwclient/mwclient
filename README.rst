@@ -1,17 +1,21 @@
 
-.. image:: http://img.shields.io/travis/mwclient/mwclient.svg
+.. image:: https://img.shields.io/travis/mwclient/mwclient.svg
    :target: https://travis-ci.org/mwclient/mwclient
    :alt: Build status
 
-.. image:: http://img.shields.io/coveralls/mwclient/mwclient.svg
+.. image:: https://img.shields.io/coveralls/mwclient/mwclient.svg
    :target: https://coveralls.io/r/mwclient/mwclient
    :alt: Test coverage
 
-.. image:: http://img.shields.io/pypi/v/mwclient.svg
+.. image:: https://landscape.io/github/mwclient/mwclient/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/mwclient/mwclient/master
+   :alt: Code health
+
+.. image:: https://img.shields.io/pypi/v/mwclient.svg
    :target: https://pypi.python.org/pypi/mwclient
    :alt: Latest version
 
-.. image:: http://img.shields.io/pypi/dw/mwclient.svg
+.. image:: https://img.shields.io/pypi/dw/mwclient.svg
    :target: https://pypi.python.org/pypi/mwclient
    :alt: Downloads
 
@@ -24,8 +28,8 @@ mwclient
 
 mwclient is a lightweight Python client library to the `MediaWiki API <https://mediawiki.org/wiki/API>`_
 which provides access to most API functionality.
-It requires Python 2.6 or 2.7 (Python 3.x support planned) and supports MediaWiki 1.16
-and above.
+It requires Python 2.6 or 2.7 (Python 3.3 and 3.4 supported in the development version)
+and supports MediaWiki 1.16 and above.
 For functions not available in the current MediaWiki, a ``MediaWikiVersionError`` is raised.
 
 This framework was written by Bryan Tong Minh, who maintained the project until
