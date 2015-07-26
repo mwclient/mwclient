@@ -259,7 +259,7 @@ class Site(object):
                 stream = self.connection.post(fullurl, data=data, files=files, headers=headers)
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
-                    log.warn('Database lag exceeds max lag. Waiting for %d seconds', wait_time)
+                    log.warning('Database lag exceeds max lag. Waiting for %d seconds', wait_time)
                     sleeper.sleep(wait_time)
                 elif stream.status_code == 200:
                     return stream.text
@@ -268,7 +268,7 @@ class Site(object):
                 else:
                     if not retry_on_error:
                         stream.raise_for_status()
-                    log.warn('Received %s response: %s. Retrying in a moment.', stream.status_code, stream.text)
+                    log.warning('Received %s response: %s. Retrying in a moment.', stream.status_code, stream.text)
                     sleeper.sleep()
 
             except requests.exceptions.ConnectionError:
@@ -276,7 +276,7 @@ class Site(object):
                 # Requests will raise a ConnectionError exception.
                 if not retry_on_error:
                     raise
-                log.warn('Connection error. Retrying in a moment.')
+                log.warning('Connection error. Retrying in a moment.')
                 sleeper.sleep()
 
     def raw_api(self, action, *args, **kwargs):
