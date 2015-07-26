@@ -9,7 +9,7 @@ import mwclient.errors
 
 class Page(object):
 
-    def __init__(self, site, name, info=None, extra_properties={}):
+    def __init__(self, site, name, info=None, extra_properties=None):
         if type(name) is type(self):
             return self.__dict__.update(name.__dict__)
         self.site = site
