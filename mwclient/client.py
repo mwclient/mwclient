@@ -673,7 +673,28 @@ class Site(object):
                                                    toponly='1' if toponly else None))
         return listing.List(self, 'recentchanges', 'rc', limit=limit, **kwargs)
 
-    def search(self, search, namespace='0', what='title', redirects=False, limit=None):
+    def search(self, search, namespace='0', what=None, redirects=False, limit=None):
+        """
+        Perform a full text search.
+        API doc: https://www.mediawiki.org/wiki/API:Search
+
+            >>> for result in site.search('prefix:Template:Citation/'):
+            ...     print(result.get('title'))
+
+        Args:
+            search (str): The query string
+            namespace (int): The namespace to search (default: 0)
+            what (str): Search scope: 'text' for fulltext, or 'title' for titles only.
+                        Depending on the search backend, both options may not be available.
+                        For instance
+                        `CirrusSearch <https://www.mediawiki.org/wiki/Help:CirrusSearch>`_
+                        doesn't support 'title', but instead provides an "intitle:"
+                        query string filter.
+            redirects (bool): Include redirect pages in the search (option removed in MediaWiki 1.23).
+
+        Returns:
+            mwclient.listings.List: Search results iterator
+        """
 
         kwargs = dict(listing.List.generate_kwargs('sr', search=search, namespace=namespace, what=what))
         if redirects:
