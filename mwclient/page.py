@@ -352,8 +352,9 @@ class Page(object):
         return mwclient.listing.RevisionsIterator(self, 'revisions', 'rv', limit=limit, **kwargs)
 
     def templates(self, namespace=None, generator=True):
-        kwargs = dict(mwclient.listing.List.generate_kwargs('tl', namespace=namespace))
+        prefix = mwclient.listing.List.get_prefix('tl', generator)
+        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace))
         if generator:
-            return mwclient.listing.PagePropertyGenerator(self, 'templates', 'tl')
+            return mwclient.listing.PagePropertyGenerator(self, 'templates', prefix, **kwargs)
         else:
-            return mwclient.listing.PageProperty(self, 'templates', 'tl', return_values='title')
+            return mwclient.listing.PageProperty(self, 'templates', prefix, return_values='title', **kwargs)
