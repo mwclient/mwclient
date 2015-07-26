@@ -363,9 +363,7 @@ class Site(object):
         if username and password:
             self.credentials = (username, password, domain)
         if cookies:
-            if self.host not in self.conn.cookies:
-                self.conn.cookies[self.host] = http.CookieJar()
-            self.conn.cookies[self.host].update(cookies)
+            self.connection.cookies.update(cookies)
 
         if self.credentials:
             sleeper = self.sleepers.make()
