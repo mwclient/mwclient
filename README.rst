@@ -1,27 +1,41 @@
 
-.. image:: http://img.shields.io/travis/mwclient/mwclient.svg?style=flat
+.. image:: https://img.shields.io/travis/mwclient/mwclient.svg
    :target: https://travis-ci.org/mwclient/mwclient
+   :alt: Build status
 
-.. image:: http://img.shields.io/pypi/v/mwclient.svg?style=flat
+.. image:: https://img.shields.io/coveralls/mwclient/mwclient.svg
+   :target: https://coveralls.io/r/mwclient/mwclient
+   :alt: Test coverage
+
+.. image:: https://landscape.io/github/mwclient/mwclient/master/landscape.svg?style=flat
+   :target: https://landscape.io/github/mwclient/mwclient/master
+   :alt: Code health
+
+.. image:: https://img.shields.io/pypi/v/mwclient.svg
    :target: https://pypi.python.org/pypi/mwclient
+   :alt: Latest version
 
-.. image:: http://img.shields.io/pypi/dw/mwclient.svg?style=flat
+.. image:: https://img.shields.io/pypi/dw/mwclient.svg
    :target: https://pypi.python.org/pypi/mwclient
+   :alt: Downloads
 
-   
+.. image:: https://img.shields.io/github/license/mwclient/mwclient.svg
+   :target: http://opensource.org/licenses/MIT
+   :alt: MIT license
+
 mwclient
 ========
 
 mwclient is a lightweight Python client library to the `MediaWiki API <https://mediawiki.org/wiki/API>`_
 which provides access to most API functionality.
-It requires Python 2.6 or 2.7 (Python 3.x support planned) and supports MediaWiki 1.16
-and above.
+It requires Python 2.6 or 2.7 (Python 3.3 and 3.4 supported in the development version)
+and supports MediaWiki 1.16 and above.
 For functions not available in the current MediaWiki, a ``MediaWikiVersionError`` is raised.
 
 This framework was written by Bryan Tong Minh, who maintained the project until
 version 0.6.5, released on 6 May 2011. The current stable
-`version 0.7.1 <https://github.com/mwclient/mwclient/archive/v0.7.1.zip>`_
-was released on 23 November 2014, and is `available through PyPI <https://pypi.python.org/pypi/mwclient>`_:
+`version 0.7.2 <https://github.com/mwclient/mwclient/archive/v0.7.2.zip>`_
+was released on 18 July 2015, and is `available through PyPI <https://pypi.python.org/pypi/mwclient>`_:
 
 .. code-block:: console
 
@@ -108,7 +122,7 @@ following example:
 
 .. code-block:: python
 
-    useragent = 'YourBot, based on mwclient v0.6.5. Run by User:You, you@gmail.com'
+    useragent = 'YourBot, based on mwclient v0.7.2. Run by User:You, you@gmail.com'
     site = mwclient.Site(('https', 'en.wikipedia.org'), clients_useragent=useragent)
 
 

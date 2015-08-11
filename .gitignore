@@ -5,3 +5,5 @@ dist
 *~
 *.egg
 *.egg-info
+.eggs
+.tox

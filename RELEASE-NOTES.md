@@ -1,17 +1,27 @@
 # Release Notes for mwclient
 
-## Changes in version 0.7.2
+
+## Changes in version 0.8.0
 
 This is the development version of mwclient.
 
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+  Add support for Python 3.
+  [#52](https://github.com/mwclient/mwclient/issues/52)
+* [2015-07-19] [@Danmichaelo](https://github.com/Danmichaelo)
+  Fix broken `Image.download()` method.
+
+## Changes in version 0.7.2
+
+
 * [2014-11-28] [@c-martinez](https://github.com/c-martinez):
-  Add 'continue' parameter to all queries.
+  Add `continue` parameter to all queries.
   [#73](https://github.com/mwclient/mwclient/issues/73).
 * [2014-12-18] [@AdamWill](https://github.com/AdamWill):
   Fix PageList API arg passing to GeneratorList.
   [059322e](https://github.com/mwclient/mwclient/commit/059322e).
 * [2015-03-15] [@itkach](https://github.com/itkach):
-  Add 'toponly' parameter for recentchanges.
+  Add `toponly` parameter for recentchanges.
   [#78](https://github.com/mwclient/mwclient/issues/78).
 * [2015-06-04] [@Gui13](https://github.com/Gui13):
   Configure default logger.
@@ -19,6 +29,21 @@ This is the development version of mwclient.
 * [2015-06-20] [@lfaraone](https://github.com/lfaraone):
   Add support for querying the CheckUser log.
   [#86](https://github.com/mwclient/mwclient/pull/86).
+* [2015-07-06] [@PierreSelim](https://github.com/PierreSelim)
+  Expose `pageid`, `contentmodel`, `pagelanguage`, `restrictiontypes` as attributes of `Page`.
+  [#89](https://github.com/mwclient/mwclient/pull/89)
+* [2015-07-08] [@Pathoschild](https://github.com/Pathoschild)
+  Fix 'New messages' flag (`hasmsg`).
+  [#90](https://github.com/mwclient/mwclient/issues/90)
+* [2015-07-17] [@Danmichaelo](https://github.com/Danmichaelo)
+  Don't retry on connection error during site init.
+  [#85](https://github.com/mwclient/mwclient/issues/85)
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+  Deprecate implicit use of Page.section when saving, to prepare for
+  the merge of [#81](https://github.com/mwclient/mwclient/issues/81)
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+  More intuitive error message when an invalid JSON response is received.
+  [#79](https://github.com/mwclient/mwclient/issues/79)
 
 ## Changes in version 0.7.1
 
@@ -84,7 +109,7 @@ Detailed changelog:
   [773adf9](https://github.com/btongminh/mwclient/commit/773adf9),
   [#16](https://github.com/btongminh/mwclient/pull/16).
 * [2013-03-20] [@eug48](https://github.com/eug48):
-  Removed unused 'Request' class.
+  Removed unused `Request` class.
   [99e786d](https://github.com/btongminh/mwclient/commit/99e786d),
   [#16](https://github.com/btongminh/mwclient/pull/16).
 * [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
@@ -109,7 +134,7 @@ Detailed changelog:
   [223aa0](https://github.com/danmichaelo/mwclient/commit/223aa0),
   [#19](https://github.com/btongminh/mwclient/pull/19).
 * [2013-11-14] [@kyv](https://github.com/kyv):
-  Allow setting HTTP 'Authorization' header.
+  Allow setting HTTP `Authorization` header.
   [HTTP headers](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.8).
   [72fc49a](https://github.com/kyv/mwclient/commit/72fc49a).
 * [2013-11-15] [@kyv](https://github.com/kyv):

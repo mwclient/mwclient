@@ -1,16 +1,15 @@
-import client
-import errors
-import listing
-
-from six.moves import urllib
+import six
 from six import text_type
 import time
 import warnings
+from mwclient.util import parse_timestamp
+import mwclient.listing
+import mwclient.errors
 
 
 class Page(object):
 
-    def __init__(self, site, name, info=None, extra_properties={}):
+    def __init__(self, site, name, info=None, extra_properties=None):
         if type(name) is type(self):
             return self.__dict__.update(name.__dict__)
         self.site = site
@@ -19,9 +18,9 @@ class Page(object):
 
         if not info:
             if extra_properties:
-                prop = 'info|' + '|'.join(extra_properties.iterkeys())
+                prop = 'info|' + '|'.join(six.iterkeys(extra_properties))
                 extra_props = []
-                [extra_props.extend(extra_prop) for extra_prop in extra_properties.itervalues()]
+                [extra_props.extend(extra_prop) for extra_prop in six.itervalues(extra_properties)]
             else:
                 prop = 'info'
                 extra_props = ()
@@ -32,7 +31,7 @@ class Page(object):
             else:
                 info = self.site.api('query', prop=prop, titles=name,
                                      inprop='protection', *extra_props)
-            info = info['query']['pages'].itervalues().next()
+            info = six.next(six.itervalues(info['query']['pages']))
         self._info = info
 
         self.namespace = info.get('ns', 0)
@@ -42,7 +41,7 @@ class Page(object):
         else:
             self.page_title = self.name
 
-        self.touched = client.parse_timestamp(info.get('touched', '0000-00-00T00:00:00Z'))
+        self.touched = parse_timestamp(info.get('touched'))
         self.revision = info.get('lastrevid', 0)
         self.exists = 'missing' not in info
         self.length = info.get('length')
@@ -109,14 +108,14 @@ class Page(object):
 
     def get_expanded(self):
         """Deprecated. Use page.text(expandtemplates=True) instead"""
-        warnings.warn("page.get_expanded() was deprecated in mwclient 0.7.0, use page.text(expandtemplates=True) instead.",
+        warnings.warn("page.get_expanded() was deprecated in mwclient 0.7.0 and will be removed in 0.8.0, use page.text(expandtemplates=True) instead.",
                       category=DeprecationWarning, stacklevel=2)
 
         return self.text(expandtemplates=True)
 
     def edit(self, *args, **kwargs):
         """Deprecated. Use page.text() instead"""
-        warnings.warn("page.edit() was deprecated in mwclient 0.7.0, please use page.text() instead.",
+        warnings.warn("page.edit() was deprecated in mwclient 0.7.0 and will be removed in 0.8.0, please use page.text() instead.",
                       category=DeprecationWarning, stacklevel=2)
         return self.text(*args, **kwargs)
 
@@ -131,7 +130,7 @@ class Page(object):
         """
 
         if not self.can('read'):
-            raise errors.InsufficientPermission(self)
+            raise mwclient.errors.InsufficientPermission(self)
         if not self.exists:
             return u''
         if section is not None:
@@ -157,19 +156,25 @@ class Page(object):
         """
         if not self.site.logged_in and self.site.force_login:
             # Should we really check for this?
-            raise errors.LoginError(self.site, 'By default, mwclient protects you from accidentally ' +
-                                    'editing without being logged in. If you actually want to edit without '
-                                    'logging in, you can set force_login on the Site object to False.')
+            raise mwclient.errors.LoginError(self.site, 'By default, mwclient protects you from ' +
+                                             'accidentally editing without being logged in. If you ' +
+                                             'actually want to edit without logging in, you can set ' +
+                                             'force_login on the Site object to False.')
         if self.site.blocked:
-            raise errors.UserBlocked(self.site.blocked)
+            raise mwclient.errors.UserBlocked(self.site.blocked)
         if not self.can('edit'):
-            raise errors.ProtectedPageError(self)
+            raise mwclient.errors.ProtectedPageError(self)
 
-        if not section:
+        if self.section is not None and section is None:
+            warnings.warn('From mwclient version 0.8.0, the `save()` method will no longer ' +
+                          'implicitly use the `section` parameter from the last `text()` or ' +
+                          '`edit()` call. Please pass the `section` parameter explicitly to ' +
+                          'the save() method to save only a single section.',
+                          category=DeprecationWarning, stacklevel=2)
             section = self.section
 
         if not self.site.writeapi:
-            raise errors.NoWriteApi(self)
+            raise mwclient.errors.NoWriteApi(self)
 
         data = {}
         if minor:
@@ -192,32 +197,32 @@ class Page(object):
                                    summary=summary, token=self.get_token('edit'),
                                    **data)
             if result['edit'].get('result').lower() == 'failure':
-                raise errors.EditError(self, result['edit'])
+                raise mwclient.errors.EditError(self, result['edit'])
             return result
         try:
             result = do_edit()
-        except errors.APIError as e:
+        except mwclient.errors.APIError as e:
             if e.code == 'badtoken':
                 # Retry, but only once to avoid an infinite loop
                 self.get_token('edit', force=True)
                 try:
                     result = do_edit()
-                except errors.APIError as e:
+                except mwclient.errors.APIError as e:
                     self.handle_edit_error(e, summary)
             else:
                 self.handle_edit_error(e, summary)
 
         # 'newtimestamp' is not included if no change was made
         if 'newtimestamp' in result['edit'].keys():
-            self.last_rev_time = client.parse_timestamp(result['edit'].get('newtimestamp'))
+            self.last_rev_time = parse_timestamp(result['edit'].get('newtimestamp'))
         return result['edit']
 
     def handle_edit_error(self, e, summary):
         if e.code == 'editconflict':
-            raise errors.EditError(self, summary, e.info)
+            raise mwclient.errors.EditError(self, summary, e.info)
         elif e.code in ('protectedtitle', 'cantcreate', 'cantcreate-anon', 'noimageredirect-anon',
                         'noimageredirect', 'noedit-anon', 'noedit'):
-            raise errors.ProtectedPageError(self, e.code, e.info)
+            raise mwclient.errors.ProtectedPageError(self, e.code, e.info)
         else:
             raise
 
@@ -232,10 +237,10 @@ class Page(object):
 
         """
         if not self.can('move'):
-            raise errors.InsufficientPermission(self)
+            raise mwclient.errors.InsufficientPermission(self)
 
         if not self.site.writeapi:
-            raise errors.NoWriteApi(self)
+            raise mwclient.errors.NoWriteApi(self)
 
         data = {}
         if move_talk:
@@ -254,10 +259,10 @@ class Page(object):
 
         """
         if not self.can('delete'):
-            raise errors.InsufficientPermission(self)
+            raise mwclient.errors.InsufficientPermission(self)
 
         if not self.site.writeapi:
-            raise errors.NoWriteApi(self)
+            raise mwclient.errors.NoWriteApi(self)
 
         data = {}
         if watch:
@@ -282,63 +287,61 @@ class Page(object):
 
     # Properties
     def backlinks(self, namespace=None, filterredir='all', redirect=False, limit=None, generator=True):
-        prefix = listing.List.get_prefix('bl', generator)
-        kwargs = dict(listing.List.generate_kwargs(prefix,
-                                                   namespace=namespace, filterredir=filterredir))
+        prefix = mwclient.listing.List.get_prefix('bl', generator)
+        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace, filterredir=filterredir))
         if redirect:
             kwargs['%sredirect' % prefix] = '1'
         kwargs[prefix + 'title'] = self.name
 
-        return listing.List.get_list(generator)(self.site, 'backlinks', 'bl', limit=limit, return_values='title', **kwargs)
+        return mwclient.listing.List.get_list(generator)(self.site, 'backlinks', 'bl', limit=limit, return_values='title', **kwargs)
 
     def categories(self, generator=True):
         if generator:
-            return listing.PagePropertyGenerator(self, 'categories', 'cl')
+            return mwclient.listing.PagePropertyGenerator(self, 'categories', 'cl')
         else:
             # TODO: return sortkey if wanted
-            return listing.PageProperty(self, 'categories', 'cl', return_values='title')
+            return mwclient.listing.PageProperty(self, 'categories', 'cl', return_values='title')
 
     def embeddedin(self, namespace=None, filterredir='all', redirect=False, limit=None, generator=True):
-        prefix = listing.List.get_prefix('ei', generator)
-        kwargs = dict(listing.List.generate_kwargs(prefix,
-                                                   namespace=namespace, filterredir=filterredir))
+        prefix = mwclient.listing.List.get_prefix('ei', generator)
+        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace, filterredir=filterredir))
         if redirect:
             kwargs['%sredirect' % prefix] = '1'
         kwargs[prefix + 'title'] = self.name
 
-        return listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit=limit, return_values='title', **kwargs)
+        return mwclient.listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit=limit, return_values='title', **kwargs)
 
     def extlinks(self):
-        return listing.PageProperty(self, 'extlinks', 'el', return_values='*')
+        return mwclient.listing.PageProperty(self, 'extlinks', 'el', return_values='*')
 
     def images(self, generator=True):
         if generator:
-            return listing.PagePropertyGenerator(self, 'images', '')
+            return mwclient.listing.PagePropertyGenerator(self, 'images', '')
         else:
-            return listing.PageProperty(self, 'images', '', return_values='title')
+            return mwclient.listing.PageProperty(self, 'images', '', return_values='title')
 
     def iwlinks(self):
-        return listing.PageProperty(self, 'iwlinks', 'iw', return_values=('prefix', '*'))
+        return mwclient.listing.PageProperty(self, 'iwlinks', 'iw', return_values=('prefix', '*'))
 
     def langlinks(self, **kwargs):
-        return listing.PageProperty(self, 'langlinks', 'll', return_values=('lang', '*'), **kwargs)
+        return mwclient.listing.PageProperty(self, 'langlinks', 'll', return_values=('lang', '*'), **kwargs)
 
     def links(self, namespace=None, generator=True, redirects=False):
-        prefix = listing.List.get_prefix('pl', generator)
-        kwargs = dict(listing.List.generate_kwargs(prefix, namespace=namespace))
+        prefix = mwclient.listing.List.get_prefix('pl', generator)
+        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace))
 
         if redirects:
             kwargs['redirects'] = '1'
         if generator:
-            return listing.PagePropertyGenerator(self, 'links', 'pl', **kwargs)
+            return mwclient.listing.PagePropertyGenerator(self, 'links', 'pl', **kwargs)
         else:
-            return listing.PageProperty(self, 'links', 'pl', return_values='title', **kwargs)
+            return mwclient.listing.PageProperty(self, 'links', 'pl', return_values='title', **kwargs)
 
     def revisions(self, startid=None, endid=None, start=None, end=None,
                   dir='older', user=None, excludeuser=None, limit=50,
                   prop='ids|timestamp|flags|comment|user', expandtemplates=False, section=None):
-        kwargs = dict(listing.List.generate_kwargs('rv', startid=startid, endid=endid,
-                                                   start=start, end=end, user=user, excludeuser=excludeuser))
+        kwargs = dict(mwclient.listing.List.generate_kwargs('rv', startid=startid, endid=endid, start=start,
+                                                            end=end, user=user, excludeuser=excludeuser))
         kwargs['rvdir'] = dir
         kwargs['rvprop'] = prop
         if expandtemplates:
@@ -346,51 +349,12 @@ class Page(object):
         if section is not None:
             kwargs['rvsection'] = section
 
-        return listing.RevisionsIterator(self, 'revisions', 'rv', limit=limit, **kwargs)
+        return mwclient.listing.RevisionsIterator(self, 'revisions', 'rv', limit=limit, **kwargs)
 
     def templates(self, namespace=None, generator=True):
-        kwargs = dict(listing.List.generate_kwargs('tl', namespace=namespace))
+        prefix = mwclient.listing.List.get_prefix('tl', generator)
+        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace))
         if generator:
-            return listing.PagePropertyGenerator(self, 'templates', 'tl')
+            return mwclient.listing.PagePropertyGenerator(self, 'templates', prefix, **kwargs)
         else:
-            return listing.PageProperty(self, 'templates', 'tl', return_values='title')
-
-
-class Image(Page):
-
-    def __init__(self, site, name, info=None):
-        Page.__init__(self, site, name, info,
-                      extra_properties={'imageinfo':
-                                        (('iiprop', 'timestamp|user|comment|url|size|sha1|metadata|archivename'), )
-                                        })
-        self.imagerepository = self._info.get('imagerepository', '')
-        self.imageinfo = self._info.get('imageinfo', ({}, ))[0]
-
-    def imagehistory(self):
-        return listing.PageProperty(self, 'imageinfo', 'ii',
-                                    iiprop='timestamp|user|comment|url|size|sha1|metadata|archivename')
-
-    def imageusage(self, namespace=None, filterredir='all', redirect=False,
-                   limit=None, generator=True):
-        prefix = listing.List.get_prefix('iu', generator)
-        kwargs = dict(listing.List.generate_kwargs(prefix, title=self.name,
-                                                   namespace=namespace, filterredir=filterredir))
-        if redirect:
-            kwargs['%sredirect' % prefix] = '1'
-        return listing.List.get_list(generator)(self.site, 'imageusage', 'iu',
-                                                limit=limit, return_values='title', **kwargs)
-
-    def duplicatefiles(self, limit=None):
-        return listing.PageProperty(self, 'duplicatefiles', 'df',
-                                    dflimit=limit)
-
-    def download(self):
-        url = self.imageinfo['url']
-        if not url.startswith('http://'):
-            url = 'http://' + self.site.host + url
-        url = urllib.parse.urlparse(url)
-        # TODO: query string
-        return self.site.connection.get(url[1], url[2])
-
-    def __repr__(self):
-        return "<Image object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
+            return mwclient.listing.PageProperty(self, 'templates', prefix, return_values='title', **kwargs)

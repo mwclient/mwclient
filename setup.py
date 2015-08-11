@@ -17,7 +17,7 @@ class PyTest(TestCommand):
 
     def initialize_options(self):
         TestCommand.initialize_options(self)
-        self.pytest_args = '-v --pep8 tests mwclient'
+        self.pytest_args = '-v --pep8 tests mwclient --cov mwclient'
 
     def finalize_options(self):
         TestCommand.finalize_options(self)
@@ -39,13 +39,15 @@ if sys.version_info < (2, 7):
     requirements.append('ordereddict')
 
 setup(name='mwclient',
-      version='0.7.2.dev1',  # Rember to also update __ver__ in client.py
+      version='0.8.0.dev1',  # Rember to also update __ver__ in client.py
       description='MediaWiki API client',
       long_description=README,
       classifiers=[
           'Programming Language :: Python',
           'Programming Language :: Python :: 2.6',
-          'Programming Language :: Python :: 2.7'
+          'Programming Language :: Python :: 2.7',
+          'Programming Language :: Python :: 3.3',
+          'Programming Language :: Python :: 3.4'
       ],
       keywords='mediawiki wikipedia',
       author='Bryan Tong Minh',
@@ -54,6 +56,7 @@ setup(name='mwclient',
       license='MIT',
       packages=['mwclient'],
       cmdclass={'test': PyTest},
-      tests_require=['pytest-pep8', 'pytest-cache', 'pytest', 'responses>=0.3.0'],
-      install_requires=requirements
+      tests_require=['pytest-pep8', 'pytest-cache', 'pytest', 'pytest-cov', 'funcsigs', 'responses>=0.3.0'],
+      install_requires=requirements,
+      zip_safe=True
       )

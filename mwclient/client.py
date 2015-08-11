@@ -5,6 +5,7 @@ import sys
 import weakref
 import logging
 from six import text_type
+import six
 
 try:
     # Python 2.7+
@@ -20,33 +21,18 @@ except ImportError:
 import requests
 from requests.auth import HTTPBasicAuth, AuthBase
 
-import errors
-import listing
-import page
+import mwclient.errors as errors
+import mwclient.listing as listing
+from mwclient.sleep import Sleepers
 
 try:
     import gzip
 except ImportError:
     gzip = None
 
-__ver__ = '0.7.2.dev1'
+__ver__ = '0.8.0.dev1'
 
 log = logging.getLogger(__name__)
-
-
-def parse_timestamp(t):
-    if t == '0000-00-00T00:00:00Z':
-        return (0, 0, 0, 0, 0, 0, 0, 0)
-    return time.strptime(t, '%Y-%m-%dT%H:%M:%SZ')
-
-
-class WaitToken(object):
-
-    def __init__(self):
-        self.id = '%x' % random.randint(0, sys.maxint)
-
-    def __hash__(self):
-        return hash(self.id)
 
 
 class Site(object):
@@ -61,9 +47,6 @@ class Site(object):
         self.ext = ext
         self.credentials = None
         self.compress = compress
-        self.retry_timeout = retry_timeout
-        self.max_retries = max_retries
-        self.wait_callback = wait_callback
         self.max_lag = text_type(max_lag)
         self.force_login = force_login
 
@@ -74,8 +57,7 @@ class Site(object):
         else:
             raise RuntimeError('Authentication is not a tuple or an instance of AuthBase')
 
-        # The token string => token object mapping
-        self.wait_tokens = weakref.WeakKeyDictionary()
+        self.sleepers = Sleepers(max_retries, retry_timeout, wait_callback)
 
         # Site properties
         self.blocked = False    # Whether current user is blocked
@@ -121,11 +103,11 @@ class Site(object):
 
     def site_init(self):
         meta = self.api('query', meta='siteinfo|userinfo',
-                        siprop='general|namespaces', uiprop='groups|rights')
+                        siprop='general|namespaces', uiprop='groups|rights', retry_on_error=False)
 
         # Extract site info
         self.site = meta['query']['general']
-        self.namespaces = dict(((i['id'], i.get('*', '')) for i in meta['query']['namespaces'].itervalues()))
+        self.namespaces = dict(((i['id'], i.get('*', '')) for i in six.itervalues(meta['query']['namespaces'])))
         self.writeapi = 'writeapi' in self.site
 
         # Determine version
@@ -198,17 +180,18 @@ class Site(object):
             else:
                 kwargs['uiprop'] = 'blockinfo|hasmsg'
 
-        token = self.wait_token()
+        sleeper = self.sleepers.make()
+
         while True:
             info = self.raw_api(action, **kwargs)
             if not info:
                 info = {}
-            if self.handle_api_result(info, token=token):
+            if self.handle_api_result(info, sleeper=sleeper):
                 return info
 
-    def handle_api_result(self, info, kwargs=None, token=None):
-        if token is None:
-            token = self.wait_token()
+    def handle_api_result(self, info, kwargs=None, sleeper=None):
+        if sleeper is None:
+            sleeper = self.sleepers.make()
 
         try:
             userinfo = info['query']['userinfo']
@@ -218,11 +201,11 @@ class Site(object):
             self.blocked = (userinfo['blockedby'], userinfo.get('blockreason', u''))
         else:
             self.blocked = False
-        self.hasmsg = 'message' in userinfo
+        self.hasmsg = 'messages' in userinfo
         self.logged_in = 'anon' not in userinfo
         if 'error' in info:
             if info['error']['code'] in (u'internal_api_error_DBConnectionError', u'internal_api_error_DBQueryError'):
-                self.wait(token)
+                sleeper.sleep()
                 return False
             if '*' in info['error']:
                 raise errors.APIError(info['error']['code'],
@@ -234,16 +217,36 @@ class Site(object):
     @staticmethod
     def _query_string(*args, **kwargs):
         kwargs.update(args)
-        qs1 = [(k, v) for k, v in kwargs.iteritems() if k not in ('wpEditToken', 'token')]
-        qs2 = [(k, v) for k, v in kwargs.iteritems() if k in ('wpEditToken', 'token')]
+        qs1 = [(k, v) for k, v in six.iteritems(kwargs) if k not in ('wpEditToken', 'token')]
+        qs2 = [(k, v) for k, v in six.iteritems(kwargs) if k in ('wpEditToken', 'token')]
         return OrderedDict(qs1 + qs2)
 
-    def raw_call(self, script, data, files=None):
+    def raw_call(self, script, data, files=None, retry_on_error=True):
+        """
+        Perform a generic API call and return the raw text.
+
+        In the event of a network problem, or a HTTP response with status code 5XX,
+        we'll wait and retry the configured number of times before giving up
+        if `retry_on_error` is True.
+
+        `requests.exceptions.HTTPError` is still raised directly for
+        HTTP responses with status codes in the 4XX range, and invalid
+        HTTP responses.
+
+        Args:
+            script (str): Script name, usually 'api'.
+            data (dict): Post data
+            files (dict): Files to upload
+            retry_on_error (bool): Retry on connection error
+
+        Returns:
+            The raw text response.
+        """
         url = self.path + script + self.ext
         headers = {}
         if self.compress and gzip:
             headers['Accept-Encoding'] = 'gzip'
-        token = self.wait_token((script, data))
+        sleeper = self.sleepers.make((script, data))
         while True:
             scheme = 'http'  # Should we move to 'https' as default?
             host = self.host
@@ -256,42 +259,43 @@ class Site(object):
                 stream = self.connection.post(fullurl, data=data, files=files, headers=headers)
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
-                    log.warn('Database lag exceeds max lag. Waiting for %d seconds', wait_time)
-                    self.wait(token, wait_time)
+                    log.warning('Database lag exceeds max lag. Waiting for %d seconds', wait_time)
+                    sleeper.sleep(wait_time)
                 elif stream.status_code == 200:
                     return stream.text
                 elif stream.status_code < 500 or stream.status_code > 599:
                     stream.raise_for_status()
                 else:
-                    log.warn('Received %s response: %s. Retrying in a moment.', stream.status_code, stream.text)
-                    self.wait(token)
+                    if not retry_on_error:
+                        stream.raise_for_status()
+                    log.warning('Received %s response: %s. Retrying in a moment.', stream.status_code, stream.text)
+                    sleeper.sleep()
 
             except requests.exceptions.ConnectionError:
                 # In the event of a network problem (e.g. DNS failure, refused connection, etc),
                 # Requests will raise a ConnectionError exception.
-                log.warn('Connection error. Retrying in a moment.')
-                self.wait(token)
-
-            except requests.exceptions.HTTPError as e:
-                log.warn('HTTP error: %s', e.message)
-                raise
-
-            except requests.exceptions.TooManyRedirects:
-                raise
+                if not retry_on_error:
+                    raise
+                log.warning('Connection error. Retrying in a moment.')
+                sleeper.sleep()
 
     def raw_api(self, action, *args, **kwargs):
         """Sends a call to the API."""
+        try:
+            retry_on_error = kwargs.pop('retry_on_error')
+        except KeyError:
+            retry_on_error = True
         kwargs['action'] = action
         kwargs['format'] = 'json'
         data = self._query_string(*args, **kwargs)
-        res = self.raw_call('api', data)
+        res = self.raw_call('api', data, retry_on_error=retry_on_error)
 
         try:
             return json.loads(res)
         except ValueError:
             if res.startswith('MediaWiki API is not enabled for this site.'):
                 raise errors.APIDisabledError
-            raise ValueError('Could not decode JSON: %s' % res)
+            raise errors.InvalidResponse(res)
 
     def raw_index(self, action, *args, **kwargs):
         """Sends a call to index.php rather than the API."""
@@ -299,25 +303,6 @@ class Site(object):
         kwargs['maxlag'] = self.max_lag
         data = self._query_string(*args, **kwargs)
         return self.raw_call('index', data)
-
-    def wait_token(self, args=None):
-        token = WaitToken()
-        self.wait_tokens[token] = (0, args)
-        return token
-
-    def wait(self, token, min_wait=0):
-        retry, args = self.wait_tokens[token]
-        self.wait_tokens[token] = (retry + 1, args)
-        if retry > self.max_retries and self.max_retries != -1:
-            raise errors.MaximumRetriesExceeded(self, token, args)
-        self.wait_callback(self, token, retry, args)
-
-        timeout = self.retry_timeout * retry
-        if timeout < min_wait:
-            timeout = min_wait
-        log.debug('Sleeping for %d seconds', timeout)
-        time.sleep(timeout)
-        return self.wait_tokens[token]
 
     def require(self, major, minor, revision=None, raise_error=True):
         if self.version is None:
@@ -378,12 +363,10 @@ class Site(object):
         if username and password:
             self.credentials = (username, password, domain)
         if cookies:
-            if self.host not in self.conn.cookies:
-                self.conn.cookies[self.host] = http.CookieJar()
-            self.conn.cookies[self.host].update(cookies)
+            self.connection.cookies.update(cookies)
 
         if self.credentials:
-            wait_token = self.wait_token()
+            sleeper = self.sleepers.make()
             kwargs = {
                 'lgname': self.credentials[0],
                 'lgpassword': self.credentials[1]
@@ -397,7 +380,7 @@ class Site(object):
                 elif login['login']['result'] == 'NeedToken':
                     kwargs['lgtoken'] = login['login']['token']
                 elif login['login']['result'] == 'Throttled':
-                    self.wait(wait_token, login['login'].get('wait', 5))
+                    sleeper.sleep(int(login['login'].get('wait', 5)))
                 else:
                     raise errors.LoginError(self, login['login'])
 
@@ -434,7 +417,7 @@ class Site(object):
                     title = 'Test'
                 info = self.api('query', titles=title,
                                 prop='info', intoken=type)
-                for i in info['query']['pages'].itervalues():
+                for i in six.itervalues(info['query']['pages']):
                     if i['title'] == title:
                         self.tokens[type] = i['%stoken' % type]
 
@@ -525,13 +508,13 @@ class Site(object):
 
             files = {'file': file}
 
-        wait_token = self.wait_token()
+        sleeper = self.sleepers.make()
         while True:
             data = self.raw_call('api', postdata, files)
             info = json.loads(data)
             if not info:
                 info = {}
-            if self.handle_api_result(info, kwargs=predata, token=wait_token):
+            if self.handle_api_result(info, kwargs=predata, sleeper=sleeper):
                 return info.get('upload', {})
 
     def parse(self, text=None, title=None, page=None):
@@ -690,7 +673,28 @@ class Site(object):
                                                    toponly='1' if toponly else None))
         return listing.List(self, 'recentchanges', 'rc', limit=limit, **kwargs)
 
-    def search(self, search, namespace='0', what='title', redirects=False, limit=None):
+    def search(self, search, namespace='0', what=None, redirects=False, limit=None):
+        """
+        Perform a full text search.
+        API doc: https://www.mediawiki.org/wiki/API:Search
+
+            >>> for result in site.search('prefix:Template:Citation/'):
+            ...     print(result.get('title'))
+
+        Args:
+            search (str): The query string
+            namespace (int): The namespace to search (default: 0)
+            what (str): Search scope: 'text' for fulltext, or 'title' for titles only.
+                        Depending on the search backend, both options may not be available.
+                        For instance
+                        `CirrusSearch <https://www.mediawiki.org/wiki/Help:CirrusSearch>`_
+                        doesn't support 'title', but instead provides an "intitle:"
+                        query string filter.
+            redirects (bool): Include redirect pages in the search (option removed in MediaWiki 1.23).
+
+        Returns:
+            mwclient.listings.List: Search results iterator
+        """
 
         kwargs = dict(listing.List.generate_kwargs('sr', search=search, namespace=namespace, what=what))
         if redirects:
