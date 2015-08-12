@@ -1,4 +1,3 @@
-import random
 import time
 import logging
 from mwclient.errors import MaximumRetriesExceeded
