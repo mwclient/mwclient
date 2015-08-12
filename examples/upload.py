@@ -43,7 +43,7 @@ assert 'exists' in res['warnings']
 ses = res['sessionkey']
 
 print 'Overwriting with stashed file'
-res = site.upload(filename=name, session_key=ses)
+res = site.upload(filename=name, filekey=ses)
 pprint.pprint(res)
 assert res['result'] == 'Warning'
 assert 'duplicate' in res['warnings']
