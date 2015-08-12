@@ -1,8 +1,4 @@
 import warnings
-import time
-import random
-import sys
-import weakref
 import logging
 from six import text_type
 import six
