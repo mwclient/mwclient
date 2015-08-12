@@ -482,8 +482,8 @@ class Site(object):
         if url:
             predata['url'] = url
 
-        # Renamed from sessionkey to filekey
-        # https://git.wikimedia.org/commit/mediawiki%2Fcore.git/5f13517e
+        # sessionkey was renamed to filekey in MediaWiki 1.18
+        # https://phabricator.wikimedia.org/rMW5f13517e36b45342f228f3de4298bb0fe186995d
         if self.version[:2] < (1, 18):
             predata['sessionkey'] = filekey
         else:
