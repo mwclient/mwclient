@@ -302,11 +302,23 @@ class Page(object):
             # TODO: return sortkey if wanted
             return mwclient.listing.PageProperty(self, 'categories', 'cl', return_values='title')
 
-    def embeddedin(self, namespace=None, filterredir='all', redirect=False, limit=None, generator=True):
+    def embeddedin(self, namespace=None, filterredir='all', limit=None, generator=True):
+        """
+        List pages that transclude the current page.
+        API doc: https://www.mediawiki.org/wiki/API:Embeddedin
+
+        Args:
+            namespace (int): Restricts search to a given namespace (Default: None)
+            filterredir (str): How to filter redirects, either 'all' (default),
+                'redirects' or 'nonredirects'.
+            limit (int): Maximum amount of pages to return per request
+            generator (bool): Use generator
+
+        Returns:
+            mwclient.listings.List: Page iterator
+        """
         prefix = mwclient.listing.List.get_prefix('ei', generator)
         kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace, filterredir=filterredir))
-        if redirect:
-            kwargs['%sredirect' % prefix] = '1'
         kwargs[prefix + 'title'] = self.name
 
         return mwclient.listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit=limit, return_values='title', **kwargs)
