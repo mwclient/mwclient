@@ -1,4 +1,4 @@
-.. _`userguide`:
+.. _userguide:
 
 User guide
 =================

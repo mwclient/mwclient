@@ -172,7 +172,9 @@ class Site(object):
             >>> result = site.api('query', prop='coordinates', titles='Oslo|Copenhagen')
             >>> for page in result['query']['pages'].values():
             ...     if 'coordinates' in page:
-            ...         print page['title'], page['coordinates'][0]['lat'], page['coordinates'][0]['lon']
+            ...         print '{} {} {}'.format(page['title'],
+            ...             page['coordinates'][0]['lat'],
+            ...             page['coordinates'][0]['lon'])
             Oslo 59.95 10.75
             Copenhagen 55.6761 12.5683
 
