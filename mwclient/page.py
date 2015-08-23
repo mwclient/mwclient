@@ -97,6 +97,13 @@ class Page(object):
         return title
 
     def can(self, action):
+        """
+        Check if the current user has the right to carry out some action with the current page.
+
+            >>> page.can('edit')
+            True
+
+        """
         level = self.protection.get(action, (action, ))[0]
         if level == 'sysop':
             level = 'editprotected'
@@ -121,12 +128,12 @@ class Page(object):
 
     def text(self, section=None, expandtemplates=False):
         """
-        Returns the current wikitext of the page, or of a specific section.
+        Get the current wikitext of the page, or of a specific section.
         If the page does not exist, an empty string is returned.
 
-        :Arguments:
-          - `section` : numbered section or `None` to get the whole page (default: `None`)
-          - `expandtemplates` : set to `True` to expand templates (default: `False`)
+        Args:
+            section (int): numbered section or `None` to get the whole page (default: `None`)
+            expandtemplates (bool): set to `True` to expand templates (default: `False`)
         """
 
         if not self.can('read'):
@@ -229,7 +236,7 @@ class Page(object):
     def move(self, new_title, reason='', move_talk=True, no_redirect=False):
         """Move (rename) page to new_title.
 
-        If user account is an administrator, specify no_direct as True to not
+        If user account is an administrator, specify no_redirect as True to not
         leave a redirect.
 
         If user does not have permission to move page, an InsufficientPermission
@@ -287,6 +294,12 @@ class Page(object):
 
     # Properties
     def backlinks(self, namespace=None, filterredir='all', redirect=False, limit=None, generator=True):
+        """
+        List pages that link to the current page, similar to Special:Whatlinkshere.
+
+        API doc: https://www.mediawiki.org/wiki/API:Backlinks
+
+        """
         prefix = mwclient.listing.List.get_prefix('bl', generator)
         kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace, filterredir=filterredir))
         if redirect:
@@ -296,6 +309,12 @@ class Page(object):
         return mwclient.listing.List.get_list(generator)(self.site, 'backlinks', 'bl', limit=limit, return_values='title', **kwargs)
 
     def categories(self, generator=True):
+        """
+        List categories used on the current page.
+
+        API doc: https://www.mediawiki.org/wiki/API:Categories
+
+        """
         if generator:
             return mwclient.listing.PagePropertyGenerator(self, 'categories', 'cl')
         else:
@@ -305,6 +324,7 @@ class Page(object):
     def embeddedin(self, namespace=None, filterredir='all', limit=None, generator=True):
         """
         List pages that transclude the current page.
+
         API doc: https://www.mediawiki.org/wiki/API:Embeddedin
 
         Args:
@@ -324,21 +344,51 @@ class Page(object):
         return mwclient.listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit=limit, return_values='title', **kwargs)
 
     def extlinks(self):
+        """
+        List external links from the current page.
+
+        API doc: https://www.mediawiki.org/wiki/API:Extlinks
+
+        """
         return mwclient.listing.PageProperty(self, 'extlinks', 'el', return_values='*')
 
     def images(self, generator=True):
+        """
+        List files/images embedded in the current page.
+
+        API doc: https://www.mediawiki.org/wiki/API:Images
+
+        """
         if generator:
             return mwclient.listing.PagePropertyGenerator(self, 'images', '')
         else:
             return mwclient.listing.PageProperty(self, 'images', '', return_values='title')
 
     def iwlinks(self):
+        """
+        List interwiki links from the current page.
+
+        API doc: https://www.mediawiki.org/wiki/API:Iwlinks
+
+        """
         return mwclient.listing.PageProperty(self, 'iwlinks', 'iw', return_values=('prefix', '*'))
 
     def langlinks(self, **kwargs):
+        """
+        List interlanguage links from the current page.
+
+        API doc: https://www.mediawiki.org/wiki/API:Langlinks
+
+        """
         return mwclient.listing.PageProperty(self, 'langlinks', 'll', return_values=('lang', '*'), **kwargs)
 
     def links(self, namespace=None, generator=True, redirects=False):
+        """
+        List links to other pages from the current page.
+
+        API doc: https://www.mediawiki.org/wiki/API:Links
+
+        """
         prefix = mwclient.listing.List.get_prefix('pl', generator)
         kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace))
 
@@ -352,6 +402,28 @@ class Page(object):
     def revisions(self, startid=None, endid=None, start=None, end=None,
                   dir='older', user=None, excludeuser=None, limit=50,
                   prop='ids|timestamp|flags|comment|user', expandtemplates=False, section=None):
+        """
+        List revisions of the current page.
+
+        API doc: https://www.mediawiki.org/wiki/API:Revisions
+
+        Args:
+            startid (int): Revision ID to start listing from.
+            endid (int): Revision ID to stop listing at.
+            start (str): Timestamp to start listing from.
+            end (str): Timestamp to end listing at.
+            dir (str): Direction to list in: 'older' (default) or 'newer'.
+            user (str): Only list revisions made by this user.
+            excludeuser (str): Exclude revisions made by this user.
+            limit (int): The maximum number of revisions to return per request.
+            prop (str): Which properties to get for each revision,
+                default: 'ids|timestamp|flags|comment|user'
+            expandtemplates (bool): Expand templates in rvprop=content output
+            section (int): If rvprop=content is set, only retrieve the contents of this section.
+
+        Returns:
+            mwclient.listings.List: Revision iterator
+        """
         kwargs = dict(mwclient.listing.List.generate_kwargs('rv', startid=startid, endid=endid, start=start,
                                                             end=end, user=user, excludeuser=excludeuser))
         kwargs['rvdir'] = dir
@@ -364,6 +436,12 @@ class Page(object):
         return mwclient.listing.RevisionsIterator(self, 'revisions', 'rv', limit=limit, **kwargs)
 
     def templates(self, namespace=None, generator=True):
+        """
+        List templates used on the current page.
+
+        API doc: https://www.mediawiki.org/wiki/API:Templates
+
+        """
         prefix = mwclient.listing.List.get_prefix('tl', generator)
         kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace))
         if generator:

@@ -1,3 +1,4 @@
+# encoding=utf-8
 import warnings
 import logging
 from six import text_type
@@ -32,6 +33,22 @@ log = logging.getLogger(__name__)
 
 
 class Site(object):
+    """
+    A MediaWiki site identified by its hostname.
+
+        >>> import mwclient
+        >>> site = mwclient.Site('en.wikipedia.org')
+
+    Do not include the leading "http://".
+
+    Mwclient assumes that the script path (where index.php and api.php are located)
+    is '/w/'. If the site uses a different script path, you must specify this
+    (path must end in a '/'). Examples:
+
+        >>> site = mwclient.Site('vim.wikia.com', path='/')
+        >>> site = mwclient.Site('sourceforge.net', path='/apps/mediawiki/mwclient/')
+
+    """
     api_limit = 500
 
     def __init__(self, host, path='/w/', ext='.php', pool=None, retry_timeout=30,
@@ -219,7 +236,7 @@ class Site(object):
 
     def raw_call(self, script, data, files=None, retry_on_error=True):
         """
-        Perform a generic API call and return the raw text.
+        Perform a generic request and return the raw text.
 
         In the event of a network problem, or a HTTP response with status code 5XX,
         we'll wait and retry the configured number of times before giving up
@@ -612,13 +629,13 @@ class Site(object):
         return listing.List(self, 'deletedrevs', 'dr', limit=limit, **kwargs)
 
     def exturlusage(self, query, prop=None, protocol='http', namespace=None, limit=None):
-        """Retrieves list of pages that link to a particular domain or URL as a generator.
+        r"""Retrieves list of pages that link to a particular domain or URL as a generator.
 
         This API call mirrors the Special:LinkSearch function on-wiki.
 
-        Query can be a domain like 'bbc.co.uk'. Wildcards can be used, e.g. '*.bbc.co.uk'.
+        Query can be a domain like 'bbc.co.uk'. Wildcards can be used, e.g. '\*.bbc.co.uk'.
         Alternatively, a query can contain a full domain name and some or all of a URL:
-        e.g. '*.wikipedia.org/wiki/*'
+        e.g. '\*.wikipedia.org/wiki/\*'
 
         See <https://meta.wikimedia.org/wiki/Help:Linksearch> for details.
 
@@ -636,12 +653,13 @@ class Site(object):
 
     def logevents(self, type=None, prop=None, start=None, end=None,
                   dir='older', user=None, title=None, limit=None, action=None):
-
+        """Retrieve logevents as a generator."""
         kwargs = dict(listing.List.generate_kwargs('le', prop=prop, type=type, start=start,
                                                    end=end, dir=dir, user=user, title=title, action=action))
         return listing.List(self, 'logevents', 'le', limit=limit, **kwargs)
 
     def checkuserlog(self, user=None, target=None, limit=10, dir='older', start=None, end=None):
+        """Retrieve checkuserlog items as a generator."""
 
         kwargs = dict(listing.List.generate_kwargs('cul', target=target, start=start,
                                                    end=end, dir=dir, user=user))
@@ -663,7 +681,9 @@ class Site(object):
 
     def recentchanges(self, start=None, end=None, dir='older', namespace=None,
                       prop=None, show=None, limit=None, type=None, toponly=None):
-
+        """
+        List recent changes to the wiki, à la Special:Recentchanges.
+        """
         kwargs = dict(listing.List.generate_kwargs('rc', start=start, end=end, dir=dir,
                                                    namespace=namespace, prop=prop, show=show, type=type,
                                                    toponly='1' if toponly else None))
@@ -699,17 +719,31 @@ class Site(object):
 
     def usercontributions(self, user, start=None, end=None, dir='older', namespace=None,
                           prop=None, show=None, limit=None):
+        """
+        List the contributions made by a given user to the wiki, à la Special:Contributions.
 
+        API doc: https://www.mediawiki.org/wiki/API:Usercontribs
+        """
         kwargs = dict(listing.List.generate_kwargs('uc', user=user, start=start, end=end,
                                                    dir=dir, namespace=namespace, prop=prop, show=show))
         return listing.List(self, 'usercontribs', 'uc', limit=limit, **kwargs)
 
     def users(self, users, prop='blockinfo|groups|editcount'):
+        """
+        Get information about a list of users.
+
+        API doc: https://www.mediawiki.org/wiki/API:Users
+        """
 
         return listing.List(self, 'users', 'us', ususers='|'.join(users), usprop=prop)
 
     def watchlist(self, allrev=False, start=None, end=None, namespace=None, dir='older',
                   prop=None, show=None, limit=None):
+        """
+        List the pages on the current user's watchlist.
+
+        API doc: https://www.mediawiki.org/wiki/API:Watchlist
+        """
 
         kwargs = dict(listing.List.generate_kwargs('wl', start=start, end=end,
                                                    namespace=namespace, dir=dir, prop=prop, show=show))
@@ -718,7 +752,11 @@ class Site(object):
         return listing.List(self, 'watchlist', 'wl', limit=limit, **kwargs)
 
     def expandtemplates(self, text, title=None, generatexml=False):
-        """Takes wikitext (text) and expands templates."""
+        """
+        Takes wikitext (text) and expands templates.
+
+        API doc: https://www.mediawiki.org/wiki/API:Expandtemplates
+        """
 
         kwargs = {}
         if title is None:
@@ -734,7 +772,11 @@ class Site(object):
             return result['expandtemplates']['*']
 
     def ask(self, query, title=None):
-        """Ask a query against Semantic MediaWiki."""
+        """
+        Ask a query against Semantic MediaWiki.
+
+        API doc: https://semantic-mediawiki.org/wiki/Ask_API
+        """
         kwargs = {}
         if title is None:
             kwargs['title'] = title

@@ -11,11 +11,21 @@ class Image(mwclient.page.Page):
         self.imageinfo = self._info.get('imageinfo', ({}, ))[0]
 
     def imagehistory(self):
+        """
+        Get file revision info for the given file.
+
+        API doc: https://www.mediawiki.org/wiki/API:Imageinfo
+        """
         return mwclient.listing.PageProperty(self, 'imageinfo', 'ii',
                                              iiprop='timestamp|user|comment|url|size|sha1|metadata|archivename')
 
     def imageusage(self, namespace=None, filterredir='all', redirect=False,
                    limit=None, generator=True):
+        """
+        List pages that use the given file.
+
+        API doc: https://www.mediawiki.org/wiki/API:Imageusage
+        """
         prefix = mwclient.listing.List.get_prefix('iu', generator)
         kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, title=self.name, namespace=namespace, filterredir=filterredir))
         if redirect:
@@ -23,6 +33,11 @@ class Image(mwclient.page.Page):
         return mwclient.listing.List.get_list(generator)(self.site, 'imageusage', 'iu', limit=limit, return_values='title', **kwargs)
 
     def duplicatefiles(self, limit=None):
+        """
+        List duplicates of the current file.
+
+        API doc: https://www.mediawiki.org/wiki/API:Duplicatefiles
+        """
         return mwclient.listing.PageProperty(self, 'duplicatefiles', 'df', dflimit=limit)
 
     def download(self, destination=None):
