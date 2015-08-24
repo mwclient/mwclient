@@ -23,6 +23,10 @@
    :target: http://opensource.org/licenses/MIT
    :alt: MIT license
 
+.. image:: https://readthedocs.org/projects/mwclient/badge/?version=master
+   :target: https://readthedocs.org/projects/mwclient/?badge=master
+   :alt: Documentation Status
+
 mwclient
 ========
 
