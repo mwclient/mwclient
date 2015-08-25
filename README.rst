@@ -1,4 +1,7 @@
 
+.. image:: docs/source/logo.png
+   :alt: Logo
+
 .. image:: https://img.shields.io/travis/mwclient/mwclient.svg
    :target: https://travis-ci.org/mwclient/mwclient
    :alt: Build status
