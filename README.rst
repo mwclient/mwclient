@@ -1,6 +1,7 @@
 
-.. image:: docs/source/logo.png
+.. figure:: docs/source/logo.png
    :alt: Logo
+   :align: center
 
 .. image:: https://img.shields.io/travis/mwclient/mwclient.svg
    :target: https://travis-ci.org/mwclient/mwclient
