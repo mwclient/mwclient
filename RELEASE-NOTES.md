@@ -5,11 +5,25 @@
 
 This is the development version of mwclient.
 
+Upgrade notices:
+
+ - Breaking change: Saving a section rather than the full page can now only
+   be achieved by passing in the section parameter explicitly to the `save`
+   method. The section number is no longer part of the `Page` state, so
+   `Page.save()` no longer makes use of a section parameter earlier passed
+   into `Page.text()`. A deprecation warning was added in 0.7.2.
+
+Detailed changelog:
+
 * [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
   Add support for Python 3.
   [#52](https://github.com/mwclient/mwclient/issues/52)
 * [2015-07-19] [@Danmichaelo](https://github.com/Danmichaelo)
   Fix broken `Image.download()` method.
+* [2015-08-29] [@AdamWill](https://github.com/AdamWill)
+  Remove implicit use of Page.section when saving
+  (deprecated in 0.7.2),
+  [#81](https://github.com/mwclient/mwclient/issues/81)
 
 ## Changes in version 0.7.2
 
