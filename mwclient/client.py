@@ -472,7 +472,6 @@ class Site(object):
                 'file_size is deprecated since mwclient 0.7',
                 DeprecationWarning
             )
-            file_size = None
 
         if filename is None:
             raise TypeError('filename must be specified')
