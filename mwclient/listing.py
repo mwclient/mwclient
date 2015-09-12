@@ -210,7 +210,6 @@ class PageList(GeneratorList):
             return mwclient.page.Page(self.site, name, info)
 
     def guess_namespace(self, name):
-        normal_name = mwclient.page.Page.normalize_title(name)
         for ns in self.site.namespaces:
             if ns == 0:
                 continue
