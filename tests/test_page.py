@@ -238,6 +238,17 @@ class TestPageApiArgs(unittest.TestCase):
             'rvlimit': '1'
         }
 
+    def test_get_page_text_cached(self):
+        # Check page.text() caching
+        self.page.revisions = mock.Mock(return_value=iter([]))
+        self.page.text()
+        self.page.text()
+        # When cache is hit, revisions is not, so call_count should be 1
+        assert self.page.revisions.call_count == 1
+        self.page.text(cache=False)
+        # With cache explicitly disabled, we should hit revisions
+        assert self.page.revisions.call_count == 2
+
     def test_get_section_text(self):
         # Check that the 'rvsection' parameter is sent to the API
         text = self.page.text(section=0)
