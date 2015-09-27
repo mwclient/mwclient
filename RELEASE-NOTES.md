@@ -24,6 +24,9 @@ Detailed changelog:
   Remove implicit use of Page.section when saving
   (deprecated in 0.7.2),
   [#81](https://github.com/mwclient/mwclient/issues/81)
+* [2015-09-27] [@AdamWill](https://github.com/AdamWill)
+  Cache page text until next edit operation.
+  [#80](https://github.com/mwclient/mwclient/issues/80)
 
 ## Changes in version 0.7.2
 
