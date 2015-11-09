@@ -56,7 +56,7 @@ setup(name='mwclient',
       license='MIT',
       packages=['mwclient'],
       cmdclass={'test': PyTest},
-      tests_require=['pytest-pep8', 'pytest-cache', 'pytest', 'pytest-cov', 'funcsigs', 'responses>=0.3.0'],
+      tests_require=['pytest-pep8', 'pytest-cache', 'pytest', 'pytest-cov', 'funcsigs', 'responses>=0.3.0', 'mock'],
       install_requires=requirements,
       zip_safe=True
       )
