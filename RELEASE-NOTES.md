@@ -27,6 +27,8 @@ Detailed changelog:
 * [2015-09-27] [@AdamWill](https://github.com/AdamWill)
   Cache page text until next edit operation.
   [#80](https://github.com/mwclient/mwclient/issues/80)
+* Add `Site.revisions()` method and support `diffto`.
+  [#84](https://github.com/mwclient/mwclient/pull/84)
 
 ## Changes in version 0.7.2
 

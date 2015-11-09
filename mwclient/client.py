@@ -690,24 +690,41 @@ class Site(object):
                                                    toponly='1' if toponly else None))
         return listing.List(self, 'recentchanges', 'rc', limit=limit, **kwargs)
 
-    def revisions(self, revids, prop = 'ids|timestamp|flags|comment|user', 
+    def revisions(self, revids, prop='ids|timestamp|flags|comment|user',
                   expandtemplates=False, diffto='prev'):
-            self.require(1, 12) # version?
-            if expandtemplates: expandtemplates = '1'
-            # http://en.wikipedia.org/w/api.php?rvexpandtemplates=False&format=json&list=&rvprop=ids|timestamp|flags|comment|user&rvdiffto=prev&revids=396240352|392544274|396332337&meta=userinfo&action=query&prop=revisions&uiprop=blockinfo|hasmsg
-            revids_s = '|'.join(map(str,revids))
-            kwargs = {'prop':'revisions','rvexpandtemplates':expandtemplates,'format':'json','rvprop':prop,
-                      'rvdiffto':diffto, 'revids':revids_s}
-            if (diffto is None) or (diffto == ''):
-                del kwargs['rvdiffto']
-            if (expandtemplates is None) or (expandtemplates == '') or (expandtemplates == 0):
-                del kwargs['rvexpandtemplates']
-            res = self.api('query', **kwargs)
+        """
+        Get data about a list of revisions. See also the `Page.revisions()`
+        method.
+        API doc: https://www.mediawiki.org/wiki/API:Revisions
 
-            if res.has_key('query'):
-                return res['query']
-            else:
-                return None
+        Example: Get revision text for two revisions:
+
+            >>> for page in site.revisions([689697696, 689816909], prop='content').values():
+            ...     for rev in page['revisions']:
+            ...         print rev['*']
+
+        Args:
+            revids (list): A list of (max 50) revisions.
+            prop (str): Which properties to get for each revision.
+            expandtemplates (bool): Expand templates in `rvprop=content` output.
+            diffto (str): Revision ID to diff each revision to. Use "prev",
+                          "next" and "cur" for the previous, next and current
+                          revision respectively.
+
+        Returns:
+            API response as a dictionary.
+        """
+        kwargs = {
+            'prop': 'revisions',
+            'rvprop': prop,
+            'revids': '|'.join(map(text_type, revids))
+        }
+        if expandtemplates:
+            kwargs['rvexpandtemplates'] = '1'
+        if diffto:
+            kwargs['rvdiffto'] = diffto
+
+        return self.api('query', **kwargs).get('query', {}).get('pages')
 
     def search(self, search, namespace='0', what=None, redirects=False, limit=None):
         """
