@@ -406,7 +406,8 @@ class Page(object):
 
     def revisions(self, startid=None, endid=None, start=None, end=None,
                   dir='older', user=None, excludeuser=None, limit=50,
-                  prop='ids|timestamp|flags|comment|user', expandtemplates=False, section=None):
+                  prop='ids|timestamp|flags|comment|user', expandtemplates=False, section=None,
+                  diffto=None):
         """
         List revisions of the current page.
 
@@ -425,12 +426,16 @@ class Page(object):
                 default: 'ids|timestamp|flags|comment|user'
             expandtemplates (bool): Expand templates in rvprop=content output
             section (int): If rvprop=content is set, only retrieve the contents of this section.
+            diffto (str): Revision ID to diff each revision to. Use "prev",
+                          "next" and "cur" for the previous, next and current
+                          revision respectively.
 
         Returns:
             mwclient.listings.List: Revision iterator
         """
-        kwargs = dict(mwclient.listing.List.generate_kwargs('rv', startid=startid, endid=endid, start=start,
-                                                            end=end, user=user, excludeuser=excludeuser))
+        kwargs = dict(mwclient.listing.List.generate_kwargs('rv', startid=startid, endid=endid,
+                                                            start=start, end=end, user=user,
+                                                            excludeuser=excludeuser, diffto=diffto))
         kwargs['rvdir'] = dir
         kwargs['rvprop'] = prop
         if expandtemplates:
