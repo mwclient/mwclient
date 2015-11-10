@@ -10,6 +10,7 @@ import requests
 import responses
 import pkg_resources  # part of setuptools
 import mock
+import time
 
 try:
     import json
@@ -27,7 +28,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 class TestCase(unittest.TestCase):
 
-    def makeMetaResponse(self, **kwargs):
+    def metaResponse(self, **kwargs):
         tpl = '{"query":{"general":{"generator":"MediaWiki %(version)s"},"namespaces":{"-1":{"*":"Special","canonical":"Special","case":"first-letter","id":-1},"-2":{"*":"Media","canonical":"Media","case":"first-letter","id":-2},"0":{"*":"","case":"first-letter","content":"","id":0},"1":{"*":"Talk","canonical":"Talk","case":"first-letter","id":1,"subpages":""},"10":{"*":"Template","canonical":"Template","case":"first-letter","id":10,"subpages":""},"100":{"*":"Test namespace 1","canonical":"Test namespace 1","case":"first-letter","id":100,"subpages":""},"101":{"*":"Test namespace 1 talk","canonical":"Test namespace 1 talk","case":"first-letter","id":101,"subpages":""},"102":{"*":"Test namespace 2","canonical":"Test namespace 2","case":"first-letter","id":102,"subpages":""},"103":{"*":"Test namespace 2 talk","canonical":"Test namespace 2 talk","case":"first-letter","id":103,"subpages":""},"11":{"*":"Template talk","canonical":"Template talk","case":"first-letter","id":11,"subpages":""},"1198":{"*":"Translations","canonical":"Translations","case":"first-letter","id":1198,"subpages":""},"1199":{"*":"Translations talk","canonical":"Translations talk","case":"first-letter","id":1199,"subpages":""},"12":{"*":"Help","canonical":"Help","case":"first-letter","id":12,"subpages":""},"13":{"*":"Help talk","canonical":"Help talk","case":"first-letter","id":13,"subpages":""},"14":{"*":"Category","canonical":"Category","case":"first-letter","id":14},"15":{"*":"Category talk","canonical":"Category talk","case":"first-letter","id":15,"subpages":""},"2":{"*":"User","canonical":"User","case":"first-letter","id":2,"subpages":""},"2500":{"*":"VisualEditor","canonical":"VisualEditor","case":"first-letter","id":2500},"2501":{"*":"VisualEditor talk","canonical":"VisualEditor talk","case":"first-letter","id":2501},"2600":{"*":"Topic","canonical":"Topic","case":"first-letter","defaultcontentmodel":"flow-board","id":2600},"3":{"*":"User talk","canonical":"User talk","case":"first-letter","id":3,"subpages":""},"4":{"*":"Wikipedia","canonical":"Project","case":"first-letter","id":4,"subpages":""},"460":{"*":"Campaign","canonical":"Campaign","case":"case-sensitive","defaultcontentmodel":"Campaign","id":460},"461":{"*":"Campaign talk","canonical":"Campaign talk","case":"case-sensitive","id":461},"5":{"*":"Wikipedia talk","canonical":"Project talk","case":"first-letter","id":5,"subpages":""},"6":{"*":"File","canonical":"File","case":"first-letter","id":6},"7":{"*":"File talk","canonical":"File talk","case":"first-letter","id":7,"subpages":""},"710":{"*":"TimedText","canonical":"TimedText","case":"first-letter","id":710},"711":{"*":"TimedText talk","canonical":"TimedText talk","case":"first-letter","id":711},"8":{"*":"MediaWiki","canonical":"MediaWiki","case":"first-letter","id":8,"subpages":""},"828":{"*":"Module","canonical":"Module","case":"first-letter","id":828,"subpages":""},"829":{"*":"Module talk","canonical":"Module talk","case":"first-letter","id":829,"subpages":""},"866":{"*":"CNBanner","canonical":"CNBanner","case":"first-letter","id":866},"867":{"*":"CNBanner talk","canonical":"CNBanner talk","case":"first-letter","id":867,"subpages":""},"9":{"*":"MediaWiki talk","canonical":"MediaWiki talk","case":"first-letter","id":9,"subpages":""},"90":{"*":"Thread","canonical":"Thread","case":"first-letter","id":90},"91":{"*":"Thread talk","canonical":"Thread talk","case":"first-letter","id":91},"92":{"*":"Summary","canonical":"Summary","case":"first-letter","id":92},"93":{"*":"Summary talk","canonical":"Summary talk","case":"first-letter","id":93}},"userinfo":{"anon":"","groups":["*"],"id":0,"name":"127.0.0.1","rights": %(rights)s}}}'
         tpl = tpl % {'version': kwargs.get('version', '1.24wmf17'),
                      'rights': json.dumps(kwargs.get('rights', ["createaccount", "read", "edit", "createpage", "createtalk", "writeapi", "editmyusercss", "editmyuserjs", "viewmywatchlist", "editmywatchlist", "viewmyprivateinfo", "editmyprivateinfo", "editmyoptions", "centralauth-merge", "abusefilter-view", "abusefilter-log", "translate", "vipsscaler-test", "upload"]))
@@ -37,7 +38,10 @@ class TestCase(unittest.TestCase):
         if kwargs.get('writeapi', True):
             res['query']['general']['writeapi'] = ''
 
-        return json.dumps(res)
+        return res
+
+    def metaResponseAsJson(self, **kwargs):
+        return json.dumps(self.metaResponse(**kwargs))
 
     def httpShouldReturn(self, body=None, callback=None, scheme='http', host='test.wikipedia.org', path='/w/',
                          script='api', headers=None, status=200):
@@ -49,7 +53,7 @@ class TestCase(unittest.TestCase):
                           adding_headers=headers, status=status)
 
     def stdSetup(self):
-        self.httpShouldReturn(self.makeMetaResponse())
+        self.httpShouldReturn(self.metaResponseAsJson())
         site = mwclient.Site('test.wikipedia.org')
         responses.reset()
         return site
@@ -95,7 +99,7 @@ class TestClient(TestCase):
     def test_http_as_default(self):
         # 'http' should be the default scheme (for historical reasons)
 
-        self.httpShouldReturn(self.makeMetaResponse(), scheme='http')
+        self.httpShouldReturn(self.metaResponseAsJson(), scheme='http')
 
         site = mwclient.Site('test.wikipedia.org')
 
@@ -110,7 +114,7 @@ class TestClient(TestCase):
             if len(responses.calls) == 0:
                 return (200, {'x-database-lag': '0', 'retry-after': '0'}, '')
             else:
-                return (200, {}, self.makeMetaResponse())
+                return (200, {}, self.metaResponseAsJson())
 
         self.httpShouldReturn(callback=request_callback, scheme='http')
 
@@ -133,7 +137,7 @@ class TestClient(TestCase):
     def test_headers(self):
         # Content-type should be 'application/x-www-form-urlencoded'
 
-        self.httpShouldReturn(self.makeMetaResponse(), scheme='http')
+        self.httpShouldReturn(self.metaResponseAsJson(), scheme='http')
 
         site = mwclient.Site('test.wikipedia.org')
 
@@ -145,7 +149,7 @@ class TestClient(TestCase):
     def test_force_https(self):
         # Setting https should work
 
-        self.httpShouldReturn(self.makeMetaResponse(), scheme='https')
+        self.httpShouldReturn(self.metaResponseAsJson(), scheme='https')
 
         site = mwclient.Site(('https', 'test.wikipedia.org'))
 
@@ -155,7 +159,7 @@ class TestClient(TestCase):
     def test_user_agent_is_sent(self):
         # User specified user agent should be sent sent to server
 
-        self.httpShouldReturn(self.makeMetaResponse())
+        self.httpShouldReturn(self.metaResponseAsJson())
 
         site = mwclient.Site('test.wikipedia.org', clients_useragent='MyFabulousClient')
 
@@ -164,7 +168,7 @@ class TestClient(TestCase):
     @responses.activate
     def test_basic_request(self):
 
-        self.httpShouldReturn(self.makeMetaResponse())
+        self.httpShouldReturn(self.metaResponseAsJson())
 
         site = mwclient.Site('test.wikipedia.org')
 
@@ -174,7 +178,7 @@ class TestClient(TestCase):
     @responses.activate
     def test_httpauth_defaults_to_basic_auth(self):
 
-        self.httpShouldReturn(self.makeMetaResponse())
+        self.httpShouldReturn(self.metaResponseAsJson())
 
         site = mwclient.Site('test.wikipedia.org', httpauth=('me', 'verysecret'))
 
@@ -183,7 +187,7 @@ class TestClient(TestCase):
     @responses.activate
     def test_httpauth_raise_error_on_invalid_type(self):
 
-        self.httpShouldReturn(self.makeMetaResponse())
+        self.httpShouldReturn(self.metaResponseAsJson())
 
         with pytest.raises(RuntimeError):
             site = mwclient.Site('test.wikipedia.org', httpauth=1)
@@ -201,7 +205,7 @@ class TestClient(TestCase):
     def test_version(self):
         # Should parse the MediaWiki version number correctly
 
-        self.httpShouldReturn(self.makeMetaResponse(version='1.16'))
+        self.httpShouldReturn(self.metaResponseAsJson(version='1.16'))
 
         site = mwclient.Site('test.wikipedia.org')
 
@@ -212,7 +216,7 @@ class TestClient(TestCase):
     def test_min_version(self):
         # Should raise MediaWikiVersionError if API version is < 1.16
 
-        self.httpShouldReturn(self.makeMetaResponse(version='1.15'))
+        self.httpShouldReturn(self.metaResponseAsJson(version='1.15'))
 
         with pytest.raises(mwclient.errors.MediaWikiVersionError):
             site = mwclient.Site('test.wikipedia.org')
@@ -231,6 +235,45 @@ class TestClient(TestCase):
         assert len(responses.calls) == 1
 
 
+class TestClientApiMethods(TestCase):
+
+    def setUp(self):
+        self.api = mock.patch('mwclient.client.Site.api').start()
+        self.api.return_value = self.metaResponse()
+        self.site = mwclient.Site('test.wikipedia.org')
+
+    def tearDown(self):
+        mock.patch.stopall()
+
+    def test_revisions(self):
+
+        self.api.return_value = {
+            'query': {'pages': {'1': {
+                'pageid': 1,
+                'title': 'Test page',
+                'revisions': [{
+                    'revid': 689697696,
+                    'timestamp': '2015-11-08T21:52:46Z',
+                    'comment': 'Test comment 1'
+                }, {
+                    'revid': 689816909,
+                    'timestamp': '2015-11-09T16:09:28Z',
+                    'comment': 'Test comment 2'
+                }]
+            }}}}
+
+        revisions = [rev for rev in self.site.revisions([689697696, 689816909], prop='content')]
+
+        args, kwargs = self.api.call_args
+        assert kwargs.get('revids') == '689697696|689816909'
+        assert len(revisions) == 2
+        assert revisions[0]['pageid'] == 1
+        assert revisions[0]['pagetitle'] == 'Test page'
+        assert revisions[0]['revid'] == 689697696
+        assert revisions[0]['timestamp'] == time.strptime('2015-11-08T21:52:46Z', '%Y-%m-%dT%H:%M:%SZ')
+        assert revisions[1]['revid'] == 689816909
+
+
 class TestClientUploadArgs(TestCase):
 
     def setUp(self):
@@ -238,7 +281,7 @@ class TestClientUploadArgs(TestCase):
 
     def configure(self, rights=['read', 'upload']):
 
-        self.raw_call.side_effect = [self.makeMetaResponse(rights=rights)]
+        self.raw_call.side_effect = [self.metaResponseAsJson(rights=rights)]
         self.site = mwclient.Site('test.wikipedia.org')
 
         self.vars = {
@@ -318,7 +361,7 @@ class TestClientGetTokens(TestCase):
         self.raw_call = mock.patch('mwclient.client.Site.raw_call').start()
 
     def configure(self, version='1.24'):
-        self.raw_call.return_value = self.makeMetaResponse(version=version)
+        self.raw_call.return_value = self.metaResponseAsJson(version=version)
         self.site = mwclient.Site('test.wikipedia.org')
         responses.reset()
 

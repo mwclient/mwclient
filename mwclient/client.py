@@ -21,6 +21,7 @@ from requests.auth import HTTPBasicAuth, AuthBase
 import mwclient.errors as errors
 import mwclient.listing as listing
 from mwclient.sleep import Sleepers
+from mwclient.util import parse_timestamp
 
 try:
     import gzip
@@ -699,9 +700,8 @@ class Site(object):
 
         Example: Get revision text for two revisions:
 
-            >>> for page in site.revisions([689697696, 689816909], prop='content').values():
-            ...     for rev in page['revisions']:
-            ...         print rev['*']
+            >>> for revision in site.revisions([689697696, 689816909], prop='content'):
+            ...     print revision['*']
 
         Args:
             revids (list): A list of (max 50) revisions.
@@ -712,7 +712,7 @@ class Site(object):
                           revision respectively.
 
         Returns:
-            API response as a dictionary.
+            A list of revisions
         """
         kwargs = {
             'prop': 'revisions',
@@ -724,7 +724,15 @@ class Site(object):
         if diffto:
             kwargs['rvdiffto'] = diffto
 
-        return self.api('query', **kwargs).get('query', {}).get('pages')
+        revisions = []
+        pages = self.api('query', **kwargs).get('query', {}).get('pages', {}).values()
+        for page in pages:
+            for revision in page.get('revisions', ()):
+                revision['pageid'] = page.get('pageid')
+                revision['pagetitle'] = page.get('title')
+                revision['timestamp'] = parse_timestamp(revision['timestamp'])
+                revisions.append(revision)
+        return revisions
 
     def search(self, search, namespace='0', what=None, redirects=False, limit=None):
         """
