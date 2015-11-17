@@ -29,7 +29,7 @@ print 'Site has writeapi:', getattr(site, 'writeapi', False)
 
 page = site.Pages[prefix + '/text1']
 
-print 'Editting page1'
+print 'Editing page1'
 
 page.edit()
 text1 = u"""== [[Test page]] ==
@@ -41,7 +41,7 @@ page.save(text1, comment1)
 rev = page.revisions(limit = 1, prop = 'timestamp|comment|content').next()
 assert rev['comment'] == comment1, rev
 assert rev['*'] == rev['*'], rev
-print 'Page editted on', rev['timestamp']
+print 'Page edited on', rev['timestamp']
 print 'Links:', list(page.links(generator = False))
 print 'External links:', list(page.extlinks())
 
