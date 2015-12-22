@@ -54,7 +54,7 @@ class Site(object):
 
     def __init__(self, host, path='/w/', ext='.php', pool=None, retry_timeout=30,
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
-                 max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None):
+                 max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None, do_ssl_cert_verify=True):
         # Setup member variables
         self.host = host
         self.path = path
@@ -87,6 +87,7 @@ class Site(object):
         # Setup connection
         if pool is None:
             self.connection = requests.Session()
+            self.connection.verify = do_ssl_cert_verify
             self.connection.auth = self.httpauth
             self.connection.headers['User-Agent'] = 'MwClient/' + __ver__ + ' (https://github.com/mwclient/mwclient)'
             if clients_useragent:
