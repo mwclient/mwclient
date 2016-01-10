@@ -5,13 +5,14 @@
 
 This is the development version of mwclient.
 
-Upgrade notices:
+Upgrade notices / breaking changes:
 
- - Breaking change: Saving a section rather than the full page can now only
+ - Saving a section rather than the full page can now only
    be achieved by passing in the section parameter explicitly to the `save`
    method. The section number is no longer part of the `Page` state, so
    `Page.save()` no longer makes use of a section parameter earlier passed
    into `Page.text()`. A deprecation warning was added in 0.7.2.
+ - Https is now used as default.
 
 Detailed changelog:
 
@@ -27,8 +28,10 @@ Detailed changelog:
 * [2015-09-27] [@AdamWill](https://github.com/AdamWill)
   Cache page text until next edit operation.
   [#80](https://github.com/mwclient/mwclient/issues/80)
-* Add `Site.revisions()` method and support `diffto`.
+* [2015-11-09] [@Rdhyee](https://github.com/Rdhyee) Add `Site.revisions()` method and support `diffto`.
   [#84](https://github.com/mwclient/mwclient/pull/84)
+* [2016-01-10] [@Danmichaelo](https://github.com/Danmichaelo) Use https as default.
+  [#70](https://github.com/mwclient/mwclient/issues/70)
 
 ## Changes in version 0.7.2
 

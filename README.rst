@@ -113,7 +113,8 @@ Default chunk size is generally the maximum chunk size.
 HTTPS
 -----
 
-To use https, specify the host as a tuple in the form of ``('https', hostname)``.
+mwclient uses https as default from version 0.8.0. To use http instead,
+specify the host as a tuple in the form of ``('http', hostname)``.
 
 
 User-agents
@@ -127,7 +128,7 @@ following example:
 .. code-block:: python
 
     useragent = 'YourBot, based on mwclient v0.7.2. Run by User:You, you@gmail.com'
-    site = mwclient.Site(('https', 'en.wikipedia.org'), clients_useragent=useragent)
+    site = mwclient.Site('en.wikipedia.org', clients_useragent=useragent)
 
 
 Example

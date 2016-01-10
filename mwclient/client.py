@@ -264,7 +264,7 @@ class Site(object):
             headers['Accept-Encoding'] = 'gzip'
         sleeper = self.sleepers.make((script, data))
         while True:
-            scheme = 'http'  # Should we move to 'https' as default?
+            scheme = 'https'
             host = self.host
             if isinstance(host, (list, tuple)):
                 scheme, host = host
