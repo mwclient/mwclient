@@ -39,7 +39,7 @@ if sys.version_info < (2, 7):
     requirements.append('ordereddict')
 
 setup(name='mwclient',
-      version='0.8.0.dev1',  # Rember to also update __ver__ in client.py
+      version='0.8.0',  # Rember to also update __ver__ in client.py
       description='MediaWiki API client',
       long_description=README,
       classifiers=[
@@ -47,7 +47,8 @@ setup(name='mwclient',
           'Programming Language :: Python :: 2.6',
           'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3.3',
-          'Programming Language :: Python :: 3.4'
+          'Programming Language :: Python :: 3.4',
+          'Programming Language :: Python :: 3.5'
       ],
       keywords='mediawiki wikipedia',
       author='Bryan Tong Minh',

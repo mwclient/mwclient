@@ -1,9 +1,14 @@
 # Release Notes for mwclient
 
+## Changes in version 0.8.1
+
+This is the development version of mwclient.
+
+* *No changes yet*
 
 ## Changes in version 0.8.0
 
-This is the development version of mwclient.
+Mwclient 0.8.0 was released on 10 January 2016.
 
 Upgrade notices / breaking changes:
 

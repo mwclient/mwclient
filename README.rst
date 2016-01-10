@@ -38,8 +38,8 @@ For functions not available in the current MediaWiki, a ``MediaWikiVersionError`
 
 This framework was written by Bryan Tong Minh, who maintained the project until
 version 0.6.5, released on 6 May 2011. The current stable
-`version 0.7.2 <https://github.com/mwclient/mwclient/archive/v0.7.2.zip>`_
-was released on 18 July 2015, and is `available through PyPI <https://pypi.python.org/pypi/mwclient>`_:
+`version 0.8.0 <https://github.com/mwclient/mwclient/archive/v0.8.0.zip>`_
+was released on 10 January 2016, and is `available through PyPI <https://pypi.python.org/pypi/mwclient>`_:
 
 .. code-block:: console
 
