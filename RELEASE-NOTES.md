@@ -4,7 +4,8 @@
 
 This is the development version of mwclient.
 
-* *No changes yet*
+* [2016-01-23] [@Danmichaelo](https://github.com/Danmichaelo)
+  Add more options to `Site.parse`.
 
 ## Changes in version 0.8.0
 
