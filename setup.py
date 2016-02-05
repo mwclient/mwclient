@@ -39,7 +39,7 @@ if sys.version_info < (2, 7):
     requirements.append('ordereddict')
 
 setup(name='mwclient',
-      version='0.8.1.dev1',  # Rember to also update __ver__ in client.py
+      version='0.8.1',  # Rember to also update __ver__ in client.py
       description='MediaWiki API client',
       long_description=README,
       classifiers=[
