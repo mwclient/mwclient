@@ -57,7 +57,7 @@ class List(object):
             if self.last:
                 raise StopIteration
             self.load_chunk()
-            return List.next(self, full=full)
+            return List.__next__(self, full=full)
 
     def next(self, full=False):
         """ For Python 2.x support """
@@ -139,13 +139,17 @@ class GeneratorList(List):
 
         self.page_class = mwclient.page.Page
 
-    def next(self):
-        info = List.next(self, full=True)
+    def __next__(self):
+        info = List.__next__(self, full=True)
         if info['ns'] == 14:
             return Category(self.site, u'', info)
         if info['ns'] == 6:
             return mwclient.image.Image(self.site, u'', info)
         return mwclient.page.Page(self.site, u'', info)
+
+    def next(self):
+        """ For Python 2.x support """
+        return self.__next__()
 
     def load_chunk(self):
         # Put this here so that the constructor does not fail
