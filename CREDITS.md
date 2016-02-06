@@ -28,7 +28,9 @@ Dan Michael O. Heggø ([@danmichaelo](https://github.com/danmichaelo)) was the a
 Soon after, the repository was moved to an organization
   [#12 (comment)](https://github.com/mwclient/mwclient/issues/12#issuecomment-20447515),
   and in 2014 version 7.0 was released (the first after a 3-year hiatus).
-Dan has been the maintainer of the project since then.
+Since then, Dan has been the maintainer of the project,
+  which has attracted contributions from
+  [several other people](../../graphs/contributors).
 
 For more details on the technical history of the project,
   see the [RELEASE-NOTES.md](RELEASE-NOTES.md) document.
