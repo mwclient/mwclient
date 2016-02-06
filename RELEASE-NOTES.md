@@ -8,11 +8,11 @@ This is the development version of mwclient.
 
 Mwclient 0.8.1 was released on 5 February 2016.
 
-* [2016-01-23] [@Danmichaelo](https://github.com/Danmichaelo)
+* [2016-01-23] [@Danmichaelo](https://github.com/Danmichaelo):
   Add more options to `Site.parse`.
-* [2016-02-05] [@tosher](https://github.com/tosher) [@AdamWill](https://github.com/AdamWill)
+* [2016-02-05] [@tosher](https://github.com/tosher), [@AdamWill](https://github.com/AdamWill):
   Fix GeneratorList with Python 3.
-  [#106](https://github.com/mwclient/mwclient/issues/106)
+  [#106](https://github.com/mwclient/mwclient/issues/106).
 
 ## Changes in version 0.8.0
 
@@ -29,22 +29,24 @@ Upgrade notices / breaking changes:
 
 Detailed changelog:
 
-* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo):
   Add support for Python 3.
-  [#52](https://github.com/mwclient/mwclient/issues/52)
-* [2015-07-19] [@Danmichaelo](https://github.com/Danmichaelo)
+  [#52](https://github.com/mwclient/mwclient/issues/52).
+* [2015-07-19] [@Danmichaelo](https://github.com/Danmichaelo):
   Fix broken `Image.download()` method.
-* [2015-08-29] [@AdamWill](https://github.com/AdamWill)
+* [2015-08-29] [@AdamWill](https://github.com/AdamWill):
   Remove implicit use of Page.section when saving
   (deprecated in 0.7.2),
-  [#81](https://github.com/mwclient/mwclient/issues/81)
-* [2015-09-27] [@AdamWill](https://github.com/AdamWill)
+  [#81](https://github.com/mwclient/mwclient/issues/81).
+* [2015-09-27] [@AdamWill](https://github.com/AdamWill):
   Cache page text until next edit operation.
-  [#80](https://github.com/mwclient/mwclient/issues/80)
-* [2015-11-09] [@Rdhyee](https://github.com/Rdhyee) Add `Site.revisions()` method and support `diffto`.
-  [#84](https://github.com/mwclient/mwclient/pull/84)
-* [2016-01-10] [@Danmichaelo](https://github.com/Danmichaelo) Use https as default.
-  [#70](https://github.com/mwclient/mwclient/issues/70)
+  [#80](https://github.com/mwclient/mwclient/issues/80).
+* [2015-11-09] [@Rdhyee](https://github.com/Rdhyee):
+  Add `Site.revisions()` method and support `diffto`.
+  [#84](https://github.com/mwclient/mwclient/pull/84).
+* [2016-01-10] [@Danmichaelo](https://github.com/Danmichaelo):
+  Use https as default.
+  [#70](https://github.com/mwclient/mwclient/issues/70).
 
 ## Changes in version 0.7.2
 
@@ -65,21 +67,21 @@ Mwclient 0.7.2 was released on 18 July 2015.
 * [2015-06-20] [@lfaraone](https://github.com/lfaraone):
   Add support for querying the CheckUser log.
   [#86](https://github.com/mwclient/mwclient/pull/86).
-* [2015-07-06] [@PierreSelim](https://github.com/PierreSelim)
+* [2015-07-06] [@PierreSelim](https://github.com/PierreSelim):
   Expose `pageid`, `contentmodel`, `pagelanguage`, `restrictiontypes` as attributes of `Page`.
-  [#89](https://github.com/mwclient/mwclient/pull/89)
-* [2015-07-08] [@Pathoschild](https://github.com/Pathoschild)
+  [#89](https://github.com/mwclient/mwclient/pull/89).
+* [2015-07-08] [@Pathoschild](https://github.com/Pathoschild):
   Fix 'New messages' flag (`hasmsg`).
-  [#90](https://github.com/mwclient/mwclient/issues/90)
-* [2015-07-17] [@Danmichaelo](https://github.com/Danmichaelo)
+  [#90](https://github.com/mwclient/mwclient/issues/90).
+* [2015-07-17] [@Danmichaelo](https://github.com/Danmichaelo):
   Don't retry on connection error during site init.
-  [#85](https://github.com/mwclient/mwclient/issues/85)
-* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+  [#85](https://github.com/mwclient/mwclient/issues/85).
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo):
   Deprecate implicit use of Page.section when saving, to prepare for
-  the merge of [#81](https://github.com/mwclient/mwclient/issues/81)
-* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+  the merge of [#81](https://github.com/mwclient/mwclient/issues/81).
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo):
   More intuitive error message when an invalid JSON response is received.
-  [#79](https://github.com/mwclient/mwclient/issues/79)
+  [#79](https://github.com/mwclient/mwclient/issues/79).
 
 ## Changes in version 0.7.1
 
