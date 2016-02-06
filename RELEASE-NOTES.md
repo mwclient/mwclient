@@ -130,45 +130,45 @@ Upgrade notices:
 Detailed changelog:
 * [2012-08-30] [@btongminh](https://github.com/btongminh):
   Allow setting both the upload description and the page content separately.
-  [0aa748f](https://github.com/btongminh/mwclient/commit/0aa748f).
+  [0aa748f](https://github.com/mwclient/mwclient/commit/0aa748f).
 * [2012-08-30] [@tommorris](https://github.com/tommorris):
   Improve documentation.
-  [a2723e7](https://github.com/btongminh/mwclient/commit/a2723e7).
+  [a2723e7](https://github.com/mwclient/mwclient/commit/a2723e7).
 * [2013-02-15] [@waldyrious](https://github.com/waldyrious):
   Converted the repository to git and moved from sourceforge to github.
-  [#1](https://github.com/btongminh/mwclient/issues/1) (also
-  [#11](https://github.com/btongminh/mwclient/issues/11),
-  [#13](https://github.com/btongminh/mwclient/issues/13) and
-  [#15](https://github.com/btongminh/mwclient/issues/15)).
+  [#1](https://github.com/mwclient/mwclient/issues/1) (also
+  [#11](https://github.com/mwclient/mwclient/issues/11),
+  [#13](https://github.com/mwclient/mwclient/issues/13) and
+  [#15](https://github.com/mwclient/mwclient/issues/15)).
 * [2013-03-20] [@eug48](https://github.com/eug48):
   Support for customising the useragent.
-  [773adf9](https://github.com/btongminh/mwclient/commit/773adf9),
-  [#16](https://github.com/btongminh/mwclient/pull/16).
+  [773adf9](https://github.com/mwclient/mwclient/commit/773adf9),
+  [#16](https://github.com/mwclient/mwclient/pull/16).
 * [2013-03-20] [@eug48](https://github.com/eug48):
   Removed unused `Request` class.
-  [99e786d](https://github.com/btongminh/mwclient/commit/99e786d),
-  [#16](https://github.com/btongminh/mwclient/pull/16).
+  [99e786d](https://github.com/mwclient/mwclient/commit/99e786d),
+  [#16](https://github.com/mwclient/mwclient/pull/16).
 * [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
   Support for requesting pages by their page id (`site.pages[page_id]`).
   [a1a2ced](https://github.com/danmichaelo/mwclient/commit/a1a2ced),
-  [#19](https://github.com/btongminh/mwclient/pull/19).
+  [#19](https://github.com/mwclient/mwclient/pull/19).
 * [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
   Support for editing sections.
   [546f77d](https://github.com/danmichaelo/mwclient/commit/546f77d),
-  [#19](https://github.com/btongminh/mwclient/pull/19).
+  [#19](https://github.com/mwclient/mwclient/pull/19).
 * [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
   New method `Page.redirects_to()` and helper method `Page.resolve_redirect()`.
   [3b851cb](https://github.com/danmichaelo/mwclient/commit/3b851cb),
   [36e8dcc](https://github.com/danmichaelo/mwclient/commit/36e8dcc),
-  [#19](https://github.com/btongminh/mwclient/pull/19).
+  [#19](https://github.com/mwclient/mwclient/pull/19).
 * [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
   Support argument `action` with `logevents()`.
   [241ed37](https://github.com/danmichaelo/mwclient/commit/241ed37),
-  [#19](https://github.com/btongminh/mwclient/pull/19).
+  [#19](https://github.com/mwclient/mwclient/pull/19).
 * [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
   Support argument `page` with `parse()`.
   [223aa0](https://github.com/danmichaelo/mwclient/commit/223aa0),
-  [#19](https://github.com/btongminh/mwclient/pull/19).
+  [#19](https://github.com/mwclient/mwclient/pull/19).
 * [2013-11-14] [@kyv](https://github.com/kyv):
   Allow setting HTTP `Authorization` header.
   [HTTP headers](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.8).
