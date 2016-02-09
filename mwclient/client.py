@@ -28,7 +28,7 @@ try:
 except ImportError:
     gzip = None
 
-__ver__ = '0.8.0.dev1'
+__ver__ = '0.8.1'
 
 log = logging.getLogger(__name__)
 
@@ -267,7 +267,7 @@ class Site(object):
             headers['Accept-Encoding'] = 'gzip'
         sleeper = self.sleepers.make((script, data))
         while True:
-            scheme = 'http'  # Should we move to 'https' as default?
+            scheme = 'https'
             host = self.host
             if isinstance(host, (list, tuple)):
                 scheme, host = host
@@ -535,7 +535,7 @@ class Site(object):
             if self.handle_api_result(info, kwargs=predata, sleeper=sleeper):
                 return info.get('upload', {})
 
-    def parse(self, text=None, title=None, page=None):
+    def parse(self, text=None, title=None, page=None, prop=None, redirects=False, mobileformat=False):
         kwargs = {}
         if text is not None:
             kwargs['text'] = text
@@ -543,6 +543,12 @@ class Site(object):
             kwargs['title'] = title
         if page is not None:
             kwargs['page'] = page
+        if prop is not None:
+            kwargs['prop'] = prop
+        if redirects:
+            kwargs['redirects'] = '1'
+        if mobileformat:
+            kwargs['mobileformat'] = '1'
         result = self.api('parse', **kwargs)
         return result['parse']
 

@@ -43,7 +43,7 @@ class TestCase(unittest.TestCase):
     def metaResponseAsJson(self, **kwargs):
         return json.dumps(self.metaResponse(**kwargs))
 
-    def httpShouldReturn(self, body=None, callback=None, scheme='http', host='test.wikipedia.org', path='/w/',
+    def httpShouldReturn(self, body=None, callback=None, scheme='https', host='test.wikipedia.org', path='/w/',
                          script='api', headers=None, status=200):
         url = '{scheme}://{host}{path}{script}.php'.format(scheme=scheme, host=host, path=path, script=script)
         if body is None:
@@ -96,10 +96,10 @@ class TestClient(TestCase):
         assert version == mwclient.__ver__
 
     @responses.activate
-    def test_http_as_default(self):
-        # 'http' should be the default scheme (for historical reasons)
+    def test_https_as_default(self):
+        # 'https' should be the default scheme
 
-        self.httpShouldReturn(self.metaResponseAsJson(), scheme='http')
+        self.httpShouldReturn(self.metaResponseAsJson(), scheme='https')
 
         site = mwclient.Site('test.wikipedia.org')
 
@@ -116,7 +116,7 @@ class TestClient(TestCase):
             else:
                 return (200, {}, self.metaResponseAsJson())
 
-        self.httpShouldReturn(callback=request_callback, scheme='http')
+        self.httpShouldReturn(callback=request_callback, scheme='https')
 
         site = mwclient.Site('test.wikipedia.org')
 
@@ -128,7 +128,7 @@ class TestClient(TestCase):
     def test_http_error(self):
         # Client should raise HTTPError
 
-        self.httpShouldReturn('Uh oh', scheme='http', status=400)
+        self.httpShouldReturn('Uh oh', scheme='https', status=400)
 
         with pytest.raises(requests.exceptions.HTTPError):
             site = mwclient.Site('test.wikipedia.org')
@@ -137,7 +137,7 @@ class TestClient(TestCase):
     def test_headers(self):
         # Content-type should be 'application/x-www-form-urlencoded'
 
-        self.httpShouldReturn(self.metaResponseAsJson(), scheme='http')
+        self.httpShouldReturn(self.metaResponseAsJson(), scheme='https')
 
         site = mwclient.Site('test.wikipedia.org')
 
@@ -146,12 +146,12 @@ class TestClient(TestCase):
         assert responses.calls[0].request.headers['content-type'] == 'application/x-www-form-urlencoded'
 
     @responses.activate
-    def test_force_https(self):
-        # Setting https should work
+    def test_force_http(self):
+        # Setting http should work
 
-        self.httpShouldReturn(self.metaResponseAsJson(), scheme='https')
+        self.httpShouldReturn(self.metaResponseAsJson(), scheme='http')
 
-        site = mwclient.Site(('https', 'test.wikipedia.org'))
+        site = mwclient.Site(('http', 'test.wikipedia.org'))
 
         assert len(responses.calls) == 1
 

@@ -1,34 +1,52 @@
 # Release Notes for mwclient
 
-
-## Changes in version 0.8.0
+## Changes in version 0.8.2
 
 This is the development version of mwclient.
 
-Upgrade notices:
+## Changes in version 0.8.1
 
- - Breaking change: Saving a section rather than the full page can now only
+Mwclient 0.8.1 was released on 5 February 2016.
+
+* [2016-01-23] [@Danmichaelo](https://github.com/Danmichaelo):
+  Add more options to `Site.parse`.
+* [2016-02-05] [@tosher](https://github.com/tosher), [@AdamWill](https://github.com/AdamWill):
+  Fix GeneratorList with Python 3.
+  [#106](https://github.com/mwclient/mwclient/issues/106).
+
+## Changes in version 0.8.0
+
+Mwclient 0.8.0 was released on 10 January 2016.
+
+Upgrade notices / breaking changes:
+
+ - Saving a section rather than the full page can now only
    be achieved by passing in the section parameter explicitly to the `save`
    method. The section number is no longer part of the `Page` state, so
    `Page.save()` no longer makes use of a section parameter earlier passed
    into `Page.text()`. A deprecation warning was added in 0.7.2.
+ - Https is now used as default.
 
 Detailed changelog:
 
-* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo):
   Add support for Python 3.
-  [#52](https://github.com/mwclient/mwclient/issues/52)
-* [2015-07-19] [@Danmichaelo](https://github.com/Danmichaelo)
+  [#52](https://github.com/mwclient/mwclient/issues/52).
+* [2015-07-19] [@Danmichaelo](https://github.com/Danmichaelo):
   Fix broken `Image.download()` method.
-* [2015-08-29] [@AdamWill](https://github.com/AdamWill)
+* [2015-08-29] [@AdamWill](https://github.com/AdamWill):
   Remove implicit use of Page.section when saving
   (deprecated in 0.7.2),
-  [#81](https://github.com/mwclient/mwclient/issues/81)
-* [2015-09-27] [@AdamWill](https://github.com/AdamWill)
+  [#81](https://github.com/mwclient/mwclient/issues/81).
+* [2015-09-27] [@AdamWill](https://github.com/AdamWill):
   Cache page text until next edit operation.
-  [#80](https://github.com/mwclient/mwclient/issues/80)
-* Add `Site.revisions()` method and support `diffto`.
-  [#84](https://github.com/mwclient/mwclient/pull/84)
+  [#80](https://github.com/mwclient/mwclient/issues/80).
+* [2015-11-09] [@Rdhyee](https://github.com/Rdhyee):
+  Add `Site.revisions()` method and support `diffto`.
+  [#84](https://github.com/mwclient/mwclient/pull/84).
+* [2016-01-10] [@Danmichaelo](https://github.com/Danmichaelo):
+  Use https as default.
+  [#70](https://github.com/mwclient/mwclient/issues/70).
 
 ## Changes in version 0.7.2
 
@@ -49,21 +67,21 @@ Mwclient 0.7.2 was released on 18 July 2015.
 * [2015-06-20] [@lfaraone](https://github.com/lfaraone):
   Add support for querying the CheckUser log.
   [#86](https://github.com/mwclient/mwclient/pull/86).
-* [2015-07-06] [@PierreSelim](https://github.com/PierreSelim)
+* [2015-07-06] [@PierreSelim](https://github.com/PierreSelim):
   Expose `pageid`, `contentmodel`, `pagelanguage`, `restrictiontypes` as attributes of `Page`.
-  [#89](https://github.com/mwclient/mwclient/pull/89)
-* [2015-07-08] [@Pathoschild](https://github.com/Pathoschild)
+  [#89](https://github.com/mwclient/mwclient/pull/89).
+* [2015-07-08] [@Pathoschild](https://github.com/Pathoschild):
   Fix 'New messages' flag (`hasmsg`).
-  [#90](https://github.com/mwclient/mwclient/issues/90)
-* [2015-07-17] [@Danmichaelo](https://github.com/Danmichaelo)
+  [#90](https://github.com/mwclient/mwclient/issues/90).
+* [2015-07-17] [@Danmichaelo](https://github.com/Danmichaelo):
   Don't retry on connection error during site init.
-  [#85](https://github.com/mwclient/mwclient/issues/85)
-* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+  [#85](https://github.com/mwclient/mwclient/issues/85).
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo):
   Deprecate implicit use of Page.section when saving, to prepare for
-  the merge of [#81](https://github.com/mwclient/mwclient/issues/81)
-* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo)
+  the merge of [#81](https://github.com/mwclient/mwclient/issues/81).
+* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo):
   More intuitive error message when an invalid JSON response is received.
-  [#79](https://github.com/mwclient/mwclient/issues/79)
+  [#79](https://github.com/mwclient/mwclient/issues/79).
 
 ## Changes in version 0.7.1
 
@@ -114,45 +132,45 @@ Upgrade notices:
 Detailed changelog:
 * [2012-08-30] [@btongminh](https://github.com/btongminh):
   Allow setting both the upload description and the page content separately.
-  [0aa748f](https://github.com/btongminh/mwclient/commit/0aa748f).
+  [0aa748f](https://github.com/mwclient/mwclient/commit/0aa748f).
 * [2012-08-30] [@tommorris](https://github.com/tommorris):
   Improve documentation.
-  [a2723e7](https://github.com/btongminh/mwclient/commit/a2723e7).
+  [a2723e7](https://github.com/mwclient/mwclient/commit/a2723e7).
 * [2013-02-15] [@waldyrious](https://github.com/waldyrious):
   Converted the repository to git and moved from sourceforge to github.
-  [#1](https://github.com/btongminh/mwclient/issues/1) (also
-  [#11](https://github.com/btongminh/mwclient/issues/11),
-  [#13](https://github.com/btongminh/mwclient/issues/13) and
-  [#15](https://github.com/btongminh/mwclient/issues/15)).
+  [#1](https://github.com/mwclient/mwclient/issues/1) (also
+  [#11](https://github.com/mwclient/mwclient/issues/11),
+  [#13](https://github.com/mwclient/mwclient/issues/13) and
+  [#15](https://github.com/mwclient/mwclient/issues/15)).
 * [2013-03-20] [@eug48](https://github.com/eug48):
   Support for customising the useragent.
-  [773adf9](https://github.com/btongminh/mwclient/commit/773adf9),
-  [#16](https://github.com/btongminh/mwclient/pull/16).
+  [773adf9](https://github.com/mwclient/mwclient/commit/773adf9),
+  [#16](https://github.com/mwclient/mwclient/pull/16).
 * [2013-03-20] [@eug48](https://github.com/eug48):
   Removed unused `Request` class.
-  [99e786d](https://github.com/btongminh/mwclient/commit/99e786d),
-  [#16](https://github.com/btongminh/mwclient/pull/16).
+  [99e786d](https://github.com/mwclient/mwclient/commit/99e786d),
+  [#16](https://github.com/mwclient/mwclient/pull/16).
 * [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
   Support for requesting pages by their page id (`site.pages[page_id]`).
   [a1a2ced](https://github.com/danmichaelo/mwclient/commit/a1a2ced),
-  [#19](https://github.com/btongminh/mwclient/pull/19).
+  [#19](https://github.com/mwclient/mwclient/pull/19).
 * [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
   Support for editing sections.
   [546f77d](https://github.com/danmichaelo/mwclient/commit/546f77d),
-  [#19](https://github.com/btongminh/mwclient/pull/19).
+  [#19](https://github.com/mwclient/mwclient/pull/19).
 * [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
   New method `Page.redirects_to()` and helper method `Page.resolve_redirect()`.
   [3b851cb](https://github.com/danmichaelo/mwclient/commit/3b851cb),
   [36e8dcc](https://github.com/danmichaelo/mwclient/commit/36e8dcc),
-  [#19](https://github.com/btongminh/mwclient/pull/19).
+  [#19](https://github.com/mwclient/mwclient/pull/19).
 * [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
   Support argument `action` with `logevents()`.
   [241ed37](https://github.com/danmichaelo/mwclient/commit/241ed37),
-  [#19](https://github.com/btongminh/mwclient/pull/19).
+  [#19](https://github.com/mwclient/mwclient/pull/19).
 * [2013-05-13] [@danmichaelo](https://github.com/danmichaelo):
   Support argument `page` with `parse()`.
   [223aa0](https://github.com/danmichaelo/mwclient/commit/223aa0),
-  [#19](https://github.com/btongminh/mwclient/pull/19).
+  [#19](https://github.com/mwclient/mwclient/pull/19).
 * [2013-11-14] [@kyv](https://github.com/kyv):
   Allow setting HTTP `Authorization` header.
   [HTTP headers](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.8).

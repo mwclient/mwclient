@@ -32,14 +32,11 @@ mwclient
 
 mwclient is a lightweight Python client library to the `MediaWiki API <https://mediawiki.org/wiki/API>`_
 which provides access to most API functionality.
-It requires Python 2.6 or 2.7 (Python 3.3 and 3.4 supported in the development version)
-and supports MediaWiki 1.16 and above.
+It works with Python 2.6, 2.7, 3.3 and above, and supports MediaWiki 1.16 and above.
 For functions not available in the current MediaWiki, a ``MediaWikiVersionError`` is raised.
 
-This framework was written by Bryan Tong Minh, who maintained the project until
-version 0.6.5, released on 6 May 2011. The current stable
-`version 0.7.2 <https://github.com/mwclient/mwclient/archive/v0.7.2.zip>`_
-was released on 18 July 2015, and is `available through PyPI <https://pypi.python.org/pypi/mwclient>`_:
+The current stable `version 0.8.1 <https://github.com/mwclient/mwclient/archive/v0.8.1.zip>`_
+was released on 5 February 2016, and is `available through PyPI <https://pypi.python.org/pypi/mwclient>`_:
 
 .. code-block:: console
 
@@ -113,7 +110,8 @@ Default chunk size is generally the maximum chunk size.
 HTTPS
 -----
 
-To use https, specify the host as a tuple in the form of ``('https', hostname)``.
+mwclient uses https as default from version 0.8.0. To use http instead,
+specify the host as a tuple in the form of ``('http', hostname)``.
 
 
 User-agents
@@ -127,7 +125,7 @@ following example:
 .. code-block:: python
 
     useragent = 'YourBot, based on mwclient v0.7.2. Run by User:You, you@gmail.com'
-    site = mwclient.Site(('https', 'en.wikipedia.org'), clients_useragent=useragent)
+    site = mwclient.Site('en.wikipedia.org', clients_useragent=useragent)
 
 
 Example

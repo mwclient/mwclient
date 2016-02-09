@@ -12,7 +12,7 @@ def read_config(config_files, **predata):
 
 def _read_config_file(_config_file, predata):
     _file = open(_config_file)
-    exec _file in globals(), predata
+    exec(_file, globals(), predata)
     _file.close()
 
     for _k, _v in predata.iteritems():
