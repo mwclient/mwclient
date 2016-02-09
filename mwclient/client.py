@@ -55,7 +55,7 @@ class Site(object):
     def __init__(self, host, path='/w/', ext='.php', pool=None, retry_timeout=30,
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
                  max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
-                 do_ssl_cert_verify=True, proxies=None):
+                 **kwargs):
         # Setup member variables
         self.host = host
         self.path = path
@@ -64,6 +64,7 @@ class Site(object):
         self.compress = compress
         self.max_lag = text_type(max_lag)
         self.force_login = force_login
+        self.connection_kwargs = kwargs
 
         if isinstance(httpauth, (list, tuple)):
             self.httpauth = HTTPBasicAuth(*httpauth)
@@ -88,8 +89,6 @@ class Site(object):
         # Setup connection
         if pool is None:
             self.connection = requests.Session()
-            self.connection.verify = do_ssl_cert_verify
-            self.connection.proxies = proxies
             self.connection.auth = self.httpauth
             self.connection.headers['User-Agent'] = 'MwClient/' + __ver__ + ' (https://github.com/mwclient/mwclient)'
             if clients_useragent:
@@ -275,7 +274,7 @@ class Site(object):
             fullurl = '{scheme}://{host}{url}'.format(scheme=scheme, host=host, url=url)
 
             try:
-                stream = self.connection.post(fullurl, data=data, files=files, headers=headers)
+                stream = self.connection.post(fullurl, data=data, files=files, headers=headers, **self.connection_kwargs)
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
                     log.warning('Database lag exceeds max lag. Waiting for %d seconds', wait_time)
