@@ -28,7 +28,7 @@ Dan Michael O. Heggø ([@danmichaelo](https://github.com/danmichaelo))
   in the early history of mwclient as a git repository.
 Soon after, the repository was moved to an organization
   ([#12, comment](https://github.com/mwclient/mwclient/issues/12#issuecomment-20447515)),
-  and in 2014 version 7.0 was released (the first after a 3-year hiatus).
+  and in 2014 version 0.7.0 was released (the first after a 3-year hiatus).
 Since then, Dan has been the maintainer of the project,
   which has attracted contributions from
   [several other people](../../graphs/contributors).
