@@ -181,7 +181,7 @@ class Category(mwclient.page.Page, GeneratorList):
 
 class PageList(GeneratorList):
 
-    def __init__(self, site, prefix=None, start=None, namespace=0, redirects='all'):
+    def __init__(self, site, prefix=None, start=None, namespace=0, redirects='all', end=None):
         self.namespace = namespace
 
         kwargs = {}
@@ -189,6 +189,8 @@ class PageList(GeneratorList):
             kwargs['gapprefix'] = prefix
         if start:
             kwargs['gapfrom'] = start
+        if end:
+            kwargs['gapto'] = end
 
         GeneratorList.__init__(self, site, 'allpages', 'ap',
                                gapnamespace=text_type(namespace), gapfilterredir=redirects, **kwargs)
