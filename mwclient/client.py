@@ -64,7 +64,7 @@ class Site(object):
         self.compress = compress
         self.max_lag = text_type(max_lag)
         self.force_login = force_login
-        self.connection_kwargs = kwargs
+        self.requests = kwargs.get('requests', {})
 
         if isinstance(httpauth, (list, tuple)):
             self.httpauth = HTTPBasicAuth(*httpauth)
@@ -274,7 +274,7 @@ class Site(object):
             fullurl = '{scheme}://{host}{url}'.format(scheme=scheme, host=host, url=url)
 
             try:
-                stream = self.connection.post(fullurl, data=data, files=files, headers=headers, **self.connection_kwargs)
+                stream = self.connection.post(fullurl, data=data, files=files, headers=headers, **self.requests)
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
                     log.warning('Database lag exceeds max lag. Waiting for %d seconds', wait_time)
