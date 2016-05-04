@@ -55,7 +55,7 @@ class Site(object):
     def __init__(self, host, path='/w/', ext='.php', pool=None, retry_timeout=30,
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
                  max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
-                 **kwargs):
+                 requests=None):
         # Setup member variables
         self.host = host
         self.path = path
@@ -64,7 +64,7 @@ class Site(object):
         self.compress = compress
         self.max_lag = text_type(max_lag)
         self.force_login = force_login
-        self.requests = kwargs.get('requests', {})
+        self.requests = requests or {}
 
         if isinstance(httpauth, (list, tuple)):
             self.httpauth = HTTPBasicAuth(*httpauth)
