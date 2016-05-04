@@ -54,7 +54,8 @@ class Site(object):
 
     def __init__(self, host, path='/w/', ext='.php', pool=None, retry_timeout=30,
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
-                 max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None):
+                 max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
+                 requests=None):
         # Setup member variables
         self.host = host
         self.path = path
@@ -63,6 +64,7 @@ class Site(object):
         self.compress = compress
         self.max_lag = text_type(max_lag)
         self.force_login = force_login
+        self.requests = requests or {}
 
         if isinstance(httpauth, (list, tuple)):
             self.httpauth = HTTPBasicAuth(*httpauth)
@@ -272,7 +274,7 @@ class Site(object):
             fullurl = '{scheme}://{host}{url}'.format(scheme=scheme, host=host, url=url)
 
             try:
-                stream = self.connection.post(fullurl, data=data, files=files, headers=headers)
+                stream = self.connection.post(fullurl, data=data, files=files, headers=headers, **self.requests)
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
                     log.warning('Database lag exceeds max lag. Waiting for %d seconds', wait_time)
