@@ -627,7 +627,7 @@ class Site(object):
 
         # TODO: Fix. Fix what?
         kwargs = dict(listing.List.generate_kwargs('bk', start=start, end=end, dir=dir,
-                                                   users=users, prop=prop))
+                                                   ids=ids, users=users, prop=prop))
         return listing.List(self, 'blocks', 'bk', limit=limit, **kwargs)
 
     def deletedrevisions(self, start=None, end=None, dir='older', namespace=None,
