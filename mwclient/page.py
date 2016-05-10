@@ -11,7 +11,8 @@ class Page(object):
 
     def __init__(self, site, name, info=None, extra_properties=None):
         if type(name) is type(self):
-            return self.__dict__.update(name.__dict__)
+            self.__dict__.update(name.__dict__)
+            return
         self.site = site
         self.name = name
         self._textcache = {}
@@ -20,7 +21,8 @@ class Page(object):
             if extra_properties:
                 prop = 'info|' + '|'.join(six.iterkeys(extra_properties))
                 extra_props = []
-                [extra_props.extend(extra_prop) for extra_prop in six.itervalues(extra_properties)]
+                for extra_prop in six.itervalues(extra_properties):
+                    extra_props.extend(extra_prop)
             else:
                 prop = 'info'
                 extra_props = ()
