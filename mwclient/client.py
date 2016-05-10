@@ -570,7 +570,7 @@ class Site(object):
         return listing.List.get_list(generator)(self, 'allpages', 'ap', limit=limit, return_values='title', **kwargs)
 
     def allimages(self, start=None, prefix=None, minsize=None, maxsize=None, limit=None,
-                  dir='ascending', sha1=None, sha1base36=None, prop='timestamp|url',
+                  dir='ascending', sha1=None, sha1base36=None,
                   generator=True):
         """Retrieve all images on the wiki as a generator."""
 
