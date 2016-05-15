@@ -25,7 +25,11 @@
 
 .. image:: https://readthedocs.org/projects/mwclient/badge/?version=master
    :target: https://readthedocs.org/projects/mwclient/?badge=master
-   :alt: Documentation Status
+   :alt: Documentation status
+   
+.. image:: http://issuestats.com/github/mwclient/mwclient/badge/pr?style=flat
+   :target: http://issuestats.com/github/mwclient/mwclient
+   :alt: Issue statistics
 
 mwclient
 ========
