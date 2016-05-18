@@ -559,50 +559,51 @@ class Site(object):
     # Lists
     def allpages(self, start=None, prefix=None, namespace='0', filterredir='all',
                  minsize=None, maxsize=None, prtype=None, prlevel=None,
-                 limit=None, dir='ascending', filterlanglinks='all', generator=True):
+                 limit=None, dir='ascending', filterlanglinks='all', generator=True,
+                 end=None):
         """Retrieve all pages on the wiki as a generator."""
 
         pfx = listing.List.get_prefix('ap', generator)
-        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), prefix=prefix,
+        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end), prefix=prefix,
                                                    minsize=minsize, maxsize=maxsize, prtype=prtype, prlevel=prlevel,
                                                    namespace=namespace, filterredir=filterredir, dir=dir,
                                                    filterlanglinks=filterlanglinks))
         return listing.List.get_list(generator)(self, 'allpages', 'ap', limit=limit, return_values='title', **kwargs)
 
     def allimages(self, start=None, prefix=None, minsize=None, maxsize=None, limit=None,
-                  dir='ascending', sha1=None, sha1base36=None,
-                  generator=True):
+                  dir='ascending', sha1=None, sha1base36=None, generator=True, end=None):
         """Retrieve all images on the wiki as a generator."""
 
         pfx = listing.List.get_prefix('ai', generator)
-        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), prefix=prefix,
+        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end), prefix=prefix,
                                                    minsize=minsize, maxsize=maxsize,
                                                    dir=dir, sha1=sha1, sha1base36=sha1base36))
         return listing.List.get_list(generator)(self, 'allimages', 'ai', limit=limit, return_values='timestamp|url', **kwargs)
 
     def alllinks(self, start=None, prefix=None, unique=False, prop='title',
-                 namespace='0', limit=None, generator=True):
+                 namespace='0', limit=None, generator=True, end=None):
         """Retrieve a list of all links on the wiki as a generator."""
 
         pfx = listing.List.get_prefix('al', generator)
-        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), prefix=prefix,
+        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end), prefix=prefix,
                                                    prop=prop, namespace=namespace))
         if unique:
             kwargs[pfx + 'unique'] = '1'
         return listing.List.get_list(generator)(self, 'alllinks', 'al', limit=limit, return_values='title', **kwargs)
 
-    def allcategories(self, start=None, prefix=None, dir='ascending', limit=None, generator=True):
+    def allcategories(self, start=None, prefix=None, dir='ascending', limit=None, generator=True,
+                      end=None):
         """Retrieve all categories on the wiki as a generator."""
 
         pfx = listing.List.get_prefix('ac', generator)
-        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), prefix=prefix, dir=dir))
+        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end), prefix=prefix, dir=dir))
         return listing.List.get_list(generator)(self, 'allcategories', 'ac', limit=limit, **kwargs)
 
     def allusers(self, start=None, prefix=None, group=None, prop=None, limit=None,
-                 witheditsonly=False, activeusers=False, rights=None):
+                 witheditsonly=False, activeusers=False, rights=None, end=None):
         """Retrieve all users on the wiki as a generator."""
 
-        kwargs = dict(listing.List.generate_kwargs('au', ('from', start), prefix=prefix,
+        kwargs = dict(listing.List.generate_kwargs('au', ('from', start), ('to', end), prefix=prefix,
                                                    group=group, prop=prop,
                                                    rights=rights,
                                                    witheditsonly=witheditsonly,
