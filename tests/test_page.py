@@ -98,7 +98,7 @@ class TestPage(unittest.TestCase):
         assert page.page_title == title
 
     @mock.patch('mwclient.client.Site')
-    def test_proection_levels(self, mock_site):
+    def test_protection_levels(self, mock_site):
         # If page is protected, check that protection is parsed correctly
 
         title = 'Some page'
