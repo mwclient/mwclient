@@ -118,6 +118,16 @@ class Site(object):
                     raise
 
     def site_init(self):
+
+        if self.initialized:
+            info = self.api('query', meta='userinfo', uiprop='groups|rights')
+            userinfo = info['query']['userinfo']
+            self.username = userinfo['name']
+            self.groups = userinfo.get('groups', [])
+            self.rights = userinfo.get('rights', [])
+            self.tokens = {}
+            return
+
         meta = self.api('query', meta='siteinfo|userinfo',
                         siprop='general|namespaces', uiprop='groups|rights', retry_on_error=False)
 
@@ -402,15 +412,7 @@ class Site(object):
                 else:
                     raise errors.LoginError(self, login['login'])
 
-        if self.initialized:
-            info = self.api('query', meta='userinfo', uiprop='groups|rights')
-            userinfo = info['query']['userinfo']
-            self.username = userinfo['name']
-            self.groups = userinfo.get('groups', [])
-            self.rights = userinfo.get('rights', [])
-            self.tokens = {}
-        else:
-            self.site_init()
+        self.site_init()
 
     def get_token(self, type, force=False, title=None):
 

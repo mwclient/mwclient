@@ -221,6 +221,21 @@ class TestClient(TestCase):
         with pytest.raises(mwclient.errors.MediaWikiVersionError):
             site = mwclient.Site('test.wikipedia.org')
 
+    @responses.activate
+    def test_private_wiki(self):
+        # Should not raise error
+
+        self.httpShouldReturn(json.dumps({
+            'error': {
+                'code': 'readapidenied',
+                'info': 'You need read permission to use this module'
+            }
+        }))
+
+        site = mwclient.Site('test.wikipedia.org')
+
+        assert site.initialized is False
+
     # ----- Use standard setup for rest
 
     @responses.activate
@@ -233,6 +248,34 @@ class TestClient(TestCase):
         site.raw_index(action='purge', title='Main Page')
 
         assert len(responses.calls) == 1
+
+    @responses.activate
+    def test_api_error_response(self):
+        # Test that APIError is thrown on error response
+
+        site = self.stdSetup()
+
+        self.httpShouldReturn(json.dumps({
+            'error': {
+                'code': 'assertuserfailed',
+                'info': 'Assertion that the user is logged in failed',
+                '*': 'See https://en.wikipedia.org/w/api.php for API usage'
+            }
+        }))
+        with pytest.raises(mwclient.errors.APIError) as excinfo:
+            site.api(action='edit', title='Wikipedia:Sandbox')
+
+        assert excinfo.value.code == 'assertuserfailed'
+        assert excinfo.value.info == 'Assertion that the user is logged in failed'
+        assert len(responses.calls) == 1
+
+    @responses.activate
+    def test_repr(self):
+        # Test repr()
+
+        site = self.stdSetup()
+
+        assert repr(site) == '<Site object \'test.wikipedia.org/w/\'>'
 
 
 class TestClientApiMethods(TestCase):
@@ -272,6 +315,33 @@ class TestClientApiMethods(TestCase):
         assert revisions[0]['revid'] == 689697696
         assert revisions[0]['timestamp'] == time.strptime('2015-11-08T21:52:46Z', '%Y-%m-%dT%H:%M:%SZ')
         assert revisions[1]['revid'] == 689816909
+
+    def test_login_flow_1(self):
+
+        login_token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+
+            if 'lgtoken' not in kwargs:
+                return {
+                    'login': {'result': 'NeedToken', 'token': login_token}
+                }
+            else:
+                assert kwargs['lgtoken'] == login_token
+                return {
+                    'login': {'result': 'Success'}
+                }
+
+        self.api.side_effect = side_effect
+
+        with mock.patch('mwclient.client.Site.site_init'):
+            self.site.login('myusername', 'mypassword')
+
+        call_args = self.api.call_args_list
+
+        assert len(call_args) == 3
+        assert call_args[1] == mock.call('login', lgname='myusername', lgpassword='mypassword')
+        assert call_args[2] == mock.call('login', lgname='myusername', lgpassword='mypassword', lgtoken=login_token)
 
 
 class TestClientUploadArgs(TestCase):
