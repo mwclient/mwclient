@@ -173,14 +173,7 @@ class Page(object):
         """Update the text of a section or the whole page by performing an edit operation.
         """
         if not self.site.logged_in and self.site.force_login:
-            # Should we really check for this?
-            raise mwclient.errors.LoginError(
-                self.site,
-                'By default, mwclient protects you from accidentally editing '
-                'without being logged in. '
-                'If you actually want to edit without logging in, '
-                'you can set force_login on the Site object to False.'
-            )
+            raise mwclient.errors.AssertUserFailedError()
         if self.site.blocked:
             raise mwclient.errors.UserBlocked(self.site.blocked)
         if not self.can('edit'):
@@ -204,6 +197,9 @@ class Page(object):
             data['section'] = section
 
         data.update(kwargs)
+
+        if self.site.force_login:
+            data['assert'] = 'user'
 
         def do_edit():
             result = self.site.post('edit', title=self.name, text=text,
@@ -240,6 +236,8 @@ class Page(object):
                         'noimageredirect-anon', 'noimageredirect', 'noedit-anon',
                         'noedit'}:
             raise mwclient.errors.ProtectedPageError(self, e.code, e.info)
+        elif e.code == 'assertuserfailed':
+            raise mwclient.errors.AssertUserFailedError()
         else:
             raise
 
