@@ -38,7 +38,7 @@ If you are connecting to a Wikimedia site, you should follow the
 `Wikimedia User-Agent policy <https://meta.wikimedia.org/wiki/User-Agent_policy>`_
 and identify your tool like so:
 
-    >>> ua = 'MyCoolTool. Run by User:Xyz. Using mwclient/0.8'
+    >>> ua = 'MyCoolTool. Run by User:Xyz. Using mwclient/' + mwclient.__ver__
     >>> site = mwclient.Site('test.wikipedia.org', clients_useragent=ua)
 
 .. _auth:
