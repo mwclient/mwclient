@@ -11,17 +11,11 @@ Then try to connect to a site:
 
     >>> site = mwclient.Site('test.wikipedia.org')
 
-.. _https:
+By default, mwclient will try to conncet using https. If your site
+doesn't support https, you need to explicitly ask for http like so:
 
-Using HTTPS
------------
+    >>> site = mwclient.Site(('http', 'test.wikipedia.org'))
 
-If the site supports HTTPS, you can create a secure connection by passing
-in a tupple like so:
-
-    >>> site = mwclient.Site(('https', 'test.wikipedia.org'))
-
-Note that HTTPS is planned to be the default for the next major version of mwclient.
 
 .. _endpoint:
 
@@ -49,35 +43,56 @@ and identify your tool like so:
 
 .. _logging-in:
 
-Logging in
-----------
+Authenticating
+--------------
 
-To login to the wiki:
-
-    >>> site.login(username, password)
-
-If login fails, a :class:`mwclient.errors.LoginError` will be thrown.
-
-Note that mwclient by default will protect you from editing if you should
-forget to login. If you actually want to edit without logging in, just set
+Note that mwclient by default will protect you from editing when unauthenticated.
+If you actually want to edit unauthenticated, set
 
     >>> site.force_login = False
 
-and mwclient won't get in your way.
+.. _oauth:
+
+OAuth
+^^^^^
+
+mwclient supports different ways of authenticating. On Wikimedia
+wikis, the recommended way is now to use OAuth to authenticate as a
+`owner-only consumer <https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers#Python>`_.
+Once you have obtained the *consumer token* (also called *consumer key*), the
+*consumer secret*, the *access token* and the *access secret*, you can authenticate
+like so:
+
+    >>> site = mwclient.Site('test.wikipedia.org',
+                             consumer_token='my_consumer_token',
+                             consumer_secret='my_consumer_secret',
+                             access_token='my_access_token',
+                             access_secret='my_access_secret')
+
+.. _old_login:
+
+Old-school login
+^^^^^^^^^^^^^^^^
+
+To use old-school login, call the login method:
+
+    >>> site.login('my_username', 'my_password')
+
+If login fails, a :class:`mwclient.errors.LoginError` will be thrown.
 
 .. _http-auth:
 
 HTTP authentication
--------------------
+^^^^^^^^^^^^^^^^^^^
 
 If your server is configured to use HTTP authentication, you can
 authenticate using the ``httpauth`` parameter. For Basic HTTP authentication:
 
-    >>> site = mwclient.Site('awesome.site', httpauth=('user', 'pass'))
+    >>> site = mwclient.Site('awesome.site', httpauth=('my_username', 'my_password'))
 
 You can also pass in any other :ref:`authentication mechanism <requests:authentication>`
 based on the :class:`requests.auth.AuthBase`, such as Digest authentication:
 
 	>>> from requests.auth import HTTPDigestAuth
-	>>> site = mwclient.Site('awesome.site', httpauth=HTTPDigestAuth('user', 'pass'))
+	>>> site = mwclient.Site('awesome.site', httpauth=HTTPDigestAuth('my_username', 'my_password'))
 

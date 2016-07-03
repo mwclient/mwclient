@@ -17,6 +17,7 @@ except ImportError:
     import simplejson as json
 import requests
 from requests.auth import HTTPBasicAuth, AuthBase
+from requests_oauthlib import OAuth1
 
 import mwclient.errors as errors
 import mwclient.listing as listing
@@ -55,7 +56,8 @@ class Site(object):
     def __init__(self, host, path='/w/', ext='.php', pool=None, retry_timeout=30,
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
                  max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
-                 reqs=None):
+                 reqs=None, consumer_token=None, consumer_secret=None, access_token=None,
+                 access_secret=None):
         # Setup member variables
         self.host = host
         self.path = path
@@ -66,10 +68,12 @@ class Site(object):
         self.force_login = force_login
         self.requests = reqs or {}
 
-        if isinstance(httpauth, (list, tuple)):
-            self.httpauth = HTTPBasicAuth(*httpauth)
+        if consumer_token is not None:
+            auth = OAuth1(consumer_token, consumer_secret, access_token, access_secret)
+        elif isinstance(httpauth, (list, tuple)):
+            auth = HTTPBasicAuth(*httpauth)
         elif httpauth is None or isinstance(httpauth, (AuthBase,)):
-            self.httpauth = httpauth
+            auth = httpauth
         else:
             raise RuntimeError('Authentication is not a tuple or an instance of AuthBase')
 
@@ -89,7 +93,7 @@ class Site(object):
         # Setup connection
         if pool is None:
             self.connection = requests.Session()
-            self.connection.auth = self.httpauth
+            self.connection.auth = auth
             self.connection.headers['User-Agent'] = 'MwClient/' + __ver__ + ' (https://github.com/mwclient/mwclient)'
             if clients_useragent:
                 self.connection.headers['User-Agent'] = clients_useragent + ' - ' + self.connection.headers['User-Agent']
@@ -113,6 +117,9 @@ class Site(object):
             try:
                 self.site_init()
             except errors.APIError as e:
+                if e.args[0] == 'mwoauth-invalid-authorization':
+                    raise errors.OAuthAuthorizationError(e.code, e.info)
+
                 # Private wiki, do init after login
                 if e.args[0] not in (u'unknown_action', u'readapidenied'):
                     raise

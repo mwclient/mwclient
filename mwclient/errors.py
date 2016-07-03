@@ -46,6 +46,16 @@ class LoginError(MwClientError):
     pass
 
 
+class OAuthAuthorizationError(LoginError):
+
+    def __init__(self, code, info):
+        self.code = code
+        self.info = info
+
+    def __str__(self):
+        return self.info
+
+
 class EmailError(MwClientError):
     pass
 

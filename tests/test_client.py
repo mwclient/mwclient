@@ -11,6 +11,7 @@ import responses
 import pkg_resources  # part of setuptools
 import mock
 import time
+from requests_oauthlib import OAuth1
 
 try:
     import json
@@ -182,7 +183,7 @@ class TestClient(TestCase):
 
         site = mwclient.Site('test.wikipedia.org', httpauth=('me', 'verysecret'))
 
-        assert isinstance(site.httpauth, requests.auth.HTTPBasicAuth)
+        assert isinstance(site.connection.auth, requests.auth.HTTPBasicAuth)
 
     @responses.activate
     def test_httpauth_raise_error_on_invalid_type(self):
@@ -191,6 +192,16 @@ class TestClient(TestCase):
 
         with pytest.raises(RuntimeError):
             site = mwclient.Site('test.wikipedia.org', httpauth=1)
+
+    @responses.activate
+    def test_oauth(self):
+
+        self.httpShouldReturn(self.metaResponseAsJson())
+
+        site = mwclient.Site('test.wikipedia.org',
+                             consumer_token='a', consumer_secret='b',
+                             access_token='c', access_secret='d')
+        assert isinstance(site.connection.auth, OAuth1)
 
     @responses.activate
     def test_api_disabled(self):
