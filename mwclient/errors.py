@@ -35,7 +35,16 @@ class EditError(MwClientError):
 
 
 class ProtectedPageError(EditError, InsufficientPermission):
-    pass
+
+    def __init__(self, page, code=None, info=None):
+        self.page = page
+        self.code = code
+        self.info = info
+
+    def __str__(self):
+        if self.info is not None:
+            return self.info
+        return 'You do not have the "edit" right.'
 
 
 class FileExists(EditError):

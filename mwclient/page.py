@@ -234,12 +234,14 @@ class Page(object):
             raise mwclient.errors.EditError(self, summary, e.info)
         elif e.code in {'protectedtitle', 'cantcreate', 'cantcreate-anon',
                         'noimageredirect-anon', 'noimageredirect', 'noedit-anon',
-                        'noedit'}:
+                        'noedit', 'protectedpage', 'cascadeprotected',
+                        'customcssjsprotected',
+                        'protectednamespace-interface', 'protectednamespace'}:
             raise mwclient.errors.ProtectedPageError(self, e.code, e.info)
         elif e.code == 'assertuserfailed':
             raise mwclient.errors.AssertUserFailedError()
         else:
-            raise
+            raise e
 
     def move(self, new_title, reason='', move_talk=True, no_redirect=False):
         """Move (rename) page to new_title.
