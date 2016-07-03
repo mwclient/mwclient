@@ -24,9 +24,9 @@
    :alt: MIT license
 
 .. image:: https://readthedocs.org/projects/mwclient/badge/?version=master
-   :target: https://readthedocs.org/projects/mwclient/?badge=master
+   :target: http://mwclient.readthedocs.io/en/latest/
    :alt: Documentation status
-   
+
 .. image:: http://issuestats.com/github/mwclient/mwclient/badge/pr?style=flat
    :target: http://issuestats.com/github/mwclient/mwclient
    :alt: Issue statistics
@@ -56,6 +56,17 @@ can be installed from GitHub:
 Please see the 
 `release notes <https://github.com/mwclient/mwclient/blob/master/RELEASE-NOTES.md>`_
 for a list of changes.
+
+Getting started
+---------------
+
+See the `user guide <http://mwclient.readthedocs.io/en/latest/user/index.html>`_
+to get started using mwclient.
+
+For more information, see the
+`REFERENCE.md <https://github.com/mwclient/mwclient/blob/master/REFERENCE.md>`_ file
+and the `documentation on the wiki <https://github.com/mwclient/mwclient/wiki>`_.
+
 
 Contributing
 --------------------
@@ -109,60 +120,3 @@ It is not the total limit.
 Doing ``list(generator(limit = limit))`` will return ALL items of generator,
 and not be limited by the limit value.
 Default chunk size is generally the maximum chunk size.
-
-
-HTTPS
------
-
-mwclient uses https as default from version 0.8.0. To use http instead,
-specify the host as a tuple in the form of ``('http', hostname)``.
-
-
-User-agents
------------
-Bots that run on Wikimedia wikis `require an informative user-agent for all
-API requests <https://meta.wikimedia.org/wiki/User-Agent_policy>`_. To change
-the user-agent, you will need to include an appropriate parameter for 
-``clients_useragent`` when you initialize your ``Site``, as shown in the
-following example:
-
-.. code-block:: python
-
-    useragent = 'YourBot, based on mwclient v0.7.2. Run by User:You, you@gmail.com'
-    site = mwclient.Site('en.wikipedia.org', clients_useragent=useragent)
-
-
-Example
--------
-
-For more information, see the
-`REFERENCE.md <https://github.com/mwclient/mwclient/blob/master/REFERENCE.md>`_ file
-or the 
-`documentation on the wiki <https://github.com/mwclient/mwclient/wiki>`_.
-
-.. code-block:: python
-
-	# Initialize Site object
-	import mwclient
-	site = mwclient.Site('commons.wikimedia.org')
-	site.login(username, password)
-
-	# Edit page
-	page = site.Pages['Commons:Sandbox']
-	text = page.text()
-	print 'Text in sandbox:', text.encode('utf-8')
-	page.save(text + u'\nExtra data', summary = 'Test edit')
-
-	# Printing imageusage
-	image = site.Images['Example.jpg']
-	print 'Image', image.name.encode('utf-8'), 'usage:'
-	for page in image.imageusage():
-		print 'Used:', page.name.encode('utf-8'), '; namespace', page.namespace
-		print 'Image info:', image.imageinfo
-
-	# Uploading a file
-	site.upload(open('file.jpg'), 'destination.jpg', 'Image description')
-
-	# Listing all categories (don't do this in reality)
-	for category in site.allcategories():
-		print category

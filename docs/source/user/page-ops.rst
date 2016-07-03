@@ -6,11 +6,10 @@ Page operations
 Start by :ref:`connecting <connecting>` to your site:
 
     >>> from mwclient import Site
-    >>> site = mwclient.Site(('https', 'en.wikipedia.org'))
+    >>> site = mwclient.Site('en.wikipedia.org')
 
-and optionally :ref:`logging in <logging-in>`:
-
-    >>> site.login('username', 'password')
+For information about authenticating, please see
+:ref:`the section on authenticating <auth>`.
 
 Editing or creating a page
 --------------------------
@@ -27,11 +26,11 @@ page, use `page.exists`:
     >>> page.exists
     True
 
-Edit the text as you like before saving it back to the page:
+Edit the text as you like before saving it back to the wiki:
 
     >>> page.save(text, 'Edit summary')
 
-If the page didn't exist, it is created.
+If the page didn't exist, this operation will create it.
 
 Listing page revisions
 ----------------------

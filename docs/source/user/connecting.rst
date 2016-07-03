@@ -41,7 +41,7 @@ and identify your tool like so:
     >>> ua = 'MyCoolTool. Run by User:Xyz. Using mwclient/0.8'
     >>> site = mwclient.Site('test.wikipedia.org', clients_useragent=ua)
 
-.. _logging-in:
+.. _auth:
 
 Authenticating
 --------------
