@@ -308,9 +308,9 @@ class Site(object):
             can_get = len(dataparams) < too_big
 
         if can_get:
-            return self.raw_get(script=script,data=data,files=files, retry_on_error=retry_on_error)
+            return self.raw_get(script=script, data=data, files=files, retry_on_error=retry_on_error)
         else:
-            return self.raw_post(script=script,data,data=files=files, retry_on_error=retry_on_error)
+            return self.raw_post(script=script, data=data, files=files, retry_on_error=retry_on_error)
 
     def raw_post(self, script, data, files=None, retry_on_error=True):
         """
