@@ -291,7 +291,7 @@ class Site(object):
 
         if files:
             # if we have files to send, go with POST
-            can_get == False
+            can_get = False
 
         # if the params become too long, we should POST
         # http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
