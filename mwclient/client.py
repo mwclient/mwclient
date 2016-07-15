@@ -266,7 +266,7 @@ class Site(object):
 
     @staticmethod
     def _encoded_data(data):
-        return '&'.join(['%s=%s' % (quote(k), quote(v)) for k, v in data.items()]
+        return '&'.join(['%s=%s' % (quote(k), quote(v)) for k, v in data.items()])
 
 
     def raw_call(self, script, data, files=None, retry_on_error=True):
