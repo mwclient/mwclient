@@ -305,7 +305,7 @@ class Site(object):
 
         if can_get:
             dataparams = self._encoded_data(data)
-            can_get = len(dataparams) < too_big:
+            can_get = len(dataparams) < too_big
 
         if can_get:
             return self.raw_get(script=script,data=data,files=files, retry_on_error=retry_on_error)
