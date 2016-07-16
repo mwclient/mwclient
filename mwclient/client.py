@@ -436,7 +436,7 @@ class Site(object):
         kwargs['action'] = action
         kwargs['format'] = 'json'
         data = self._query_string(*args, **kwargs)
-        if action == 'query':
+        if action in ['query', 'ask']:
             res = self.raw_get('api', data, retry_on_error=retry_on_error)
         else:
             res = self.raw_post('api', data, retry_on_error=retry_on_error)
@@ -961,5 +961,5 @@ class Site(object):
         kwargs = {}
         if title is None:
             kwargs['title'] = title
-        result = self.raw_get('ask', query=query, **kwargs)
+        result = self.raw_api('ask', query=query, **kwargs)
         return result['query']['results']
