@@ -4,6 +4,8 @@ import logging
 from six import text_type
 import six
 
+from six.moves.urllib.parse import quote
+
 try:
     # Python 2.7+
     from collections import OrderedDict
@@ -218,7 +220,10 @@ class Site(object):
         sleeper = self.sleepers.make()
 
         while True:
-            info = self.raw_api(action, **kwargs)
+            if action == 'query':
+                info = self.raw_get(action, **kwargs)
+            else:
+                info = self.raw_post(action, **kwargs)
             if not info:
                 info = {}
             if self.handle_api_result(info, sleeper=sleeper):
@@ -256,7 +261,18 @@ class Site(object):
         qs2 = [(k, v) for k, v in six.iteritems(kwargs) if k in ('wpEditToken', 'token')]
         return OrderedDict(qs1 + qs2)
 
+    @staticmethod
+    def _encoded_data(data):
+        return '&'.join(['%s=%s' % (quote(k), quote(v)) for k, v in data.items()])
+
+
     def raw_call(self, script, data, files=None, retry_on_error=True):
+        """
+        Call the raw_post method, for backwards compatibility
+        """
+        return self.raw_post(script=script, data=data, files=files, retry_on_error=retry_on_error)
+
+    def raw_post(self, script, data, files=None, retry_on_error=True):
         """
         Perform a generic request and return the raw text.
 
@@ -314,6 +330,103 @@ class Site(object):
                 log.warning('Connection error. Retrying in a moment.')
                 sleeper.sleep()
 
+
+
+
+
+    def raw_get(self, script, data, files=None, retry_on_error=True):
+        """
+        Perform a generic request and return the raw text.
+
+        Currently this method body is nearly identical to raw_post().
+        Substantial consolidation is possible.
+
+        In the event of a network problem, or a HTTP response with status code 5XX,
+        we'll wait and retry the configured number of times before giving up
+        if `retry_on_error` is True.
+
+        `requests.exceptions.HTTPError` is still raised directly for
+        HTTP responses with status codes in the 4XX range, and invalid
+        HTTP responses.
+
+        Args:
+            script (str): Script name, usually 'api'.
+            data (dict): Post data
+            files (dict): Files to upload
+            retry_on_error (bool): Retry on connection error
+
+        Returns:
+            The raw text response.
+        """
+
+
+        # prefer GET unless we see a reason we need to POST
+        can_get = True
+
+        if files:
+            # if we have files to send, go with POST
+            can_get = False
+
+        # if the params become too long, we should POST
+        # http://stackoverflow.com/questions/417142/what-is-the-maximum-length-of-a-url-in-different-browsers
+        # for browsers there is an old defacto standard length of 2000 chars.
+        # That doesn't really affect us, but it does provide a conservative lower bound.
+        # A more realistic limit is 8k as per http://stackoverflow.com/a/2659995
+        # http://stackoverflow.com/questions/2659952/maximum-length-of-http-get-request
+        # however we could also explicitly look for status response code 414 as per
+        # http://stackoverflow.com/a/2660036 and RFC2616 https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.4.15
+        too_big = 2000
+
+        if can_get:
+            dataparams = self._encoded_data(data)
+            can_get = len(dataparams) < too_big
+
+        if not can_get:
+            return self.raw_post(script=script, data=data, files=files, retry_on_error=retry_on_error)
+
+
+        # below this point only 'fullurl' is changed from raw_post, and can be consolidated
+
+
+
+        url = self.path + script + self.ext
+        headers = {}
+        if self.compress and gzip:
+            headers['Accept-Encoding'] = 'gzip'
+        sleeper = self.sleepers.make((script, data))
+        while True:
+            scheme = 'https'
+            host = self.host
+            if isinstance(host, (list, tuple)):
+                scheme, host = host
+
+            fullurl = '{scheme}://{host}{url}?{dataparams}'.format(scheme=scheme, host=host, url=url, dataparams=dataparams)
+
+            try:
+                stream = self.connection.get(fullurl, data=data, files=files, headers=headers, **self.requests)
+                if stream.headers.get('x-database-lag'):
+                    wait_time = int(stream.headers.get('retry-after'))
+                    log.warning('Database lag exceeds max lag. Waiting for %d seconds', wait_time)
+                    sleeper.sleep(wait_time)
+                elif stream.status_code == 200:
+                    return stream.text
+                elif stream.status_code < 500 or stream.status_code > 599:
+                    stream.raise_for_status()
+                else:
+                    if not retry_on_error:
+                        stream.raise_for_status()
+                    log.warning('Received %s response: %s. Retrying in a moment.', stream.status_code, stream.text)
+                    sleeper.sleep()
+
+            except requests.exceptions.ConnectionError:
+                # In the event of a network problem (e.g. DNS failure, refused connection, etc),
+                # Requests will raise a ConnectionError exception.
+                if not retry_on_error:
+                    raise
+                log.warning('Connection error. Retrying in a moment.')
+                sleeper.sleep()
+
+
     def raw_api(self, action, *args, **kwargs):
         """Sends a call to the API."""
         try:
@@ -323,7 +436,10 @@ class Site(object):
         kwargs['action'] = action
         kwargs['format'] = 'json'
         data = self._query_string(*args, **kwargs)
-        res = self.raw_call('api', data, retry_on_error=retry_on_error)
+        if action in ['query', 'ask']:
+            res = self.raw_get('api', data, retry_on_error=retry_on_error)
+        else:
+            res = self.raw_post('api', data, retry_on_error=retry_on_error)
 
         try:
             return json.loads(res)
@@ -337,7 +453,10 @@ class Site(object):
         kwargs['action'] = action
         kwargs['maxlag'] = self.max_lag
         data = self._query_string(*args, **kwargs)
-        return self.raw_call('index', data)
+        if action == 'query':
+            return self.raw_get('index', data)
+        else:
+            return self.raw_post('index', data)
 
     def require(self, major, minor, revision=None, raise_error=True):
         if self.version is None:
@@ -536,7 +655,7 @@ class Site(object):
 
         sleeper = self.sleepers.make()
         while True:
-            data = self.raw_call('api', postdata, files)
+            data = self.raw_post('api', postdata, files)
             info = json.loads(data)
             if not info:
                 info = {}
