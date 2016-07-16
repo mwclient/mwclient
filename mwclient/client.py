@@ -4,13 +4,7 @@ import logging
 from six import text_type
 import six
 
-import sys
-if sys.version_info[0] >= 3:
-    # Python 3 http://stackoverflow.com/a/13625238
-    from urllib.parse import quote
-else:
-    # Python 2 http://stackoverflow.com/a/1695199
-    from urllib import quote
+from six.moves.urllib.parse import quote
 
 try:
     # Python 2.7+
