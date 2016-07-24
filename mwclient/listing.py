@@ -7,8 +7,16 @@ import mwclient.image
 
 
 class List(object):
+    """Base class for lazy object iteration
 
-    def __init__(self, site, list_name, prefix, limit=None, return_values=None, max_items=None, *args, **kwargs):
+    This is a class providing lazy iteration.  This means that the
+    content is loaded in chunks as long as the response hints at
+    continuing content.
+    """
+
+    def __init__(self, site, list_name, prefix,
+                 limit=None, return_values=None, max_items=None,
+                 *args, **kwargs):
         # NOTE: Fix limit
         self.site = site
         self.list_name = list_name
@@ -64,7 +72,25 @@ class List(object):
         return self.__next__(full)
 
     def load_chunk(self):
-        data = self.site.api('query', (self.generator, self.list_name), *[(text_type(k), v) for k, v in six.iteritems(self.args)])
+        """Query a new chunk of data
+
+        If the query is empty, `raise StopIteration`.
+
+        Else, update the iterator accordingly.
+
+        If 'continue' is in the response, it is added to `self.args`
+        (new style continuation, added in MediaWiki 1.21).
+
+        If not, but 'query-continue' is in the response, query its
+        item called `self.list_name` and add this to `self.args` (old
+        style continuation).
+
+        Else, set `self.last` to True.
+        """
+        data = self.site.api(
+            'query', (self.generator, self.list_name),
+            *[(text_type(k), v) for k, v in six.iteritems(self.args)]
+        )
         if not data:
             # Non existent page
             raise StopIteration
@@ -82,6 +108,7 @@ class List(object):
             self.last = True
 
     def set_iter(self, data):
+        """Set `self._iter` to the API response `data`."""
         if self.result_member not in data['query']:
             self._iter = iter(six.moves.range(0))
         elif type(data['query'][self.result_member]) is list:
