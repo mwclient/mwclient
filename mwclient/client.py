@@ -148,28 +148,7 @@ class Site(object):
         }
         self.writeapi = 'writeapi' in self.site
 
-        # Determine version
-        if self.site['generator'].startswith('MediaWiki '):
-            version = self.site['generator'][10:].split('.')
-
-            def split_num(s):
-                i = 0
-                while i < len(s):
-                    if s[i] < '0' or s[i] > '9':
-                        break
-                    i += 1
-                if s[i:]:
-                    return (int(s[:i]), s[i:], )
-                else:
-                    return (int(s[:i]), )
-            self.version = sum((split_num(s) for s in version), ())
-
-            if len(self.version) < 2:
-                raise errors.MediaWikiVersionError('Unknown MediaWiki {}'
-                                                   .format('.'.join(version)))
-        else:
-            raise errors.MediaWikiVersionError('Unknown generator {}'
-                                               .format(self.site['generator']))
+        self.version = self.version_tuple_from_generator(self.site['generator'])
 
         # Require MediaWiki version >= 1.16
         self.require(1, 16)
@@ -180,6 +159,43 @@ class Site(object):
         self.groups = userinfo.get('groups', [])
         self.rights = userinfo.get('rights', [])
         self.initialized = True
+
+    @staticmethod
+    def version_tuple_from_generator(string, prefix='MediaWiki '):
+        """Return a version tuple from a MediaWiki Generator string
+
+        Example: "MediaWiki 1.5.1" → (1, 5, 1)
+
+        :param prefix: the expected prefix of the string
+        """
+        if not string.startswith(prefix):
+            raise errors.MediaWikiVersionError('Unknown generator {}'.format(string))
+
+        version = string[len(prefix):].split('.')
+
+        def split_num(s):
+            """Split the string on the first non-digit character.
+
+            :return: a tuple of the digit part as int and, if
+            available, the rest of the string.
+            """
+            i = 0
+            while i < len(s):
+                if s[i] < '0' or s[i] > '9':
+                    break
+                i += 1
+            if s[i:]:
+                return (int(s[:i]), s[i:], )
+            else:
+                return (int(s[:i]), )
+
+        version_tuple = sum((split_num(s) for s in version), ())
+
+        if len(version_tuple) < 2:
+            raise errors.MediaWikiVersionError('Unknown MediaWiki {}'
+                                               .format('.'.join(version)))
+
+        return version_tuple
 
     default_namespaces = {
         0: u'', 1: u'Talk', 2: u'User', 3: u'User talk', 4: u'Project',
