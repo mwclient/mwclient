@@ -7,8 +7,16 @@ import mwclient.image
 
 
 class List(object):
+    """Base class for lazy object iteration
 
-    def __init__(self, site, list_name, prefix, limit=None, return_values=None, max_items=None, *args, **kwargs):
+    This is a class providing lazy iteration.  This means that the
+    content is loaded in chunks as long as the response hints at
+    continuing content.
+    """
+
+    def __init__(self, site, list_name, prefix,
+                 limit=None, return_values=None, max_items=None,
+                 *args, **kwargs):
         # NOTE: Fix limit
         self.site = site
         self.list_name = list_name
@@ -57,14 +65,32 @@ class List(object):
             if self.last:
                 raise StopIteration
             self.load_chunk()
-            return List.__next__(self, full=full)
+            return self.__next__(full=full)
 
-    def next(self, full=False):
+    def next(self, *args, **kwargs):
         """ For Python 2.x support """
-        return self.__next__(full)
+        return self.__next__(*args, **kwargs)
 
     def load_chunk(self):
-        data = self.site.api('query', (self.generator, self.list_name), *[(text_type(k), v) for k, v in six.iteritems(self.args)])
+        """Query a new chunk of data
+
+        If the query is empty, `raise StopIteration`.
+
+        Else, update the iterator accordingly.
+
+        If 'continue' is in the response, it is added to `self.args`
+        (new style continuation, added in MediaWiki 1.21).
+
+        If not, but 'query-continue' is in the response, query its
+        item called `self.list_name` and add this to `self.args` (old
+        style continuation).
+
+        Else, set `self.last` to True.
+        """
+        data = self.site.api(
+            'query', (self.generator, self.list_name),
+            *[(text_type(k), v) for k, v in six.iteritems(self.args)]
+        )
         if not data:
             # Non existent page
             raise StopIteration
@@ -82,6 +108,7 @@ class List(object):
             self.last = True
 
     def set_iter(self, data):
+        """Set `self._iter` to the API response `data`."""
         if self.result_member not in data['query']:
             self._iter = iter(six.moves.range(0))
         elif type(data['query'][self.result_member]) is list:
@@ -101,22 +128,16 @@ class List(object):
 
     @staticmethod
     def get_prefix(prefix, generator=False):
-        if generator:
-            return 'g' + prefix
-        else:
-            return prefix
+        return ('g' if generator else '') + prefix
 
     @staticmethod
     def get_list(generator=False):
-        if generator:
-            return GeneratorList
-        else:
-            return List
+        return GeneratorList if generator else List
 
 
 class NestedList(List):
     def __init__(self, nested_param, *args, **kwargs):
-        List.__init__(self, *args, **kwargs)
+        super(NestedList, self).__init__(*args, **kwargs)
         self.nested_param = nested_param
 
     def set_iter(self, data):
@@ -126,7 +147,8 @@ class NestedList(List):
 class GeneratorList(List):
 
     def __init__(self, site, list_name, prefix, *args, **kwargs):
-        List.__init__(self, site, list_name, prefix, *args, **kwargs)
+        super(GeneratorList, self).__init__(site, list_name, prefix,
+                                            *args, **kwargs)
 
         self.args['g' + self.prefix + 'limit'] = self.args[self.prefix + 'limit']
         del self.args[self.prefix + 'limit']
@@ -140,22 +162,18 @@ class GeneratorList(List):
         self.page_class = mwclient.page.Page
 
     def __next__(self):
-        info = List.__next__(self, full=True)
+        info = super(GeneratorList, self).__next__(full=True)
         if info['ns'] == 14:
             return Category(self.site, u'', info)
         if info['ns'] == 6:
             return mwclient.image.Image(self.site, u'', info)
         return mwclient.page.Page(self.site, u'', info)
 
-    def next(self):
-        """ For Python 2.x support """
-        return self.__next__()
-
     def load_chunk(self):
         # Put this here so that the constructor does not fail
         # on uninitialized sites
         self.args['iiprop'] = 'timestamp|user|comment|url|size|sha1|metadata|archivename'
-        return List.load_chunk(self)
+        return super(GeneratorList, self).load_chunk()
 
 
 class Category(mwclient.page.Page, GeneratorList):
@@ -192,30 +210,54 @@ class PageList(GeneratorList):
         if end:
             kwargs['gapto'] = end
 
-        GeneratorList.__init__(self, site, 'allpages', 'ap',
-                               gapnamespace=text_type(namespace), gapfilterredir=redirects, **kwargs)
+        super(PageList, self).__init__(site, 'allpages', 'ap',
+                                       gapnamespace=text_type(namespace),
+                                       gapfilterredir=redirects,
+                                       **kwargs)
 
     def __getitem__(self, name):
         return self.get(name, None)
 
     def get(self, name, info=()):
-        if self.namespace == 14:
-            return Category(self.site, self.site.namespaces[14] + ':' + name, info)
-        elif self.namespace == 6:
-            return mwclient.image.Image(self.site, self.site.namespaces[6] + ':' + name, info)
-        elif self.namespace != 0:
-            return mwclient.page.Page(self.site, self.site.namespaces[self.namespace] + ':' + name, info)
+        """Return the page of name `name` as an object.
+
+        If self.namespace is not zero, use {namespace}:{name} as the
+        page name, otherwise guess the namespace from the name using
+        `self.guess_namespace`.
+
+        :rtype: One of Category, Image, or Page (default), according
+        to the namespace.
+        """
+        if self.namespace != 0:
+            full_page_name = u"{namespace}:{name}".format(
+                namespace=self.site.namespaces[self.namespace],
+                name=name,
+            )
+            namespace = self.namespace
         else:
-            # Guessing page class
-            if type(name) is not int:
+            full_page_name = name
+            try:
                 namespace = self.guess_namespace(name)
-                if namespace == 14:
-                    return Category(self.site, name, info)
-                elif namespace == 6:
-                    return mwclient.image.Image(self.site, name, info)
-            return mwclient.page.Page(self.site, name, info)
+            except AttributeError:
+                # raised when `namespace` doesn't have a `startswith` attribute
+                namespace = 0
+
+        cls = {
+            14: Category,
+            6: mwclient.image.Image,
+        }.get(namespace, mwclient.page.Page)
+
+        return cls(self.site, full_page_name, info)
 
     def guess_namespace(self, name):
+        """Guess the namespace from name
+
+        If name starts with any of the site's namespaces' names or
+        default_namespaces, use that.  Else, return zero.
+
+        :param name: The pagename as a string (having `.startswith`)
+        :return: the id of the guessed namespace or zero.
+        """
         for ns in self.site.namespaces:
             if ns == 0:
                 continue
@@ -230,7 +272,9 @@ class PageList(GeneratorList):
 class PageProperty(List):
 
     def __init__(self, page, prop, prefix, *args, **kwargs):
-        List.__init__(self, page.site, prop, prefix, titles=page.name, *args, **kwargs)
+        super(PageProperty, self).__init__(page.site, prop, prefix,
+                                           titles=page.name,
+                                           *args, **kwargs)
         self.page = page
         self.generator = 'prop'
 
@@ -245,7 +289,9 @@ class PageProperty(List):
 class PagePropertyGenerator(GeneratorList):
 
     def __init__(self, page, prop, prefix, *args, **kwargs):
-        GeneratorList.__init__(self, page.site, prop, prefix, titles=page.name, *args, **kwargs)
+        super(PagePropertyGenerator, self).__init__(page.site, prop, prefix,
+                                                    titles=page.name,
+                                                    *args, **kwargs)
         self.page = page
 
 
@@ -254,4 +300,4 @@ class RevisionsIterator(PageProperty):
     def load_chunk(self):
         if 'rvstartid' in self.args and 'rvstart' in self.args:
             del self.args['rvstart']
-        return PageProperty.load_chunk(self)
+        return super(RevisionsIterator, self).load_chunk()

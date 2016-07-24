@@ -5,7 +5,7 @@ import mwclient.page
 class Image(mwclient.page.Page):
 
     def __init__(self, site, name, info=None):
-        mwclient.page.Page.__init__(self, site, name, info,
+        super(Image, self).__init__(site, name, info,
                                     extra_properties={'imageinfo': (('iiprop', 'timestamp|user|comment|url|size|sha1|metadata|archivename'), )})
         self.imagerepository = self._info.get('imagerepository', '')
         self.imageinfo = self._info.get('imageinfo', ({}, ))[0]
