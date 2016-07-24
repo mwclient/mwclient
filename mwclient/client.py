@@ -382,8 +382,12 @@ class Site(object):
             if self.version[:2] >= (major, minor):
                 return True
             elif raise_error:
-                raise errors.MediaWikiVersionError('Requires version %s.%s, current version is %s.%s'
-                                                   % ((major, minor) + self.version[:2]))
+                raise errors.MediaWikiVersionError(
+                    'Requires version {required[0]}.{required[1]}, '
+                    'current version is {current[0]}.{current[1]}'
+                    .format(required=(major, minor),
+                            current=(self.version[:2]))
+                )
             else:
                 return False
         else:
@@ -576,7 +580,8 @@ class Site(object):
             if self.handle_api_result(info, kwargs=predata, sleeper=sleeper):
                 return info.get('upload', {})
 
-    def parse(self, text=None, title=None, page=None, prop=None, redirects=False, mobileformat=False):
+    def parse(self, text=None, title=None, page=None, prop=None,
+              redirects=False, mobileformat=False):
         kwargs = {}
         if text is not None:
             kwargs['text'] = text
@@ -606,46 +611,59 @@ class Site(object):
         """Retrieve all pages on the wiki as a generator."""
 
         pfx = listing.List.get_prefix('ap', generator)
-        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end), prefix=prefix,
-                                                   minsize=minsize, maxsize=maxsize, prtype=prtype, prlevel=prlevel,
-                                                   namespace=namespace, filterredir=filterredir, dir=dir,
-                                                   filterlanglinks=filterlanglinks))
-        return listing.List.get_list(generator)(self, 'allpages', 'ap', limit=limit, return_values='title', **kwargs)
+        kwargs = dict(listing.List.generate_kwargs(
+            pfx, ('from', start), ('to', end), prefix=prefix,
+            minsize=minsize, maxsize=maxsize, prtype=prtype, prlevel=prlevel,
+            namespace=namespace, filterredir=filterredir, dir=dir,
+            filterlanglinks=filterlanglinks,
+        ))
+        return listing.List.get_list(generator)(self, 'allpages', 'ap',
+                                                limit=limit, return_values='title',
+                                                **kwargs)
 
     def allimages(self, start=None, prefix=None, minsize=None, maxsize=None, limit=None,
                   dir='ascending', sha1=None, sha1base36=None, generator=True, end=None):
         """Retrieve all images on the wiki as a generator."""
 
         pfx = listing.List.get_prefix('ai', generator)
-        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end), prefix=prefix,
-                                                   minsize=minsize, maxsize=maxsize,
-                                                   dir=dir, sha1=sha1, sha1base36=sha1base36))
-        return listing.List.get_list(generator)(self, 'allimages', 'ai', limit=limit, return_values='timestamp|url', **kwargs)
+        kwargs = dict(listing.List.generate_kwargs(
+            pfx, ('from', start), ('to', end), prefix=prefix,
+            minsize=minsize, maxsize=maxsize,
+            dir=dir, sha1=sha1, sha1base36=sha1base36,
+        ))
+        return listing.List.get_list(generator)(self, 'allimages', 'ai', limit=limit,
+                                                return_values='timestamp|url',
+                                                **kwargs)
 
     def alllinks(self, start=None, prefix=None, unique=False, prop='title',
                  namespace='0', limit=None, generator=True, end=None):
         """Retrieve a list of all links on the wiki as a generator."""
 
         pfx = listing.List.get_prefix('al', generator)
-        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end), prefix=prefix,
+        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end),
+                                                   prefix=prefix,
                                                    prop=prop, namespace=namespace))
         if unique:
             kwargs[pfx + 'unique'] = '1'
-        return listing.List.get_list(generator)(self, 'alllinks', 'al', limit=limit, return_values='title', **kwargs)
+        return listing.List.get_list(generator)(self, 'alllinks', 'al', limit=limit,
+                                                return_values='title', **kwargs)
 
-    def allcategories(self, start=None, prefix=None, dir='ascending', limit=None, generator=True,
-                      end=None):
+    def allcategories(self, start=None, prefix=None, dir='ascending', limit=None,
+                      generator=True, end=None):
         """Retrieve all categories on the wiki as a generator."""
 
         pfx = listing.List.get_prefix('ac', generator)
-        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end), prefix=prefix, dir=dir))
-        return listing.List.get_list(generator)(self, 'allcategories', 'ac', limit=limit, **kwargs)
+        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end),
+                                                   prefix=prefix, dir=dir))
+        return listing.List.get_list(generator)(self, 'allcategories', 'ac', limit=limit,
+                                                **kwargs)
 
     def allusers(self, start=None, prefix=None, group=None, prop=None, limit=None,
                  witheditsonly=False, activeusers=False, rights=None, end=None):
         """Retrieve all users on the wiki as a generator."""
 
-        kwargs = dict(listing.List.generate_kwargs('au', ('from', start), ('to', end), prefix=prefix,
+        kwargs = dict(listing.List.generate_kwargs('au', ('from', start), ('to', end),
+                                                   prefix=prefix,
                                                    group=group, prop=prop,
                                                    rights=rights,
                                                    witheditsonly=witheditsonly,
@@ -708,15 +726,18 @@ class Site(object):
                   dir='older', user=None, title=None, limit=None, action=None):
         """Retrieve logevents as a generator."""
         kwargs = dict(listing.List.generate_kwargs('le', prop=prop, type=type, start=start,
-                                                   end=end, dir=dir, user=user, title=title, action=action))
+                                                   end=end, dir=dir, user=user,
+                                                   title=title, action=action))
         return listing.List(self, 'logevents', 'le', limit=limit, **kwargs)
 
-    def checkuserlog(self, user=None, target=None, limit=10, dir='older', start=None, end=None):
+    def checkuserlog(self, user=None, target=None, limit=10, dir='older',
+                     start=None, end=None):
         """Retrieve checkuserlog items as a generator."""
 
         kwargs = dict(listing.List.generate_kwargs('cul', target=target, start=start,
                                                    end=end, dir=dir, user=user))
-        return listing.NestedList('entries', self, 'checkuserlog', 'cul', limit=limit, **kwargs)
+        return listing.NestedList('entries', self, 'checkuserlog', 'cul',
+                                  limit=limit, **kwargs)
 
     # def protectedtitles requires 1.15
     def random(self, namespace, limit=20):
@@ -738,7 +759,8 @@ class Site(object):
         List recent changes to the wiki, à la Special:Recentchanges.
         """
         kwargs = dict(listing.List.generate_kwargs('rc', start=start, end=end, dir=dir,
-                                                   namespace=namespace, prop=prop, show=show, type=type,
+                                                   namespace=namespace, prop=prop,
+                                                   show=show, type=type,
                                                    toponly='1' if toponly else None))
         return listing.List(self, 'recentchanges', 'rc', limit=limit, **kwargs)
 
@@ -807,7 +829,8 @@ class Site(object):
         Returns:
             mwclient.listings.List: Search results iterator
         """
-        kwargs = dict(listing.List.generate_kwargs('sr', search=search, namespace=namespace, what=what))
+        kwargs = dict(listing.List.generate_kwargs('sr', search=search,
+                                                   namespace=namespace, what=what))
         if redirects:
             kwargs['srredirects'] = '1'
         return listing.List(self, 'search', 'sr', limit=limit, **kwargs)
@@ -820,7 +843,8 @@ class Site(object):
         API doc: https://www.mediawiki.org/wiki/API:Usercontribs
         """
         kwargs = dict(listing.List.generate_kwargs('uc', user=user, start=start, end=end,
-                                                   dir=dir, namespace=namespace, prop=prop, show=show))
+                                                   dir=dir, namespace=namespace,
+                                                   prop=prop, show=show))
         return listing.List(self, 'usercontribs', 'uc', limit=limit, **kwargs)
 
     def users(self, users, prop='blockinfo|groups|editcount'):
@@ -841,7 +865,8 @@ class Site(object):
         """
 
         kwargs = dict(listing.List.generate_kwargs('wl', start=start, end=end,
-                                                   namespace=namespace, dir=dir, prop=prop, show=show))
+                                                   namespace=namespace, dir=dir,
+                                                   prop=prop, show=show))
         if allrev:
             kwargs['wlallrev'] = '1'
         return listing.List(self, 'watchlist', 'wl', limit=limit, **kwargs)
