@@ -128,17 +128,11 @@ class List(object):
 
     @staticmethod
     def get_prefix(prefix, generator=False):
-        if generator:
-            return 'g' + prefix
-        else:
-            return prefix
+        return ('g' if generator else '') + prefix
 
     @staticmethod
     def get_list(generator=False):
-        if generator:
-            return GeneratorList
-        else:
-            return List
+        return GeneratorList if generator else List
 
 
 class NestedList(List):
