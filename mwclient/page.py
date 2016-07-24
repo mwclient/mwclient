@@ -47,7 +47,11 @@ class Page(object):
         self.revision = info.get('lastrevid', 0)
         self.exists = 'missing' not in info
         self.length = info.get('length')
-        self.protection = dict([(i['type'], (i['level'], i['expiry'])) for i in info.get('protection', ()) if i])
+        self.protection = {
+            i['type']: (i['level'], i['expiry'])
+            for i in info.get('protection', ())
+            if i
+        }
         self.redirect = 'redirect' in info
         self.pageid = info.get('pageid', None)
         self.contentmodel = info.get('contentmodel', None)
@@ -241,8 +245,9 @@ class Page(object):
     def handle_edit_error(self, e, summary):
         if e.code == 'editconflict':
             raise mwclient.errors.EditError(self, summary, e.info)
-        elif e.code in ('protectedtitle', 'cantcreate', 'cantcreate-anon', 'noimageredirect-anon',
-                        'noimageredirect', 'noedit-anon', 'noedit'):
+        elif e.code in {'protectedtitle', 'cantcreate', 'cantcreate-anon',
+                        'noimageredirect-anon', 'noimageredirect', 'noedit-anon',
+                        'noedit'}:
             raise mwclient.errors.ProtectedPageError(self, e.code, e.info)
         else:
             raise
