@@ -254,6 +254,14 @@ class PageList(GeneratorList):
         return cls(self.site, full_page_name, info)
 
     def guess_namespace(self, name):
+        """Guess the namespace from name
+
+        If name starts with any of the site's namespaces' names or
+        default_namespaces, use that.  Else, return zero.
+
+        :param name: The pagename as a string (having `.startswith`)
+        :return: the id of the guessed namespace or zero.
+        """
         for ns in self.site.namespaces:
             if ns == 0:
                 continue
