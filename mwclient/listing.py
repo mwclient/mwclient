@@ -223,21 +223,35 @@ class PageList(GeneratorList):
         return self.get(name, None)
 
     def get(self, name, info=()):
-        if self.namespace == 14:
-            return Category(self.site, self.site.namespaces[14] + ':' + name, info)
-        elif self.namespace == 6:
-            return mwclient.image.Image(self.site, self.site.namespaces[6] + ':' + name, info)
-        elif self.namespace != 0:
-            return mwclient.page.Page(self.site, self.site.namespaces[self.namespace] + ':' + name, info)
+        """Return the page of name `name` as an object.
+
+        If self.namespace is not zero, use {namespace}:{name} as the
+        page name, otherwise guess the namespace from the name using
+        `self.guess_namespace`.
+
+        :rtype: One of Category, Image, or Page (default), according
+        to the namespace.
+        """
+        if self.namespace != 0:
+            full_page_name = u"{namespace}:{name}".format(
+                namespace=self.site.namespaces[self.namespace],
+                name=name,
+            )
+            namespace = self.namespace
         else:
-            # Guessing page class
-            if type(name) is not int:
+            full_page_name = name
+            try:
                 namespace = self.guess_namespace(name)
-                if namespace == 14:
-                    return Category(self.site, name, info)
-                elif namespace == 6:
-                    return mwclient.image.Image(self.site, name, info)
-            return mwclient.page.Page(self.site, name, info)
+            except AttributeError:
+                # raised when `namespace` doesn't have a `startswith` attribute
+                namespace = 0
+
+        cls = {
+            14: Category,
+            6: mwclient.image.Image,
+        }.get(namespace, mwclient.page.Page)
+
+        return cls(self.site, full_page_name, info)
 
     def guess_namespace(self, name):
         for ns in self.site.namespaces:
