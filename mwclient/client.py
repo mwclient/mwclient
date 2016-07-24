@@ -135,7 +135,10 @@ class Site(object):
 
         # Extract site info
         self.site = meta['query']['general']
-        self.namespaces = dict(((i['id'], i.get('*', '')) for i in six.itervalues(meta['query']['namespaces'])))
+        self.namespaces = {
+            namespace['id']: namespace.get('*', '')
+            for namespace in six.itervalues(meta['query']['namespaces'])
+        }
         self.writeapi = 'writeapi' in self.site
 
         # Determine version
