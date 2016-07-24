@@ -122,7 +122,7 @@ class Site(object):
                     raise errors.OAuthAuthorizationError(e.code, e.info)
 
                 # Private wiki, do init after login
-                if e.args[0] not in (u'unknown_action', u'readapidenied'):
+                if e.args[0] not in {u'unknown_action', u'readapidenied'}:
                     raise
 
     def site_init(self):
@@ -165,9 +165,11 @@ class Site(object):
             self.version = sum((split_num(s) for s in version), ())
 
             if len(self.version) < 2:
-                raise errors.MediaWikiVersionError('Unknown MediaWiki %s' % '.'.join(version))
+                raise errors.MediaWikiVersionError('Unknown MediaWiki {}'
+                                                   .format('.'.join(version)))
         else:
-            raise errors.MediaWikiVersionError('Unknown generator %s' % self.site['generator'])
+            raise errors.MediaWikiVersionError('Unknown generator {}'
+                                               .format(self.site['generator']))
 
         # Require MediaWiki version >= 1.16
         self.require(1, 16)
@@ -248,7 +250,8 @@ class Site(object):
         self.hasmsg = 'messages' in userinfo
         self.logged_in = 'anon' not in userinfo
         if 'error' in info:
-            if info['error']['code'] in (u'internal_api_error_DBConnectionError', u'internal_api_error_DBQueryError'):
+            if info['error']['code'] in {u'internal_api_error_DBConnectionError',
+                                         u'internal_api_error_DBQueryError'}:
                 sleeper.sleep()
                 return False
             if '*' in info['error']:
@@ -261,8 +264,8 @@ class Site(object):
     @staticmethod
     def _query_string(*args, **kwargs):
         kwargs.update(args)
-        qs1 = [(k, v) for k, v in six.iteritems(kwargs) if k not in ('wpEditToken', 'token')]
-        qs2 = [(k, v) for k, v in six.iteritems(kwargs) if k in ('wpEditToken', 'token')]
+        qs1 = [(k, v) for k, v in six.iteritems(kwargs) if k not in {'wpEditToken', 'token'}]
+        qs2 = [(k, v) for k, v in six.iteritems(kwargs) if k in {'wpEditToken', 'token'}]
         return OrderedDict(qs1 + qs2)
 
     def raw_call(self, script, data, files=None, retry_on_error=True):
@@ -300,10 +303,12 @@ class Site(object):
             fullurl = '{scheme}://{host}{url}'.format(scheme=scheme, host=host, url=url)
 
             try:
-                stream = self.connection.post(fullurl, data=data, files=files, headers=headers, **self.requests)
+                stream = self.connection.post(fullurl, data=data, files=files,
+                                              headers=headers, **self.requests)
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
-                    log.warning('Database lag exceeds max lag. Waiting for %d seconds', wait_time)
+                    log.warning('Database lag exceeds max lag. '
+                                'Waiting for {} seconds'.format(wait_time))
                     sleeper.sleep(wait_time)
                 elif stream.status_code == 200:
                     return stream.text
@@ -312,7 +317,10 @@ class Site(object):
                 else:
                     if not retry_on_error:
                         stream.raise_for_status()
-                    log.warning('Received %s response: %s. Retrying in a moment.', stream.status_code, stream.text)
+                    log.warning('Received {status} response: {text}. '
+                                'Retrying in a moment.'
+                                .format(status=stream.status_code,
+                                        text=stream.text))
                     sleeper.sleep()
 
             except requests.exceptions.ConnectionError:
@@ -435,7 +443,7 @@ class Site(object):
         if self.version[:2] >= (1, 24):
             # The 'csrf' (cross-site request forgery) token introduced in 1.24 replaces
             # the majority of older tokens, like edittoken and movetoken.
-            if type not in ['watch', 'patrol', 'rollback', 'userrights']:
+            if type not in {'watch', 'patrol', 'rollback', 'userrights'}:
                 type = 'csrf'
 
         if type not in self.tokens:
