@@ -67,9 +67,9 @@ class List(object):
             self.load_chunk()
             return self.__next__(full=full)
 
-    def next(self, full=False):
+    def next(self, *args, **kwargs):
         """ For Python 2.x support """
-        return self.__next__(full)
+        return self.__next__(*args, **kwargs)
 
     def load_chunk(self):
         """Query a new chunk of data
@@ -168,10 +168,6 @@ class GeneratorList(List):
         if info['ns'] == 6:
             return mwclient.image.Image(self.site, u'', info)
         return mwclient.page.Page(self.site, u'', info)
-
-    def next(self):
-        """ For Python 2.x support """
-        return self.__next__()
 
     def load_chunk(self):
         # Put this here so that the constructor does not fail
