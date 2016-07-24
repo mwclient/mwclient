@@ -65,7 +65,7 @@ class List(object):
             if self.last:
                 raise StopIteration
             self.load_chunk()
-            return List.__next__(self, full=full)
+            return self.__next__(full=full)
 
     def next(self, full=False):
         """ For Python 2.x support """
