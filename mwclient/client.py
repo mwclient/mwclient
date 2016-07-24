@@ -131,7 +131,8 @@ class Site(object):
             return
 
         meta = self.api('query', meta='siteinfo|userinfo',
-                        siprop='general|namespaces', uiprop='groups|rights', retry_on_error=False)
+                        siprop='general|namespaces', uiprop='groups|rights',
+                        retry_on_error=False)
 
         # Extract site info
         self.site = meta['query']['general']
@@ -172,9 +173,13 @@ class Site(object):
         self.rights = userinfo.get('rights', [])
         self.initialized = True
 
-    default_namespaces = {0: u'', 1: u'Talk', 2: u'User', 3: u'User talk', 4: u'Project', 5: u'Project talk',
-                          6: u'Image', 7: u'Image talk', 8: u'MediaWiki', 9: u'MediaWiki talk', 10: u'Template', 11: u'Template talk',
-                          12: u'Help', 13: u'Help talk', 14: u'Category', 15: u'Category talk', -1: u'Special', -2: u'Media'}
+    default_namespaces = {
+        0: u'', 1: u'Talk', 2: u'User', 3: u'User talk', 4: u'Project',
+        5: u'Project talk', 6: u'Image', 7: u'Image talk', 8: u'MediaWiki',
+        9: u'MediaWiki talk', 10: u'Template', 11: u'Template talk', 12: u'Help',
+        13: u'Help talk', 14: u'Category', 15: u'Category talk',
+        -1: u'Special', -2: u'Media'
+    }
 
     def __repr__(self):
         return "<Site object '%s%s'>" % (self.host, self.path)
