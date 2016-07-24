@@ -19,7 +19,7 @@ class APIError(MwClientError):
     def __init__(self, code, info, kwargs):
         self.code = code
         self.info = info
-        MwClientError.__init__(self, code, info, kwargs)
+        super(APIError, self).__init__(code, info, kwargs)
 
 
 class InsufficientPermission(MwClientError):
@@ -75,7 +75,7 @@ class InvalidResponse(MwClientError):
                        'you used the correct hostname. If you did, the server might ' + \
                        'be wrongly configured or experiencing temporary problems.'
         self.response_text = response_text
-        MwClientError.__init__(self, self.message, response_text)
+        super(InvalidResponse, self).__init__(self.message, response_text)
 
     def __str__(self):
         return self.message
