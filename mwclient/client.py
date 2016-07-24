@@ -89,9 +89,15 @@ class Site(object):
         if pool is None:
             self.connection = requests.Session()
             self.connection.auth = auth
-            self.connection.headers['User-Agent'] = 'MwClient/' + __ver__ + ' (https://github.com/mwclient/mwclient)'
-            if clients_useragent:
-                self.connection.headers['User-Agent'] = clients_useragent + ' - ' + self.connection.headers['User-Agent']
+
+            prefix = '{} - '.format(clients_useragent) if clients_useragent else ''
+            self.connection.headers['User-Agent'] = (
+                '{prefix}MwClient/{ver} ({url})'.format(
+                    prefix=prefix,
+                    ver=__ver__,
+                    url='https://github.com/mwclient/mwclient'
+                )
+            )
         else:
             self.connection = pool
 
