@@ -908,9 +908,19 @@ class Site(object):
         Ask a query against Semantic MediaWiki.
 
         API doc: https://semantic-mediawiki.org/wiki/Ask_API
+
+        Returns:
+            Generator for retrieving all search results
         """
         kwargs = {}
         if title is None:
             kwargs['title'] = title
-        result = self.raw_api('ask', query=query, **kwargs)
-        return result['query']['results']
+
+        offset = 0
+        while offset is not None:
+            results = self.raw_api('ask', query='{query}|offset={offset}'.format(
+                query=query, offset=offset), **kwargs)
+
+            offset = results.get('query-continue-offset')
+            for result in results['query']['results']:
+                yield result
