@@ -36,7 +36,7 @@ mwclient
 
 mwclient is a lightweight Python client library to the `MediaWiki API <https://mediawiki.org/wiki/API>`_
 which provides access to most API functionality.
-It works with Python 2.6, 2.7, 3.3 and above, and supports MediaWiki 1.16 and above.
+It works with Python 2.7, 3.3 and above, and supports MediaWiki 1.16 and above.
 For functions not available in the current MediaWiki, a ``MediaWikiVersionError`` is raised.
 
 The current stable `version 0.8.1 <https://github.com/mwclient/mwclient/archive/v0.8.1.zip>`_
