@@ -843,4 +843,9 @@ class Site(object):
         if title is None:
             kwargs['title'] = title
         result = self.raw_api('ask', query=query, **kwargs)
-        return result['query']['results']
+        for r in result['query']['results']:
+            yield r
+        while 'query-continue-offset' in result:
+            result = self.raw_api('ask', query='%s|offset=%s' % (query, result['query-continue-offset']), **kwargs)
+            for r in result['query']['results']:
+                yield r
