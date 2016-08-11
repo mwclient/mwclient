@@ -4,12 +4,7 @@ import logging
 from six import text_type
 import six
 
-try:
-    # Python 2.7+
-    from collections import OrderedDict
-except ImportError:
-    # Python 2.6
-    from ordereddict import OrderedDict
+from collections import OrderedDict
 
 try:
     import json
