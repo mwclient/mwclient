@@ -11,23 +11,25 @@ Then try to connect to a site:
 
     >>> site = mwclient.Site('test.wikipedia.org')
 
-By default, mwclient will try to conncet using https. If your site
-doesn't support https, you need to explicitly ask for http like so:
+By default, mwclient will connect using https. If your site doesn't support
+https, you need to explicitly request http like so:
 
     >>> site = mwclient.Site(('http', 'test.wikipedia.org'))
-
 
 .. _endpoint:
 
 The API endpoint location
 -------------------------
 
-The site's API endpoint location depends on the configurable `$wgScriptPath <https://www.mediawiki.org/wiki/Manual:$wgScriptPath>`_.
-Mwclient defaults to the script path '/w/' used by the Wikimedia wikis.
-If you get a 404 Not Found or a :class:`mwclient.errors.InvalidResponse` error upon connecting,
-your site might use a different script path. You can specify it using the `path` argument:
+The API endpoint location on a MediaWiki site depends on the configurable
+`$wgScriptPath`_. Mwclient defaults to the script path '/w/' used by the
+Wikimedia wikis. If you get a 404 Not Found or a
+:class:`mwclient.errors.InvalidResponse` error upon connecting, your site might
+use a different script path. You can specify it using the ``path`` argument:
 
-    >>> site = mwclient.Site(('https', 'myawesomewiki.org'), path='/wiki/', )
+    >>> site = mwclient.Site('my-awesome-wiki.org', path='/wiki/', )
+
+.. _$wgScriptPath: https://www.mediawiki.org/wiki/Manual:$wgScriptPath
 
 .. _user-agent:
 
@@ -35,21 +37,24 @@ Specifying a user agent
 -----------------------
 
 If you are connecting to a Wikimedia site, you should follow the
-`Wikimedia User-Agent policy <https://meta.wikimedia.org/wiki/User-Agent_policy>`_
-and identify your tool like so:
+`Wikimedia User-Agent policy`_ and identify your tool like so:
 
     >>> ua = 'MyCoolTool/0.2 run by User:Xyz'
     >>> site = mwclient.Site('test.wikipedia.org', clients_useragent=ua)
 
-Mwclient will append `' - MwClient/{version} ({url})'` to the User-Agent string.
+Note that Mwclient appends ' - MwClient/{version} ({url})' to your string.
+
+.. _Wikimedia User-Agent policy: https://meta.wikimedia.org/wiki/User-Agent_policy
 
 .. _auth:
 
 Authenticating
 --------------
 
-Note that mwclient by default will protect you from editing when unauthenticated.
-If you actually want to edit unauthenticated, set
+Mwclient supports several methods for authentication described below. By default
+it will also protect you from editing when not authenticated by raising a
+:class:`mwclient.errors.LoginError`. If you actually *do* want to edit
+unauthenticated, just set
 
     >>> site.force_login = False
 
@@ -58,12 +63,10 @@ If you actually want to edit unauthenticated, set
 OAuth
 ^^^^^
 
-mwclient supports different ways of authenticating. On Wikimedia
-wikis, the recommended way is now to use OAuth to authenticate as a
-`owner-only consumer <https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers#Python>`_.
-Once you have obtained the *consumer token* (also called *consumer key*), the
-*consumer secret*, the *access token* and the *access secret*, you can authenticate
-like so:
+On Wikimedia wikis, the recommended authentication method is to authenticate as
+a `owner-only consumer`_. Once you have obtained the *consumer token* (also
+called *consumer key*), the *consumer secret*, the *access token* and the
+*access secret*, you can authenticate like so:
 
     >>> site = mwclient.Site('test.wikipedia.org',
                              consumer_token='my_consumer_token',
@@ -71,6 +74,8 @@ like so:
                              access_token='my_access_token',
                              access_secret='my_access_secret')
 
+
+.. _owner-only consumer: https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
 .. _old_login:
 
 Old-school login
