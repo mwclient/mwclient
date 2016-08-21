@@ -120,19 +120,10 @@ class Page(object):
     def get_token(self, type, force=False):
         return self.site.get_token(type, force, title=self.name)
 
-    def get_expanded(self):
-        """Deprecated. Use page.text(expandtemplates=True) instead"""
-        warnings.warn("page.get_expanded() was deprecated in mwclient 0.7.0 "
-                      "and will be removed in 0.8.0, "
-                      "use page.text(expandtemplates=True) instead.",
-                      category=DeprecationWarning, stacklevel=2)
-
-        return self.text(expandtemplates=True)
-
     def edit(self, *args, **kwargs):
         """Deprecated. Use page.text() instead"""
         warnings.warn("page.edit() was deprecated in mwclient 0.7.0 "
-                      "and will be removed in 0.8.0, please use page.text() instead.",
+                      "and will be removed in 0.9.0, please use page.text() instead.",
                       category=DeprecationWarning, stacklevel=2)
         return self.text(*args, **kwargs)
 

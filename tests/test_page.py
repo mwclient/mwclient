@@ -263,13 +263,6 @@ class TestPageApiArgs(unittest.TestCase):
 
         assert args['rvexpandtemplates'] == '1'
 
-    def test_get_text_expanded_deprecated(self):
-        # Check that the 'rvexpandtemplates' parameter is sent to the API
-        text = self.page.get_expanded()
-        args = self.get_last_api_call_args()
-
-        assert args['rvexpandtemplates'] == '1'
-
 
 if __name__ == '__main__':
     unittest.main()
