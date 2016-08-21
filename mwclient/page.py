@@ -47,7 +47,11 @@ class Page(object):
         self.revision = info.get('lastrevid', 0)
         self.exists = 'missing' not in info
         self.length = info.get('length')
-        self.protection = dict([(i['type'], (i['level'], i['expiry'])) for i in info.get('protection', ()) if i])
+        self.protection = {
+            i['type']: (i['level'], i['expiry'])
+            for i in info.get('protection', ())
+            if i
+        }
         self.redirect = 'redirect' in info
         self.pageid = info.get('pageid', None)
         self.contentmodel = info.get('contentmodel', None)
@@ -117,14 +121,17 @@ class Page(object):
 
     def get_expanded(self):
         """Deprecated. Use page.text(expandtemplates=True) instead"""
-        warnings.warn("page.get_expanded() was deprecated in mwclient 0.7.0 and will be removed in 0.8.0, use page.text(expandtemplates=True) instead.",
+        warnings.warn("page.get_expanded() was deprecated in mwclient 0.7.0 "
+                      "and will be removed in 0.8.0, "
+                      "use page.text(expandtemplates=True) instead.",
                       category=DeprecationWarning, stacklevel=2)
 
         return self.text(expandtemplates=True)
 
     def edit(self, *args, **kwargs):
         """Deprecated. Use page.text() instead"""
-        warnings.warn("page.edit() was deprecated in mwclient 0.7.0 and will be removed in 0.8.0, please use page.text() instead.",
+        warnings.warn("page.edit() was deprecated in mwclient 0.7.0 "
+                      "and will be removed in 0.8.0, please use page.text() instead.",
                       category=DeprecationWarning, stacklevel=2)
         return self.text(*args, **kwargs)
 
@@ -154,7 +161,8 @@ class Page(object):
         if cache and key in self._textcache:
             return self._textcache[key]
 
-        revs = self.revisions(prop='content|timestamp', limit=1, section=section, expandtemplates=expandtemplates)
+        revs = self.revisions(prop='content|timestamp', limit=1, section=section,
+                              expandtemplates=expandtemplates)
         try:
             rev = next(revs)
             text = rev['*']
@@ -175,10 +183,13 @@ class Page(object):
         """
         if not self.site.logged_in and self.site.force_login:
             # Should we really check for this?
-            raise mwclient.errors.LoginError(self.site, 'By default, mwclient protects you from ' +
-                                             'accidentally editing without being logged in. If you ' +
-                                             'actually want to edit without logging in, you can set ' +
-                                             'force_login on the Site object to False.')
+            raise mwclient.errors.LoginError(
+                self.site,
+                'By default, mwclient protects you from accidentally editing '
+                'without being logged in. '
+                'If you actually want to edit without logging in, '
+                'you can set force_login on the Site object to False.'
+            )
         if self.site.blocked:
             raise mwclient.errors.UserBlocked(self.site.blocked)
         if not self.can('edit'):
@@ -234,8 +245,9 @@ class Page(object):
     def handle_edit_error(self, e, summary):
         if e.code == 'editconflict':
             raise mwclient.errors.EditError(self, summary, e.info)
-        elif e.code in ('protectedtitle', 'cantcreate', 'cantcreate-anon', 'noimageredirect-anon',
-                        'noimageredirect', 'noedit-anon', 'noedit'):
+        elif e.code in {'protectedtitle', 'cantcreate', 'cantcreate-anon',
+                        'noimageredirect-anon', 'noimageredirect', 'noedit-anon',
+                        'noedit'}:
             raise mwclient.errors.ProtectedPageError(self, e.code, e.info)
         else:
             raise
@@ -300,7 +312,8 @@ class Page(object):
     # def watch: requires 1.14
 
     # Properties
-    def backlinks(self, namespace=None, filterredir='all', redirect=False, limit=None, generator=True):
+    def backlinks(self, namespace=None, filterredir='all', redirect=False,
+                  limit=None, generator=True):
         """
         List pages that link to the current page, similar to Special:Whatlinkshere.
 
@@ -308,12 +321,17 @@ class Page(object):
 
         """
         prefix = mwclient.listing.List.get_prefix('bl', generator)
-        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace, filterredir=filterredir))
+        kwargs = dict(mwclient.listing.List.generate_kwargs(
+            prefix, namespace=namespace, filterredir=filterredir,
+        ))
         if redirect:
             kwargs['%sredirect' % prefix] = '1'
         kwargs[prefix + 'title'] = self.name
 
-        return mwclient.listing.List.get_list(generator)(self.site, 'backlinks', 'bl', limit=limit, return_values='title', **kwargs)
+        return mwclient.listing.List.get_list(generator)(
+            self.site, 'backlinks', 'bl', limit=limit, return_values='title',
+            **kwargs
+        )
 
     def categories(self, generator=True):
         """
@@ -326,7 +344,8 @@ class Page(object):
             return mwclient.listing.PagePropertyGenerator(self, 'categories', 'cl')
         else:
             # TODO: return sortkey if wanted
-            return mwclient.listing.PageProperty(self, 'categories', 'cl', return_values='title')
+            return mwclient.listing.PageProperty(self, 'categories', 'cl',
+                                                 return_values='title')
 
     def embeddedin(self, namespace=None, filterredir='all', limit=None, generator=True):
         """
@@ -345,10 +364,14 @@ class Page(object):
             mwclient.listings.List: Page iterator
         """
         prefix = mwclient.listing.List.get_prefix('ei', generator)
-        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace, filterredir=filterredir))
+        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace,
+                                                            filterredir=filterredir))
         kwargs[prefix + 'title'] = self.name
 
-        return mwclient.listing.List.get_list(generator)(self.site, 'embeddedin', 'ei', limit=limit, return_values='title', **kwargs)
+        return mwclient.listing.List.get_list(generator)(
+            self.site, 'embeddedin', 'ei', limit=limit, return_values='title',
+            **kwargs
+        )
 
     def extlinks(self):
         """
@@ -369,7 +392,8 @@ class Page(object):
         if generator:
             return mwclient.listing.PagePropertyGenerator(self, 'images', '')
         else:
-            return mwclient.listing.PageProperty(self, 'images', '', return_values='title')
+            return mwclient.listing.PageProperty(self, 'images', '',
+                                                 return_values='title')
 
     def iwlinks(self):
         """
@@ -378,7 +402,8 @@ class Page(object):
         API doc: https://www.mediawiki.org/wiki/API:Iwlinks
 
         """
-        return mwclient.listing.PageProperty(self, 'iwlinks', 'iw', return_values=('prefix', '*'))
+        return mwclient.listing.PageProperty(self, 'iwlinks', 'iw',
+                                             return_values=('prefix', '*'))
 
     def langlinks(self, **kwargs):
         """
@@ -387,7 +412,9 @@ class Page(object):
         API doc: https://www.mediawiki.org/wiki/API:Langlinks
 
         """
-        return mwclient.listing.PageProperty(self, 'langlinks', 'll', return_values=('lang', '*'), **kwargs)
+        return mwclient.listing.PageProperty(self, 'langlinks', 'll',
+                                             return_values=('lang', '*'),
+                                             **kwargs)
 
     def links(self, namespace=None, generator=True, redirects=False):
         """
@@ -404,11 +431,13 @@ class Page(object):
         if generator:
             return mwclient.listing.PagePropertyGenerator(self, 'links', 'pl', **kwargs)
         else:
-            return mwclient.listing.PageProperty(self, 'links', 'pl', return_values='title', **kwargs)
+            return mwclient.listing.PageProperty(self, 'links', 'pl', return_values='title',
+                                                 **kwargs)
 
     def revisions(self, startid=None, endid=None, start=None, end=None,
                   dir='older', user=None, excludeuser=None, limit=50,
-                  prop='ids|timestamp|flags|comment|user', expandtemplates=False, section=None,
+                  prop='ids|timestamp|flags|comment|user',
+                  expandtemplates=False, section=None,
                   diffto=None):
         """
         List revisions of the current page.
@@ -445,7 +474,8 @@ class Page(object):
         if section is not None:
             kwargs['rvsection'] = section
 
-        return mwclient.listing.RevisionsIterator(self, 'revisions', 'rv', limit=limit, **kwargs)
+        return mwclient.listing.RevisionsIterator(self, 'revisions', 'rv', limit=limit,
+                                                  **kwargs)
 
     def templates(self, namespace=None, generator=True):
         """
@@ -457,6 +487,8 @@ class Page(object):
         prefix = mwclient.listing.List.get_prefix('tl', generator)
         kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace))
         if generator:
-            return mwclient.listing.PagePropertyGenerator(self, 'templates', prefix, **kwargs)
+            return mwclient.listing.PagePropertyGenerator(self, 'templates', prefix,
+                                                          **kwargs)
         else:
-            return mwclient.listing.PageProperty(self, 'templates', prefix, return_values='title', **kwargs)
+            return mwclient.listing.PageProperty(self, 'templates', prefix,
+                                                 return_values='title', **kwargs)

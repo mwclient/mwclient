@@ -36,7 +36,7 @@ mwclient
 
 mwclient is a lightweight Python client library to the `MediaWiki API <https://mediawiki.org/wiki/API>`_
 which provides access to most API functionality.
-It works with Python 2.6, 2.7, 3.3 and above, and supports MediaWiki 1.16 and above.
+It works with Python 2.7, 3.3 and above, and supports MediaWiki 1.16 and above.
 For functions not available in the current MediaWiki, a ``MediaWikiVersionError`` is raised.
 
 The current stable `version 0.8.1 <https://github.com/mwclient/mwclient/archive/v0.8.1.zip>`_
@@ -53,7 +53,7 @@ can be installed from GitHub:
 
     $ pip install git+git://github.com/mwclient/mwclient.git
 
-Please see the 
+Please see the
 `release notes <https://github.com/mwclient/mwclient/blob/master/RELEASE-NOTES.md>`_
 for a list of changes.
 
@@ -111,7 +111,7 @@ without their two-letter prefix. Exceptions to this rule:
 * ``categorymembers`` is implemented as ``Category.members``
 * ``deletedrevs`` is ``deletedrevisions``
 * ``usercontribs`` is ``usercontributions``
-* First parameters of ``search`` and ``usercontributions`` are ``search`` and ``user`` 
+* First parameters of ``search`` and ``usercontributions`` are ``search`` and ``user``
   respectively
 
 Properties and generators are implemented as Python generators.
