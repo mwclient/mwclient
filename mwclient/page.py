@@ -103,9 +103,10 @@ class Page(object):
         return title
 
     def can(self, action):
-        """
-        Check if the current user has the right to carry out some action with the current page.
+        """Check if the current user has the right to carry out some action
+        with the current page.
 
+        Example:
             >>> page.can('edit')
             True
 
@@ -136,8 +137,8 @@ class Page(object):
         return self.text(*args, **kwargs)
 
     def text(self, section=None, expandtemplates=False, cache=True):
-        """
-        Get the current wikitext of the page, or of a specific section.
+        """Get the current wikitext of the page, or of a specific section.
+
         If the page does not exist, an empty string is returned. By
         default, results will be cached and if you call text() again
         with the same section and expandtemplates the result will come
@@ -178,8 +179,7 @@ class Page(object):
         return text
 
     def save(self, text, summary=u'', minor=False, bot=True, section=None, **kwargs):
-        """
-        Update the text of a section or the whole page by performing an edit operation.
+        """Update the text of a section or the whole page by performing an edit operation.
         """
         if not self.site.logged_in and self.site.force_login:
             # Should we really check for this?
@@ -314,8 +314,7 @@ class Page(object):
     # Properties
     def backlinks(self, namespace=None, filterredir='all', redirect=False,
                   limit=None, generator=True):
-        """
-        List pages that link to the current page, similar to Special:Whatlinkshere.
+        """List pages that link to the current page, similar to Special:Whatlinkshere.
 
         API doc: https://www.mediawiki.org/wiki/API:Backlinks
 
@@ -334,8 +333,7 @@ class Page(object):
         )
 
     def categories(self, generator=True):
-        """
-        List categories used on the current page.
+        """List categories used on the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Categories
 
@@ -348,8 +346,7 @@ class Page(object):
                                                  return_values='title')
 
     def embeddedin(self, namespace=None, filterredir='all', limit=None, generator=True):
-        """
-        List pages that transclude the current page.
+        """List pages that transclude the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Embeddedin
 
@@ -374,8 +371,7 @@ class Page(object):
         )
 
     def extlinks(self):
-        """
-        List external links from the current page.
+        """List external links from the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Extlinks
 
@@ -383,8 +379,7 @@ class Page(object):
         return mwclient.listing.PageProperty(self, 'extlinks', 'el', return_values='*')
 
     def images(self, generator=True):
-        """
-        List files/images embedded in the current page.
+        """List files/images embedded in the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Images
 
@@ -396,8 +391,7 @@ class Page(object):
                                                  return_values='title')
 
     def iwlinks(self):
-        """
-        List interwiki links from the current page.
+        """List interwiki links from the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Iwlinks
 
@@ -406,8 +400,7 @@ class Page(object):
                                              return_values=('prefix', '*'))
 
     def langlinks(self, **kwargs):
-        """
-        List interlanguage links from the current page.
+        """List interlanguage links from the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Langlinks
 
@@ -417,8 +410,7 @@ class Page(object):
                                              **kwargs)
 
     def links(self, namespace=None, generator=True, redirects=False):
-        """
-        List links to other pages from the current page.
+        """List links to other pages from the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Links
 
@@ -439,8 +431,7 @@ class Page(object):
                   prop='ids|timestamp|flags|comment|user',
                   expandtemplates=False, section=None,
                   diffto=None):
-        """
-        List revisions of the current page.
+        """List revisions of the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Revisions
 
@@ -478,8 +469,7 @@ class Page(object):
                                                   **kwargs)
 
     def templates(self, namespace=None, generator=True):
-        """
-        List templates used on the current page.
+        """List templates used on the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Templates
 

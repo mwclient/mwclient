@@ -225,8 +225,8 @@ class PageList(GeneratorList):
         page name, otherwise guess the namespace from the name using
         `self.guess_namespace`.
 
-        :rtype: One of Category, Image, or Page (default), according
-        to the namespace.
+        Returns:
+            One of Category, Image or Page (default), according to namespace.
         """
         if self.namespace != 0:
             full_page_name = u"{namespace}:{name}".format(
@@ -255,8 +255,11 @@ class PageList(GeneratorList):
         If name starts with any of the site's namespaces' names or
         default_namespaces, use that.  Else, return zero.
 
-        :param name: The pagename as a string (having `.startswith`)
-        :return: the id of the guessed namespace or zero.
+        Args:
+            name (str): The pagename as a string (having `.startswith`)
+
+        Returns:
+            The id of the guessed namespace or zero.
         """
         for ns in self.site.namespaces:
             if ns == 0:

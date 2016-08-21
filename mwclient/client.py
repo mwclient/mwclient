@@ -30,8 +30,7 @@ log = logging.getLogger(__name__)
 
 
 class Site(object):
-    """
-    A MediaWiki site identified by its hostname.
+    """A MediaWiki site identified by its hostname.
 
         >>> import mwclient
         >>> site = mwclient.Site('en.wikipedia.org')
@@ -40,7 +39,9 @@ class Site(object):
 
     Mwclient assumes that the script path (where index.php and api.php are located)
     is '/w/'. If the site uses a different script path, you must specify this
-    (path must end in a '/'). Examples:
+    (path must end in a '/').
+
+    Examples:
 
         >>> site = mwclient.Site('vim.wikia.com', path='/')
         >>> site = mwclient.Site('sourceforge.net', path='/apps/mediawiki/mwclient/')
@@ -164,9 +165,11 @@ class Site(object):
     def version_tuple_from_generator(string, prefix='MediaWiki '):
         """Return a version tuple from a MediaWiki Generator string
 
-        Example: "MediaWiki 1.5.1" → (1, 5, 1)
+        Example:
+            "MediaWiki 1.5.1" → (1, 5, 1)
 
-        :param prefix: the expected prefix of the string
+        Args:
+            prefix (str): The expected prefix of the string
         """
         if not string.startswith(prefix):
             raise errors.MediaWikiVersionError('Unknown generator {}'.format(string))
@@ -176,8 +179,9 @@ class Site(object):
         def split_num(s):
             """Split the string on the first non-digit character.
 
-            :return: a tuple of the digit part as int and, if
-            available, the rest of the string.
+            Returns:
+                A tuple of the digit part as int and, if available,
+                the rest of the string.
             """
             i = 0
             while i < len(s):
@@ -209,8 +213,9 @@ class Site(object):
         return "<Site object '%s%s'>" % (self.host, self.path)
 
     def api(self, action, *args, **kwargs):
-        """
-        Perform a generic API call and handle errors. All arguments will be passed on.
+        """Perform a generic API call and handle errors.
+
+        All arguments will be passed on.
 
         Example:
             To get coordinates from the GeoData MediaWiki extension at English Wikipedia:
@@ -487,32 +492,37 @@ class Site(object):
 
         return self.tokens[type]
 
-    def upload(self, file=None, filename=None, description='', ignore=False, file_size=None,
-               url=None, filekey=None, comment=None):
-        """
-        Uploads a file to the site. Returns JSON result from the API.
-        Can raise `errors.InsufficientPermission` and `requests.exceptions.HTTPError`.
+    def upload(self, file=None, filename=None, description='', ignore=False,
+               file_size=None, url=None, filekey=None, comment=None):
+        """Uploads a file to the site.
 
-        : Parameters :
-          - file         : File object or stream to upload.
-          - filename     : Destination filename, don't include namespace
-                           prefix like 'File:'
-          - description  : Wikitext for the file description page.
-          - ignore       : True to upload despite any warnings.
-          - file_size    : Deprecated in mwclient 0.7
-          - url          : URL to fetch the file from.
-          - filekey      : Key that identifies a previous upload that was
+        Note that one of `file`, `filekey` and `url` must be specified, but not
+        more than one. For normal uploads, you specify `file`.
+
+        Args:
+            file (str): File object or stream to upload.
+            filename (str): Destination filename, don't include namespace
+                            prefix like 'File:'
+            description (str): Wikitext for the file description page.
+            ignore (bool): True to upload despite any warnings.
+            file_size (int): Deprecated in mwclient 0.7
+            url (str): URL to fetch the file from.
+            filekey (str): Key that identifies a previous upload that was
                            stashed temporarily.
-          - comment      : Upload comment. Also used as the initial page text
+            comment (str): Upload comment. Also used as the initial page text
                            for new files if `description` is not specified.
-
-        Note that one of `file`, `filekey` and `url` must be specified, but not more
-        than one. For normal uploads, you specify `file`.
 
         Example:
 
-        >>> client.upload(open('somefile', 'rb'), filename='somefile.jpg',
-                          description='Some description')
+            >>> client.upload(open('somefile', 'rb'), filename='somefile.jpg',
+                              description='Some description')
+
+        Returns:
+            JSON result from the API.
+
+        Raises:
+            errors.InsufficientPermission
+            requests.exceptions.HTTPError
         """
 
         if file_size is not None:
@@ -675,6 +685,7 @@ class Site(object):
         """Retrieve blocks as a generator.
 
         Each block is a dictionary containing:
+
         - user: the username or IP address of the user
         - id: the ID of the block
         - timestamp: when the block was added
@@ -755,8 +766,7 @@ class Site(object):
 
     def recentchanges(self, start=None, end=None, dir='older', namespace=None,
                       prop=None, show=None, limit=None, type=None, toponly=None):
-        """
-        List recent changes to the wiki, à la Special:Recentchanges.
+        """List recent changes to the wiki, à la Special:Recentchanges.
         """
         kwargs = dict(listing.List.generate_kwargs('rc', start=start, end=end, dir=dir,
                                                    namespace=namespace, prop=prop,
@@ -766,9 +776,10 @@ class Site(object):
 
     def revisions(self, revids, prop='ids|timestamp|flags|comment|user',
                   expandtemplates=False, diffto='prev'):
-        """
-        Get data about a list of revisions. See also the `Page.revisions()`
-        method.
+        """Get data about a list of revisions.
+
+        See also the `Page.revisions()` method.
+
         API doc: https://www.mediawiki.org/wiki/API:Revisions
 
         Example: Get revision text for two revisions:
@@ -808,10 +819,11 @@ class Site(object):
         return revisions
 
     def search(self, search, namespace='0', what=None, redirects=False, limit=None):
-        """
-        Perform a full text search.
+        """Perform a full text search.
+
         API doc: https://www.mediawiki.org/wiki/API:Search
 
+        Example:
             >>> for result in site.search('prefix:Template:Citation/'):
             ...     print(result.get('title'))
 
