@@ -72,8 +72,8 @@ Contributing
 --------------------
 
 mwclient ships with a test suite based on `pytest <https://pytest.org>`_.
-Only a small part of mwclient is currently tested, but hopefully coverage
-will improve in the future.
+Only a small part of mwclient is currently tested,
+but hopefully coverage will improve in the future.
 
 The easiest way to run tests is:
 
@@ -99,17 +99,18 @@ can use `Tox <https://testrun.org/tox/latest/>`_:
     $ pip install tox
     $ tox
 
-*Documentation* consists of both a manually compiled user guide (under
-``docs/user``) and a reference guide generated from the docstrings using
-Sphinx autodoc with the napoleon extension. Documentation is built automatically
-on `ReadTheDocs`_ after each commit. To build documentation locally for testing:
+*Documentation* consists of both a manually compiled user guide (under ``docs/user``)
+and a reference guide generated from the docstrings,
+using Sphinx autodoc with the napoleon extension.
+Documentation is built automatically on `ReadTheDocs`_ after each commit.
+To build documentation locally for testing, do:
 
 .. code-block:: console
 
   $ cd docs
   $ make html
 
-When writing docstrings, try to adher to the `Google style`_.
+When writing docstrings, try to adhere to the `Google style`_.
 
 .. _Google style: https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html
 .. _ReadTheDocs: https://mwclient.readthedocs.io/
