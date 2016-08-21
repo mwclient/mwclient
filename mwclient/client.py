@@ -163,7 +163,7 @@ class Site(object):
 
     @staticmethod
     def version_tuple_from_generator(string, prefix='MediaWiki '):
-        """Return a version tuple from a MediaWiki Generator string
+        """Return a version tuple from a MediaWiki Generator string.
 
         Example:
             "MediaWiki 1.5.1" → (1, 5, 1)
@@ -345,7 +345,8 @@ class Site(object):
                     sleeper.sleep()
 
             except requests.exceptions.ConnectionError:
-                # In the event of a network problem (e.g. DNS failure, refused connection, etc),
+                # In the event of a network problem
+                # (e.g. DNS failure, refused connection, etc),
                 # Requests will raise a ConnectionError exception.
                 if not retry_on_error:
                     raise
@@ -353,7 +354,7 @@ class Site(object):
                 sleeper.sleep()
 
     def raw_api(self, action, *args, **kwargs):
-        """Sends a call to the API."""
+        """Send a call to the API."""
         try:
             retry_on_error = kwargs.pop('retry_on_error')
         except KeyError:
@@ -371,7 +372,7 @@ class Site(object):
             raise errors.InvalidResponse(res)
 
     def raw_index(self, action, *args, **kwargs):
-        """Sends a call to index.php rather than the API."""
+        """Send a call to index.php rather than the API."""
         kwargs['action'] = action
         kwargs['maxlag'] = self.max_lag
         data = self._query_string(*args, **kwargs)
@@ -494,7 +495,7 @@ class Site(object):
 
     def upload(self, file=None, filename=None, description='', ignore=False,
                file_size=None, url=None, filekey=None, comment=None):
-        """Uploads a file to the site.
+        """Upload a file to the site.
 
         Note that one of `file`, `filekey` and `url` must be specified, but not
         more than one. For normal uploads, you specify `file`.
@@ -711,11 +712,12 @@ class Site(object):
         return listing.List(self, 'deletedrevs', 'dr', limit=limit, **kwargs)
 
     def exturlusage(self, query, prop=None, protocol='http', namespace=None, limit=None):
-        r"""Retrieves list of pages that link to a particular domain or URL as a generator.
+        r"""Retrieve the list of pages that link to a particular domain or URL, as a generator.
 
         This API call mirrors the Special:LinkSearch function on-wiki.
 
-        Query can be a domain like 'bbc.co.uk'. Wildcards can be used, e.g. '\*.bbc.co.uk'.
+        Query can be a domain like 'bbc.co.uk'.
+        Wildcards can be used, e.g. '\*.bbc.co.uk'.
         Alternatively, a query can contain a full domain name and some or all of a URL:
         e.g. '\*.wikipedia.org/wiki/\*'
 
@@ -752,7 +754,7 @@ class Site(object):
 
     # def protectedtitles requires 1.15
     def random(self, namespace, limit=20):
-        """Retrieves a generator of random page from a particular namespace.
+        """Retrieve a generator of random pages from a particular namespace.
 
         limit specifies the number of random articles retrieved.
         namespace is a namespace identifier integer.
@@ -831,12 +833,14 @@ class Site(object):
             search (str): The query string
             namespace (int): The namespace to search (default: 0)
             what (str): Search scope: 'text' for fulltext, or 'title' for titles only.
-                        Depending on the search backend, both options may not be available.
+                        Depending on the search backend,
+                        both options may not be available.
                         For instance
                         `CirrusSearch <https://www.mediawiki.org/wiki/Help:CirrusSearch>`_
                         doesn't support 'title', but instead provides an "intitle:"
                         query string filter.
-            redirects (bool): Include redirect pages in the search (option removed in MediaWiki 1.23).
+            redirects (bool): Include redirect pages in the search
+                              (option removed in MediaWiki 1.23).
 
         Returns:
             mwclient.listings.List: Search results iterator
