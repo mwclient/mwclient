@@ -28,10 +28,10 @@ class Page(object):
                 extra_props = ()
 
             if type(name) is int:
-                info = self.site.api('query', prop=prop, pageids=name,
+                info = self.site.get('query', prop=prop, pageids=name,
                                      inprop='protection', *extra_props)
             else:
-                info = self.site.api('query', prop=prop, titles=name,
+                info = self.site.get('query', prop=prop, titles=name,
                                      inprop='protection', *extra_props)
             info = six.next(six.itervalues(info['query']['pages']))
         self._info = info
@@ -63,7 +63,7 @@ class Page(object):
 
     def redirects_to(self):
         """ Returns the redirect target page, or None if the page is not a redirect page."""
-        info = self.site.api('query', prop='pageprops', titles=self.name, redirects='')['query']
+        info = self.site.get('query', prop='pageprops', titles=self.name, redirects='')['query']
         if 'redirects' in info:
             for page in info['redirects']:
                 if page['from'] == self.name:
@@ -206,9 +206,9 @@ class Page(object):
         data.update(kwargs)
 
         def do_edit():
-            result = self.site.api('edit', title=self.name, text=text,
-                                   summary=summary, token=self.get_token('edit'),
-                                   **data)
+            result = self.site.post('edit', title=self.name, text=text,
+                                    summary=summary, token=self.get_token('edit'),
+                                    **data)
             if result['edit'].get('result').lower() == 'failure':
                 raise mwclient.errors.EditError(self, result['edit'])
             return result
@@ -264,8 +264,8 @@ class Page(object):
             data['movetalk'] = '1'
         if no_redirect:
             data['noredirect'] = '1'
-        result = self.site.api('move', ('from', self.name), to=new_title,
-                               token=self.get_token('move'), reason=reason, **data)
+        result = self.site.post('move', ('from', self.name), to=new_title,
+                                token=self.get_token('move'), reason=reason, **data)
         return result['move']
 
     def delete(self, reason='', watch=False, unwatch=False, oldimage=False):
@@ -288,9 +288,9 @@ class Page(object):
             data['unwatch'] = '1'
         if oldimage:
             data['oldimage'] = oldimage
-        result = self.site.api('delete', title=self.name,
-                               token=self.get_token('delete'),
-                               reason=reason, **data)
+        result = self.site.post('delete', title=self.name,
+                                token=self.get_token('delete'),
+                                reason=reason, **data)
         return result['delete']
 
     def purge(self):

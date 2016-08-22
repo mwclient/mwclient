@@ -30,7 +30,7 @@ class TestList(unittest.TestCase):
     def setupDummyResponses(self, mock_site, result_member, ns=None):
         if ns is None:
             ns = [0, 0, 0]
-        mock_site.api.side_effect = [
+        mock_site.get.side_effect = [
             {
                 'continue': {
                     'apcontinue': 'Kre_Mbaye',

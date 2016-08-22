@@ -131,7 +131,7 @@ class Site(object):
     def site_init(self):
 
         if self.initialized:
-            info = self.api('query', meta='userinfo', uiprop='groups|rights')
+            info = self.get('query', meta='userinfo', uiprop='groups|rights')
             userinfo = info['query']['userinfo']
             self.username = userinfo['name']
             self.groups = userinfo.get('groups', [])
@@ -139,7 +139,7 @@ class Site(object):
             self.tokens = {}
             return
 
-        meta = self.api('query', meta='siteinfo|userinfo',
+        meta = self.get('query', meta='siteinfo|userinfo',
                         siprop='general|namespaces', uiprop='groups|rights',
                         retry_on_error=False)
 
@@ -214,7 +214,29 @@ class Site(object):
     def __repr__(self):
         return "<Site object '%s%s'>" % (self.host, self.path)
 
-    def api(self, action, *args, **kwargs):
+    def get(self, action, *args, **kwargs):
+        """Perform a generic API call using GET.
+
+        This is just a shorthand for calling api() with http_method='GET'.
+        All arguments will be passed on.
+
+        Returns:
+            The raw response from the API call, as a dictionary.
+        """
+        return self.api(action, 'GET', *args, **kwargs)
+
+    def post(self, action, *args, **kwargs):
+        """Perform a generic API call using POST.
+
+        This is just a shorthand for calling api() with http_method='POST'.
+        All arguments will be passed on.
+
+        Returns:
+            The raw response from the API call, as a dictionary.
+        """
+        return self.api(action, 'POST', *args, **kwargs)
+
+    def api(self, action, http_method='POST', *args, **kwargs):
         """Perform a generic API call and handle errors.
 
         All arguments will be passed on.
@@ -252,7 +274,7 @@ class Site(object):
         sleeper = self.sleepers.make()
 
         while True:
-            info = self.raw_api(action, **kwargs)
+            info = self.raw_api(action, http_method, **kwargs)
             if not info:
                 info = {}
             if self.handle_api_result(info, sleeper=sleeper):
@@ -291,7 +313,7 @@ class Site(object):
         qs2 = [(k, v) for k, v in six.iteritems(kwargs) if k in {'wpEditToken', 'token'}]
         return OrderedDict(qs1 + qs2)
 
-    def raw_call(self, script, data, files=None, retry_on_error=True):
+    def raw_call(self, script, data, files=None, retry_on_error=True, http_method='POST'):
         """
         Perform a generic request and return the raw text.
 
@@ -325,10 +347,15 @@ class Site(object):
         url = '{scheme}://{host}{path}{script}{ext}'.format(scheme=scheme, host=host,
                                                             path=self.path, script=script,
                                                             ext=self.ext)
+
         while True:
             try:
-                stream = self.connection.post(url, data=data, files=files,
-                                              headers=headers, **self.requests)
+                if http_method == 'GET':
+                    stream = self.connection.get(url, params=data, files=files,
+                                                 headers=headers, **self.requests)
+                else:
+                    stream = self.connection.post(url, data=data, files=files,
+                                                  headers=headers, **self.requests)
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
                     log.warning('Database lag exceeds max lag. '
@@ -356,7 +383,7 @@ class Site(object):
                 log.warning('Connection error. Retrying in a moment.')
                 sleeper.sleep()
 
-    def raw_api(self, action, *args, **kwargs):
+    def raw_api(self, action, http_method='POST', *args, **kwargs):
         """Send a call to the API."""
         try:
             retry_on_error = kwargs.pop('retry_on_error')
@@ -365,7 +392,8 @@ class Site(object):
         kwargs['action'] = action
         kwargs['format'] = 'json'
         data = self._query_string(*args, **kwargs)
-        res = self.raw_call('api', data, retry_on_error=retry_on_error)
+        res = self.raw_call('api', data, retry_on_error=retry_on_error,
+                            http_method=http_method)
 
         try:
             return json.loads(res)
@@ -374,12 +402,12 @@ class Site(object):
                 raise errors.APIDisabledError
             raise errors.InvalidResponse(res)
 
-    def raw_index(self, action, *args, **kwargs):
-        """Send a call to index.php rather than the API."""
+    def raw_index(self, action, http_method='POST', *args, **kwargs):
+        """Sends a call to index.php rather than the API."""
         kwargs['action'] = action
         kwargs['maxlag'] = self.max_lag
         data = self._query_string(*args, **kwargs)
-        return self.raw_call('index', data)
+        return self.raw_call('index', data, http_method=http_method)
 
     def require(self, major, minor, revision=None, raise_error=True):
         if self.version is None:
@@ -429,8 +457,8 @@ class Site(object):
         token = self.get_token('email')
 
         try:
-            info = self.api('emailuser', target=user, subject=subject,
-                            text=text, ccme=cc, token=token)
+            info = self.post('emailuser', target=user, subject=subject,
+                             text=text, ccme=cc, token=token)
         except errors.APIError as e:
             if e.args[0] == u'noemail':
                 raise errors.NoSpecifiedEmail(user, e.args[1])
@@ -455,7 +483,7 @@ class Site(object):
             if self.credentials[2]:
                 kwargs['lgdomain'] = self.credentials[2]
             while True:
-                login = self.api('login', **kwargs)
+                login = self.post('login', **kwargs)
                 if login['login']['result'] == 'Success':
                     break
                 elif login['login']['result'] == 'NeedToken':
@@ -481,15 +509,15 @@ class Site(object):
         if self.tokens.get(type, '0') == '0' or force:
 
             if self.version[:2] >= (1, 24):
-                info = self.api('query', meta='tokens', type=type)
+                info = self.post('query', meta='tokens', type=type)
                 self.tokens[type] = info['query']['tokens']['%stoken' % type]
 
             else:
                 if title is None:
                     # Some dummy title was needed to get a token prior to 1.24
                     title = 'Test'
-                info = self.api('query', titles=title,
-                                prop='info', intoken=type)
+                info = self.post('query', titles=title,
+                                 prop='info', intoken=type)
                 for i in six.itervalues(info['query']['pages']):
                     if i['title'] == title:
                         self.tokens[type] = i['%stoken' % type]
@@ -609,7 +637,7 @@ class Site(object):
             kwargs['redirects'] = '1'
         if mobileformat:
             kwargs['mobileformat'] = '1'
-        result = self.api('parse', **kwargs)
+        result = self.get('parse', **kwargs)
         return result['parse']
 
     # def block(self): TODO?
@@ -814,7 +842,7 @@ class Site(object):
             kwargs['rvdiffto'] = diffto
 
         revisions = []
-        pages = self.api('query', **kwargs).get('query', {}).get('pages', {}).values()
+        pages = self.get('query', **kwargs).get('query', {}).get('pages', {}).values()
         for page in pages:
             for revision in page.get('revisions', ()):
                 revision['pageid'] = page.get('pageid')
@@ -903,7 +931,7 @@ class Site(object):
         if generatexml:
             kwargs['generatexml'] = '1'
 
-        result = self.api('expandtemplates', text=text, **kwargs)
+        result = self.get('expandtemplates', text=text, **kwargs)
 
         if generatexml:
             return result['expandtemplates']['*'], result['parsetree']['*']

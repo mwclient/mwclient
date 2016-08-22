@@ -45,12 +45,13 @@ class TestCase(unittest.TestCase):
         return json.dumps(self.metaResponse(**kwargs))
 
     def httpShouldReturn(self, body=None, callback=None, scheme='https', host='test.wikipedia.org', path='/w/',
-                         script='api', headers=None, status=200):
+                         script='api', headers=None, status=200, method='GET'):
         url = '{scheme}://{host}{path}{script}.php'.format(scheme=scheme, host=host, path=path, script=script)
+        mock = responses.GET if method == 'GET' else responses.POST
         if body is None:
-            responses.add_callback(responses.POST, url, callback=callback)
+            responses.add_callback(mock, url, callback=callback)
         else:
-            responses.add(responses.POST, url, body=body, content_type='application/json',
+            responses.add(mock, url, body=body, content_type='application/json',
                           adding_headers=headers, status=status)
 
     def stdSetup(self):
@@ -105,7 +106,7 @@ class TestClient(TestCase):
         site = mwclient.Site('test.wikipedia.org')
 
         assert len(responses.calls) == 1
-        assert responses.calls[0].request.method == 'POST'
+        assert responses.calls[0].request.method == 'GET'
 
     @responses.activate
     def test_max_lag(self):
@@ -135,18 +136,6 @@ class TestClient(TestCase):
             site = mwclient.Site('test.wikipedia.org')
 
     @responses.activate
-    def test_headers(self):
-        # Content-type should be 'application/x-www-form-urlencoded'
-
-        self.httpShouldReturn(self.metaResponseAsJson(), scheme='https')
-
-        site = mwclient.Site('test.wikipedia.org')
-
-        assert len(responses.calls) == 1
-        assert 'content-type' in responses.calls[0].request.headers
-        assert responses.calls[0].request.headers['content-type'] == 'application/x-www-form-urlencoded'
-
-    @responses.activate
     def test_force_http(self):
         # Setting http should work
 
@@ -173,8 +162,8 @@ class TestClient(TestCase):
 
         site = mwclient.Site('test.wikipedia.org')
 
-        assert 'action=query' in responses.calls[0].request.body
-        assert 'meta=siteinfo%7Cuserinfo' in responses.calls[0].request.body
+        assert 'action=query' in responses.calls[0].request.url
+        assert 'meta=siteinfo%7Cuserinfo' in responses.calls[0].request.url
 
     @responses.activate
     def test_httpauth_defaults_to_basic_auth(self):
@@ -250,13 +239,26 @@ class TestClient(TestCase):
     # ----- Use standard setup for rest
 
     @responses.activate
+    def test_headers(self):
+        # Content-type should be 'application/x-www-form-urlencoded' for POST requests
+
+        site = self.stdSetup()
+
+        self.httpShouldReturn('{}', method='POST')
+        site.post('purge', title='Main Page')
+
+        assert len(responses.calls) == 1
+        assert 'content-type' in responses.calls[0].request.headers
+        assert responses.calls[0].request.headers['content-type'] == 'application/x-www-form-urlencoded'
+
+    @responses.activate
     def test_raw_index(self):
         # Initializing the client should result in one request
 
         site = self.stdSetup()
 
         self.httpShouldReturn('Some data', script='index')
-        site.raw_index(action='purge', title='Main Page')
+        site.raw_index(action='purge', title='Main Page', http_method='GET')
 
         assert len(responses.calls) == 1
 
@@ -272,7 +274,7 @@ class TestClient(TestCase):
                 'info': 'Assertion that the user is logged in failed',
                 '*': 'See https://en.wikipedia.org/w/api.php for API usage'
             }
-        }))
+        }), method='POST')
         with pytest.raises(mwclient.errors.APIError) as excinfo:
             site.api(action='edit', title='Wikipedia:Sandbox')
 
@@ -351,8 +353,8 @@ class TestClientApiMethods(TestCase):
         call_args = self.api.call_args_list
 
         assert len(call_args) == 3
-        assert call_args[1] == mock.call('login', lgname='myusername', lgpassword='mypassword')
-        assert call_args[2] == mock.call('login', lgname='myusername', lgpassword='mypassword', lgtoken=login_token)
+        assert call_args[1] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword')
+        assert call_args[2] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword', lgtoken=login_token)
 
 
 class TestClientUploadArgs(TestCase):

@@ -9,6 +9,7 @@ import responses
 import mock
 import mwclient
 from mwclient.page import Page
+from mwclient.client import Site
 
 try:
     import json
@@ -29,23 +30,23 @@ class TestPage(unittest.TestCase):
 
     @mock.patch('mwclient.client.Site')
     def test_api_call_on_page_init(self, mock_site):
-        # Check that site.api() is called once on Page init
+        # Check that site.get() is called once on Page init
 
         title = 'Some page'
-        mock_site.api.return_value = {
+        mock_site.get.return_value = {
             'query': {'pages': {'1': {}}}
         }
         page = Page(mock_site, title)
 
-        # test that Page called site.api with the right parameters
-        mock_site.api.assert_called_once_with('query', inprop='protection', titles=title, prop='info')
+        # test that Page called site.get with the right parameters
+        mock_site.get.assert_called_once_with('query', inprop='protection', titles=title, prop='info')
 
     @mock.patch('mwclient.client.Site')
     def test_nonexisting_page(self, mock_site):
         # Check that API response results in page.exists being set to False
 
         title = 'Some nonexisting page'
-        mock_site.api.return_value = {
+        mock_site.get.return_value = {
             'query': {'pages': {'-1': {'missing': ''}}}
         }
         page = Page(mock_site, title)
@@ -57,7 +58,7 @@ class TestPage(unittest.TestCase):
         # Check that API response results in page.exists being set to True
 
         title = 'Norge'
-        mock_site.api.return_value = {
+        mock_site.get.return_value = {
             'query': {'pages': {'728': {}}}
         }
         page = Page(mock_site, title)
@@ -69,7 +70,7 @@ class TestPage(unittest.TestCase):
         # Check that variouse page props are read correctly from API response
 
         title = 'Some page'
-        mock_site.api.return_value = {
+        mock_site.get.return_value = {
             'query': {
                 'pages': {
                     '728': {
@@ -102,7 +103,7 @@ class TestPage(unittest.TestCase):
         # If page is protected, check that protection is parsed correctly
 
         title = 'Some page'
-        mock_site.api.return_value = {
+        mock_site.get.return_value = {
             'query': {
                 'pages': {
                     '728': {
@@ -146,7 +147,7 @@ class TestPage(unittest.TestCase):
         # Check that page.redirect is set correctly
 
         title = 'Some redirect page'
-        mock_site.api.return_value = {
+        mock_site.get.return_value = {
             "query": {
                 "pages": {
                     "796917": {
@@ -177,11 +178,11 @@ class TestPage(unittest.TestCase):
         mock_site.rights = ['read', 'edit']
 
         title = 'Norge'
-        mock_site.api.return_value = {
+        mock_site.get.return_value = {
             'query': {'pages': {'728': {'protection': []}}}
         }
         page = Page(mock_site, title)
-        mock_site.api.return_value = {
+        mock_site.post.return_value = {
             'edit': {'result': 'Failure', 'captcha': {
                 'type': 'math',
                 'mime': 'text/tex',
@@ -205,17 +206,17 @@ class TestPageApiArgs(unittest.TestCase):
         MockSite = mock.patch('mwclient.client.Site').start()
         self.site = MockSite()
 
-        self.site.api.return_value = {'query': {'pages': {'1': {'title': title}}}}
+        self.site.get.return_value = {'query': {'pages': {'1': {'title': title}}}}
         self.site.rights = ['read']
 
         self.page = Page(self.site, title)
 
-        self.site.api.return_value = {'query': {'pages': {'2': {
+        self.site.get.return_value = {'query': {'pages': {'2': {
             'ns': 0, 'pageid': 2, 'revisions': [{'*': 'Hello world', 'timestamp': '2014-08-29T22:25:15Z'}], 'title': title
         }}}}
 
     def get_last_api_call_args(self):
-        args, kwargs = self.site.api.call_args
+        args, kwargs = self.site.get.call_args
         action = args[0]
         args = args[1:]
         kwargs.update(args)
