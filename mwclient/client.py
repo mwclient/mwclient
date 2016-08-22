@@ -312,21 +312,22 @@ class Site(object):
         Returns:
             The raw text response.
         """
-        url = self.path + script + self.ext
         headers = {}
         if self.compress and gzip:
             headers['Accept-Encoding'] = 'gzip'
         sleeper = self.sleepers.make((script, data))
+
+        scheme = 'https'
+        host = self.host
+        if isinstance(host, (list, tuple)):
+            scheme, host = host
+
+        url = '{scheme}://{host}{path}{script}{ext}'.format(scheme=scheme, host=host,
+                                                            path=self.path, script=script,
+                                                            ext=self.ext)
         while True:
-            scheme = 'https'
-            host = self.host
-            if isinstance(host, (list, tuple)):
-                scheme, host = host
-
-            fullurl = '{scheme}://{host}{url}'.format(scheme=scheme, host=host, url=url)
-
             try:
-                stream = self.connection.post(fullurl, data=data, files=files,
+                stream = self.connection.post(url, data=data, files=files,
                                               headers=headers, **self.requests)
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
