@@ -7,7 +7,7 @@ import mwclient.image
 
 
 class List(object):
-    """Base class for lazy object iteration
+    """Base class for lazy iteration over api response content
 
     This is a class providing lazy iteration.  This means that the
     content is loaded in chunks as long as the response hints at
@@ -42,30 +42,29 @@ class List(object):
     def __iter__(self):
         return self
 
-    def __next__(self, full=False):
+    def __next__(self):
         if self.max_items is not None:
             if self.count >= self.max_items:
                 raise StopIteration
         try:
             item = six.next(self._iter)
-            self.count += 1
-            if 'timestamp' in item:
-                item['timestamp'] = parse_timestamp(item['timestamp'])
-            if full:
-                return item
-
-            if type(self.return_values) is tuple:
-                return tuple((item[i] for i in self.return_values))
-            elif self.return_values is None:
-                return item
-            else:
-                return item[self.return_values]
-
         except StopIteration:
             if self.last:
-                raise StopIteration
+                raise
             self.load_chunk()
-            return List.__next__(self, full=full)
+            item = six.next(self._iter)
+
+        self.count += 1
+        if 'timestamp' in item:
+            item['timestamp'] = parse_timestamp(item['timestamp'])
+
+        if isinstance(self, GeneratorList):
+            return item
+        if type(self.return_values) is tuple:
+            return tuple((item[i] for i in self.return_values))
+        if self.return_values is not None:
+            return item[self.return_values]
+        return item
 
     def next(self, *args, **kwargs):
         """ For Python 2.x support """
@@ -145,6 +144,12 @@ class NestedList(List):
 
 
 class GeneratorList(List):
+    """Lazy-loaded list of Page, Image or Category objects
+
+    While the standard List class yields raw response data
+    (optionally filtered based on the value of List.return_values),
+    this subclass turns the data into Page, Image or Category objects.
+    """
 
     def __init__(self, site, list_name, prefix, *args, **kwargs):
         super(GeneratorList, self).__init__(site, list_name, prefix,
@@ -162,7 +167,7 @@ class GeneratorList(List):
         self.page_class = mwclient.page.Page
 
     def __next__(self):
-        info = super(GeneratorList, self).__next__(full=True)
+        info = super(GeneratorList, self).__next__()
         if info['ns'] == 14:
             return Category(self.site, u'', info)
         if info['ns'] == 6:
