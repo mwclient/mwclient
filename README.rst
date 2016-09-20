@@ -3,6 +3,9 @@
    :alt: Logo
    :align: center
 
+mwclient
+========
+
 .. image:: https://img.shields.io/travis/mwclient/mwclient.svg
    :target: https://travis-ci.org/mwclient/mwclient
    :alt: Build status
@@ -34,9 +37,6 @@
 .. image:: http://issuestats.com/github/mwclient/mwclient/badge/pr?style=flat
    :target: http://issuestats.com/github/mwclient/mwclient
    :alt: Issue statistics
-
-mwclient
-========
 
 mwclient is a lightweight Python client library to the `MediaWiki API <https://mediawiki.org/wiki/API>`_
 which provides access to most API functionality.
