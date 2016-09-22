@@ -103,3 +103,18 @@ based on the :class:`requests.auth.AuthBase`, such as Digest authentication:
 	>>> from requests.auth import HTTPDigestAuth
 	>>> site = mwclient.Site('awesome.site', httpauth=HTTPDigestAuth('my_username', 'my_password'))
 
+SSL client certificate authentication
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If your server requires a SSL client certifiate to authenticate, you can
+pass the ``client_certificate`` parameter:
+
+    >>> site = mwclient.Site('awesome.site', client_certificate='/path/to/client-and-key.pem')
+    
+This parameter being a proxy to :class:`requests`' cert_ parameter, you can also specify a tuple (certificate, key) like:
+
+    >>> site = mwclient.Site('awesome.site', client_certificate=('client.pem', 'key.pem'))
+    
+Please note that the private key must not be encrypted.
+
+  .. _cert: http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification

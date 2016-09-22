@@ -53,7 +53,7 @@ class Site(object):
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
                  max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
                  reqs=None, consumer_token=None, consumer_secret=None, access_token=None,
-                 access_secret=None):
+                 access_secret=None, client_certificate=None):
         # Setup member variables
         self.host = host
         self.path = path
@@ -90,6 +90,8 @@ class Site(object):
         if pool is None:
             self.connection = requests.Session()
             self.connection.auth = auth
+            if client_certificate:
+                self.connection.cert = client_certificate
 
             prefix = '{} - '.format(clients_useragent) if clients_useragent else ''
             self.connection.headers['User-Agent'] = (
