@@ -2,7 +2,8 @@
 
 ## Changes in version 0.8.2
 
-This is the development version of mwclient.
+This is the development version of mwclient. You can review the
+[full list of changes since v0.8.1](https://github.com/mwclient/mwclient/compare/v0.8.1...master).
 
 ## Changes in version 0.8.1
 
