@@ -86,7 +86,7 @@ class List(object):
 
         Else, set `self.last` to True.
         """
-        data = self.site.api(
+        data = self.site.get(
             'query', (self.generator, self.list_name),
             *[(text_type(k), v) for k, v in six.iteritems(self.args)]
         )
