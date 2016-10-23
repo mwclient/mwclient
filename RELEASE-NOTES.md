@@ -8,12 +8,7 @@ Release notes can be found [here](https://github.com/mwclient/mwclient/releases/
 ## Changes in version 0.8.1
 
 Mwclient 0.8.1 was released on 5 February 2016.
-
-* [2016-01-23] [@Danmichaelo](https://github.com/Danmichaelo):
-  Add more options to `Site.parse`.
-* [2016-02-05] [@tosher](https://github.com/tosher), [@AdamWill](https://github.com/AdamWill):
-  Fix GeneratorList with Python 3.
-  [#106](https://github.com/mwclient/mwclient/issues/106).
+Release notes can be found [here](https://github.com/mwclient/mwclient/releases/tag/v0.8.1).
 
 ## Changes in version 0.8.0
 
