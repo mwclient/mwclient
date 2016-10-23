@@ -35,7 +35,16 @@ class EditError(MwClientError):
 
 
 class ProtectedPageError(EditError, InsufficientPermission):
-    pass
+
+    def __init__(self, page, code=None, info=None):
+        self.page = page
+        self.code = code
+        self.info = info
+
+    def __str__(self):
+        if self.info is not None:
+            return self.info
+        return 'You do not have the "edit" right.'
 
 
 class FileExists(EditError):
@@ -54,6 +63,20 @@ class OAuthAuthorizationError(LoginError):
 
     def __str__(self):
         return self.info
+
+
+class AssertUserFailedError(LoginError):
+
+    def __init__(self):
+        self.message = 'By default, mwclient protects you from ' + \
+                       'accidentally editing without being logged in. If you ' + \
+                       'actually want to edit without logging in, you can set ' + \
+                       'force_login on the Site object to False.'
+
+        LoginError.__init__(self)
+
+    def __str__(self):
+        return self.message
 
 
 class EmailError(MwClientError):
