@@ -2,8 +2,8 @@
 
 ## Changes in version 0.8.2
 
-This is the development version of mwclient. You can review the
-[full list of changes since v0.8.1](https://github.com/mwclient/mwclient/compare/v0.8.1...master).
+Mwclient 0.8.2 was released on 23 October 2016.
+Release notes can be found [here](https://github.com/mwclient/mwclient/releases/tag/v0.8.2).
 
 ## Changes in version 0.8.1
 
