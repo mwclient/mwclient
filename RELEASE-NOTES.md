@@ -13,36 +13,7 @@ Release notes can be found [here](https://github.com/mwclient/mwclient/releases/
 ## Changes in version 0.8.0
 
 Mwclient 0.8.0 was released on 10 January 2016.
-
-Upgrade notices / breaking changes:
-
- - Saving a section rather than the full page can now only
-   be achieved by passing in the section parameter explicitly to the `save`
-   method. The section number is no longer part of the `Page` state, so
-   `Page.save()` no longer makes use of a section parameter earlier passed
-   into `Page.text()`. A deprecation warning was added in 0.7.2.
- - Https is now used as default.
-
-Detailed changelog:
-
-* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo):
-  Add support for Python 3.
-  [#52](https://github.com/mwclient/mwclient/issues/52).
-* [2015-07-19] [@Danmichaelo](https://github.com/Danmichaelo):
-  Fix broken `Image.download()` method.
-* [2015-08-29] [@AdamWill](https://github.com/AdamWill):
-  Remove implicit use of Page.section when saving
-  (deprecated in 0.7.2),
-  [#81](https://github.com/mwclient/mwclient/issues/81).
-* [2015-09-27] [@AdamWill](https://github.com/AdamWill):
-  Cache page text until next edit operation.
-  [#80](https://github.com/mwclient/mwclient/issues/80).
-* [2015-11-09] [@Rdhyee](https://github.com/Rdhyee):
-  Add `Site.revisions()` method and support `diffto`.
-  [#84](https://github.com/mwclient/mwclient/pull/84).
-* [2016-01-10] [@Danmichaelo](https://github.com/Danmichaelo):
-  Use https as default.
-  [#70](https://github.com/mwclient/mwclient/issues/70).
+Release notes can be found [here](https://github.com/mwclient/mwclient/releases/tag/v0.8.0).
 
 ## Changes in version 0.7.2
 
