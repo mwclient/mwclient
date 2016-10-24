@@ -35,4 +35,4 @@ Since then, he has been the lead maintainer of the project,
   [several other people](../../graphs/contributors).
 
 For more details on the technical history of the project,
-  see the [RELEASE-NOTES.md](RELEASE-NOTES.md) document.
+  see the [CHANGELOG.md](CHANGELOG.md) document.
