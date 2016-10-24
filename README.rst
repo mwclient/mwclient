@@ -34,8 +34,8 @@ mwclient
    :target: http://mwclient.readthedocs.io/en/latest/
    :alt: Documentation status
 
-.. image:: http://issuestats.com/github/mwclient/mwclient/badge/pr?style=flat
-   :target: http://issuestats.com/github/mwclient/mwclient
+.. image:: http://isitmaintained.com/badge/resolution/tldr-pages/tldr.svg
+   :target: http://isitmaintained.com/project/tldr-pages/tldr
    :alt: Issue statistics
 
 mwclient is a lightweight Python client library to the `MediaWiki API <https://mediawiki.org/wiki/API>`_
@@ -58,7 +58,7 @@ can be installed from GitHub:
     $ pip install git+git://github.com/mwclient/mwclient.git
 
 Please see the
-`release notes <https://github.com/mwclient/mwclient/blob/master/RELEASE-NOTES.md>`_
+`changelog document <https://github.com/mwclient/mwclient/blob/master/CHANGELOG.md>`_
 for a list of changes.
 
 Getting started
