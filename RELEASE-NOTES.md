@@ -18,37 +18,7 @@ Release notes can be found [here](https://github.com/mwclient/mwclient/releases/
 ## Changes in version 0.7.2
 
 Mwclient 0.7.2 was released on 18 July 2015.
-
-* [2014-11-28] [@c-martinez](https://github.com/c-martinez):
-  Add `continue` parameter to all queries.
-  [#73](https://github.com/mwclient/mwclient/issues/73).
-* [2014-12-18] [@AdamWill](https://github.com/AdamWill):
-  Fix PageList API arg passing to GeneratorList.
-  [059322e](https://github.com/mwclient/mwclient/commit/059322e).
-* [2015-03-15] [@itkach](https://github.com/itkach):
-  Add `toponly` parameter for recentchanges.
-  [#78](https://github.com/mwclient/mwclient/issues/78).
-* [2015-06-04] [@Gui13](https://github.com/Gui13):
-  Configure default logger.
-  [#82](https://github.com/mwclient/mwclient/issues/82).
-* [2015-06-20] [@lfaraone](https://github.com/lfaraone):
-  Add support for querying the CheckUser log.
-  [#86](https://github.com/mwclient/mwclient/pull/86).
-* [2015-07-06] [@PierreSelim](https://github.com/PierreSelim):
-  Expose `pageid`, `contentmodel`, `pagelanguage`, `restrictiontypes` as attributes of `Page`.
-  [#89](https://github.com/mwclient/mwclient/pull/89).
-* [2015-07-08] [@Pathoschild](https://github.com/Pathoschild):
-  Fix 'New messages' flag (`hasmsg`).
-  [#90](https://github.com/mwclient/mwclient/issues/90).
-* [2015-07-17] [@Danmichaelo](https://github.com/Danmichaelo):
-  Don't retry on connection error during site init.
-  [#85](https://github.com/mwclient/mwclient/issues/85).
-* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo):
-  Deprecate implicit use of Page.section when saving, to prepare for
-  the merge of [#81](https://github.com/mwclient/mwclient/issues/81).
-* [2015-07-18] [@Danmichaelo](https://github.com/Danmichaelo):
-  More intuitive error message when an invalid JSON response is received.
-  [#79](https://github.com/mwclient/mwclient/issues/79).
+Release notes can be found [here](https://github.com/mwclient/mwclient/releases/tag/v0.7.2).
 
 ## Changes in version 0.7.1
 
