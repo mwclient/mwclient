@@ -156,6 +156,16 @@ class TestClient(TestCase):
         assert 'MyFabulousClient' in responses.calls[0].request.headers['user-agent']
 
     @responses.activate
+    def test_custom_headers_are_sent(self):
+        # Custom headers should be sent to the server
+
+        self.httpShouldReturn(self.metaResponseAsJson())
+
+        site = mwclient.Site('test.wikipedia.org', custom_headers={'X-Wikimedia-Debug': 'host=mw1099.eqiad.wmnet; log'})
+
+        assert 'host=mw1099.eqiad.wmnet; log' in responses.calls[0].request.headers['X-Wikimedia-Debug']
+
+    @responses.activate
     def test_basic_request(self):
 
         self.httpShouldReturn(self.metaResponseAsJson())
