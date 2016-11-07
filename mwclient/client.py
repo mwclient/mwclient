@@ -53,7 +53,7 @@ class Site(object):
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
                  max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
                  reqs=None, consumer_token=None, consumer_secret=None, access_token=None,
-                 access_secret=None, client_certificate=None):
+                 access_secret=None, client_certificate=None, custom_headers=None):
         # Setup member variables
         self.host = host
         self.path = path
@@ -101,6 +101,8 @@ class Site(object):
                     url='https://github.com/mwclient/mwclient'
                 )
             )
+            if custom_headers:
+                self.connection.headers.update(custom_headers)
         else:
             self.connection = pool
 
