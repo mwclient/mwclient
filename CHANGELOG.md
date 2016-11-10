@@ -28,32 +28,7 @@ Release notes can be found [here](https://github.com/mwclient/mwclient/releases/
 ## Changes in version 0.7.1
 
 Mwclient 0.7.1 was released on 23 November 2014.
-
-* [2014-09-27] [@jimt](https://github.com/jimt):
-  Implement `Site.allimages()`.
-  [f9b92de](https://github.com/mwclient/mwclient/commit/f9b92de),
-  [#62](https://github.com/mwclient/mwclient/issues/62).
-* [2014-10-06]
-  Support new token handling system.
-  [2f0f739](https://github.com/mwclient/mwclient/commit/2f0f739),
-  [#64](https://github.com/mwclient/mwclient/issues/64).
-* [2014-10-27]
-  Update email method to use API.
-  [e9572e1](https://github.com/mwclient/mwclient/commit/e9572e1).
-* [2014-10-27]
-  Use 'simplified' continuation.
-  [4262786](https://github.com/mwclient/mwclient/commit/4262786),
-  [#66](https://github.com/mwclient/mwclient/issues/66).
-* [2014-11-16] Use Basic/Digest Auth from Requests.
-* [2014-11-16] Fix so [maxlag](https://www.mediawiki.org/wiki/Manual:Maxlag_parameter)
-  is handled correctly.
-* [2014-11-17] [@c-martinez](https://github.com/c-martinez):
-  Fix filtering of page links by namespace.
-  [65d9ee8](https://github.com/mwclient/mwclient/commit/65d9ee8),
-  [#72](https://github.com/mwclient/mwclient/issues/72).
-* [2014-11-23]
-  Fix uploading files with non-ascii characters in filenames.
-  [#65](https://github.com/mwclient/mwclient/issues/65).
+Release notes can be found [here](https://github.com/mwclient/mwclient/releases/tag/v0.7.1).
 
 ## Changes in version 0.7.0
 
