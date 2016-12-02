@@ -1,8 +1,10 @@
 from __future__ import print_function
 from past.builtins import xrange
+from StringIO import StringIO
 import sys
 import os
 import pprint
+import random
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(sys.argv[0]), '../')))
 import mwclient
@@ -22,7 +24,6 @@ else:
 site = mwclient.Site(host, path)
 site.login(sys.argv[1], sys.argv[2])
 
-import random
 name = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(8)) + '.png'
 
 print('Using http://%s%sindex.php?title=File:' % (host, path) + name)
@@ -49,5 +50,4 @@ assert 'duplicate' in res['warnings']
 assert 'exists' in res['warnings']
 
 print('Uploading empty file; error expected')
-from StringIO import StringIO
 res = site.upload(StringIO(), name, 'Empty upload test')

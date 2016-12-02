@@ -1,13 +1,14 @@
 from __future__ import print_function
-import sys, os
+import sys
+import os
 
 if len(sys.argv) > 3:
-	sys.path.append(os.path.abspath(sys.argv[3]))
+    sys.path.append(os.path.abspath(sys.argv[3]))
 if len(sys.argv) < 3:
-	print('python basic_edit_test.py <config> <prefix> [<include path>]\n')
-	sys.exit()
+    print('python basic_edit_test.py <config> <prefix> [<include path>]\n')
+    sys.exit()
 
-## Create a config file containing:
+# Create a config file containing:
 # host = 'test.wikipedia.org'
 # path = '/w/'
 # ext = '.php'
@@ -16,11 +17,11 @@ if len(sys.argv) < 3:
 
 prefix = sys.argv[2]
 
-#import cgitb; cgitb.enable(format = 'text')
+# import cgitb; cgitb.enable(format = 'text')
 try:
-	import apiedit as mwclient
+    import apiedit as mwclient
 except ImportError:
-	import mwclient
+    import mwclient
 site = mwclient.ex.ConfiguredSite(sys.argv[1])
 site.compress = False
 
@@ -38,32 +39,32 @@ This test is done using the [[w:mw:API]]."""
 comment1 = 'Test page1'
 page.save(text1, comment1)
 
-rev = page.revisions(limit = 1, prop = 'timestamp|comment|content').next()
+rev = page.revisions(limit=1, prop='timestamp|comment|content').next()
 assert rev['comment'] == comment1, rev
 assert rev['*'] == rev['*'], rev
 print('Page edited on', rev['timestamp'])
-print('Links:', list(page.links(generator = False)))
+print('Links:', list(page.links(generator=False)))
 print('External links:', list(page.extlinks()))
 
 print('Uploading image')
-site.upload(open('test-image.png', 'rb'), prefix + '-test-image.png', 'desc', ignore = True)
+site.upload(open('test-image.png', 'rb'), prefix + '-test-image.png', 'desc', ignore=True)
 print('Uploading image for the second time')
-site.upload(open('test-image.png', 'rb'), prefix + '-test-image.png', 'desc', ignore = True)
+site.upload(open('test-image.png', 'rb'), prefix + '-test-image.png', 'desc', ignore=True)
 image = site.Images[prefix + '-test-image.png']
 print('Imageinfo:', image.imageinfo)
 history = list(image.imagehistory())
 print('History:', history)
 
 if site.writeapi:
-	print('Deleting old version')
-	archivename = history[1]['archivename']
-	image.delete('Testing history deletion', oldimage = archivename)
-	print('History:', list(image.imagehistory()))
+    print('Deleting old version')
+    archivename = history[1]['archivename']
+    image.delete('Testing history deletion', oldimage=archivename)
+    print('History:', list(image.imagehistory()))
 
 text = page.edit()
 text += u'\n[[Image:%s-test-image.png]]' % prefix
 page.save(text, 'Adding image')
-print('Images:', list(page.images(generator = False)))
+print('Images:', list(page.images(generator=False)))
 
 print('Cleaning up')
 image.delete('Cleanup')
