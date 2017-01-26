@@ -11,6 +11,10 @@ try:
 except ImportError:
     import simplejson as json
 import requests
+try:
+    import requests_cache
+except ImportError, e:
+    requests_cache = None
 from requests.auth import HTTPBasicAuth, AuthBase
 from requests_oauthlib import OAuth1
 
@@ -53,7 +57,9 @@ class Site(object):
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
                  max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
                  reqs=None, consumer_token=None, consumer_secret=None, access_token=None,
-                 access_secret=None, client_certificate=None, custom_headers=None):
+                 access_secret=None, client_certificate=None, custom_headers=None,
+                 cache_args=None):
+
         # Setup member variables
         self.host = host
         self.path = path
@@ -88,7 +94,10 @@ class Site(object):
 
         # Setup connection
         if pool is None:
-            self.connection = requests.Session()
+            if cache_args is not None and requests_cache is not None:
+                self.connection = requests_cache.core.CachedSession(**cache_args)
+            else:
+                self.connection = requests.Session()
             self.connection.auth = auth
             if client_certificate:
                 self.connection.cert = client_certificate
