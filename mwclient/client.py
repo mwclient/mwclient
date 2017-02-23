@@ -639,7 +639,7 @@ class Site(object):
             kwargs['redirects'] = '1'
         if mobileformat:
             kwargs['mobileformat'] = '1'
-        result = self.get('parse', **kwargs)
+        result = self.post('parse', **kwargs)
         return result['parse']
 
     # def block(self): TODO?
