@@ -366,6 +366,33 @@ class TestClientApiMethods(TestCase):
         assert call_args[1] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword')
         assert call_args[2] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword', lgtoken=login_token)
 
+    def test_login_flow_2(self):
+
+        login_token = 'abc+\\'
+        self.site.version = (1, 29, 0, '-wmf', 21)
+
+        def side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'logintoken': login_token}}
+                }
+            else:
+                assert kwargs['lgtoken'] == login_token
+                return {
+                    'login': {'result': 'Success'}
+                }
+
+        self.api.side_effect = side_effect
+
+        with mock.patch('mwclient.client.Site.site_init'):
+            self.site.login('myusername', 'mypassword')
+
+        call_args = self.api.call_args_list
+
+        assert len(call_args) == 3
+        assert call_args[1] == mock.call('query', 'POST', meta='tokens', type='login')
+        assert call_args[2] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword', lgtoken=login_token)
+
 
 class TestClientUploadArgs(TestCase):
 

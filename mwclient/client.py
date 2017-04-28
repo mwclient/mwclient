@@ -482,6 +482,8 @@ class Site(object):
                 'lgname': self.credentials[0],
                 'lgpassword': self.credentials[1]
             }
+            if self.version[:2] >= (1, 27):
+                kwargs['lgtoken'] = self.get_token('login')
             if self.credentials[2]:
                 kwargs['lgdomain'] = self.credentials[2]
             while True:
@@ -502,7 +504,7 @@ class Site(object):
         if self.version[:2] >= (1, 24):
             # The 'csrf' (cross-site request forgery) token introduced in 1.24 replaces
             # the majority of older tokens, like edittoken and movetoken.
-            if type not in {'watch', 'patrol', 'rollback', 'userrights'}:
+            if type not in {'watch', 'patrol', 'rollback', 'userrights', 'login'}:
                 type = 'csrf'
 
         if type not in self.tokens:
