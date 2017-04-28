@@ -301,6 +301,68 @@ class TestClient(TestCase):
         assert repr(site) == '<Site object \'test.wikipedia.org/w/\'>'
 
 
+class TestLogin(TestCase):
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_old_login_flow(self, raw_api, site_init):
+        # The login flow used before MW 1.27 that starts with a action=login POST request
+        login_token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+
+            if 'lgtoken' not in kwargs:
+                return {
+                    'login': {'result': 'NeedToken', 'token': login_token}
+                }
+            elif 'lgname' in kwargs:
+                assert kwargs['lgtoken'] == login_token
+                return {
+                    'login': {'result': 'Success'}
+                }
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        site.login('myusername', 'mypassword')
+
+        call_args = raw_api.call_args_list
+
+        assert len(call_args) == 3
+        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='login')
+        assert call_args[1] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword')
+        assert call_args[2] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword', lgtoken=login_token)
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_new_login_flow(self, raw_api, site_init):
+        # The login flow used from MW 1.27 that starts with a meta=tokens GET request
+
+        login_token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'logintoken': login_token}}
+                }
+            elif 'lgname' in kwargs:
+                assert kwargs['lgtoken'] == login_token
+                return {
+                    'login': {'result': 'Success'}
+                }
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        site.login('myusername', 'mypassword')
+
+        call_args = raw_api.call_args_list
+
+        assert len(call_args) == 2
+        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='login')
+        assert call_args[1] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword', lgtoken=login_token)
+
+
 class TestClientApiMethods(TestCase):
 
     def setUp(self):
@@ -338,60 +400,6 @@ class TestClientApiMethods(TestCase):
         assert revisions[0]['revid'] == 689697696
         assert revisions[0]['timestamp'] == time.strptime('2015-11-08T21:52:46Z', '%Y-%m-%dT%H:%M:%SZ')
         assert revisions[1]['revid'] == 689816909
-
-    def test_login_flow_1(self):
-
-        login_token = 'abc+\\'
-
-        def side_effect(*args, **kwargs):
-
-            if 'lgtoken' not in kwargs:
-                return {
-                    'login': {'result': 'NeedToken', 'token': login_token}
-                }
-            else:
-                assert kwargs['lgtoken'] == login_token
-                return {
-                    'login': {'result': 'Success'}
-                }
-
-        self.api.side_effect = side_effect
-
-        with mock.patch('mwclient.client.Site.site_init'):
-            self.site.login('myusername', 'mypassword')
-
-        call_args = self.api.call_args_list
-
-        assert len(call_args) == 3
-        assert call_args[1] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword')
-        assert call_args[2] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword', lgtoken=login_token)
-
-    def test_login_flow_2(self):
-
-        login_token = 'abc+\\'
-        self.site.version = (1, 29, 0, '-wmf', 21)
-
-        def side_effect(*args, **kwargs):
-            if kwargs.get('meta') == 'tokens':
-                return {
-                    'query': {'tokens': {'logintoken': login_token}}
-                }
-            else:
-                assert kwargs['lgtoken'] == login_token
-                return {
-                    'login': {'result': 'Success'}
-                }
-
-        self.api.side_effect = side_effect
-
-        with mock.patch('mwclient.client.Site.site_init'):
-            self.site.login('myusername', 'mypassword')
-
-        call_args = self.api.call_args_list
-
-        assert len(call_args) == 3
-        assert call_args[1] == mock.call('query', 'POST', meta='tokens', type='login')
-        assert call_args[2] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword', lgtoken=login_token)
 
 
 class TestClientUploadArgs(TestCase):

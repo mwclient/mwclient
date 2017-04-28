@@ -261,7 +261,7 @@ class Site(object):
         """
         kwargs.update(args)
 
-        if 'continue' not in kwargs:
+        if action == 'query' and 'continue' not in kwargs:
             kwargs['continue'] = ''
         if action == 'query':
             if 'meta' in kwargs:
@@ -482,12 +482,20 @@ class Site(object):
                 'lgname': self.credentials[0],
                 'lgpassword': self.credentials[1]
             }
-            if self.version[:2] >= (1, 27):
-                kwargs['lgtoken'] = self.get_token('login')
             if self.credentials[2]:
                 kwargs['lgdomain'] = self.credentials[2]
+
+            # Try to login using the scheme for MW 1.27+. If the wiki is read protected,
+            # it is not possible to get the wiki version upfront using the API, so we just
+            # have to try. If the attempt fails, we try the old method.
+            try:
+                kwargs['lgtoken'] = self.get_token('login')
+            except KeyError:
+                log.debug('Failed to get login token, MediaWiki is older than 1.27.')
+
             while True:
                 login = self.post('login', **kwargs)
+
                 if login['login']['result'] == 'Success':
                     break
                 elif login['login']['result'] == 'NeedToken':
@@ -501,7 +509,7 @@ class Site(object):
 
     def get_token(self, type, force=False, title=None):
 
-        if self.version[:2] >= (1, 24):
+        if self.version is None or self.version[:2] >= (1, 24):
             # The 'csrf' (cross-site request forgery) token introduced in 1.24 replaces
             # the majority of older tokens, like edittoken and movetoken.
             if type not in {'watch', 'patrol', 'rollback', 'userrights', 'login'}:
@@ -512,8 +520,15 @@ class Site(object):
 
         if self.tokens.get(type, '0') == '0' or force:
 
-            if self.version[:2] >= (1, 24):
-                info = self.post('query', meta='tokens', type=type)
+            if self.version is None or self.version[:2] >= (1, 24):
+                # We use raw_api() rather than api() because api() is adding "userinfo"
+                # to the query and this raises an readapideniederror if the wiki is read
+                # protected and we're trying to fetch a login token.
+                info = self.raw_api('query', 'GET', meta='tokens', type=type)
+
+                # Note that for read protected wikis, we don't know the version when
+                # fetching the login token. If it's < 1.27, the request below will
+                # raise a KeyError that we should catch.
                 self.tokens[type] = info['query']['tokens']['%stoken' % type]
 
             else:
