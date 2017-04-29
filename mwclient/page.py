@@ -298,7 +298,7 @@ class Page(object):
         dynamic content.
 
         """
-        self.site.raw_index('purge', title=self.name)
+        self.site.post('purge', titles=self.name)
 
     # def watch: requires 1.14
 
