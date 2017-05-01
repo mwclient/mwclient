@@ -1029,7 +1029,7 @@ class Site(object):
         return listing.List(self, 'search', 'sr', limit=limit, **kwargs)
 
     def usercontributions(self, user, start=None, end=None, dir='older', namespace=None,
-                          prop=None, show=None, limit=None):
+                          prop=None, show=None, limit=None, uselang=None):
         """
         List the contributions made by a given user to the wiki, à la Special:Contributions.
 
@@ -1038,7 +1038,8 @@ class Site(object):
         kwargs = dict(listing.List.generate_kwargs('uc', user=user, start=start, end=end,
                                                    dir=dir, namespace=namespace,
                                                    prop=prop, show=show))
-        return listing.List(self, 'usercontribs', 'uc', limit=limit, **kwargs)
+        return listing.List(self, 'usercontribs', 'uc', limit=limit, uselang=uselang,
+                            **kwargs)
 
     def users(self, users, prop='blockinfo|groups|editcount'):
         """
