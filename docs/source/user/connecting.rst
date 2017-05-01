@@ -48,6 +48,21 @@ Note that Mwclient appends ' - MwClient/{version} ({url})' to your string.
 
 .. _auth:
 
+Errors and warnings
+-------------------
+
+Deprecations and other warnings from the API are logged using the
+`standard Python logging facility`_, so you can handle them in any way you like.
+To print them to stdout:
+
+    >>> import logging
+    >>> logging.basicConfig(level=logging.WARNING)
+
+.. _standard Python logging facility: https://docs.python.org/3/library/logging.html
+
+Errors are thrown as exceptions. All exceptions inherit
+:class:`mwclient.errors.MwClientError`.
+
 Authenticating
 --------------
 

@@ -296,6 +296,11 @@ class Site(object):
             self.blocked = False
         self.hasmsg = 'messages' in userinfo
         self.logged_in = 'anon' not in userinfo
+        if 'warnings' in info:
+            for module, warning in info['warnings'].items():
+                if '*' in warning:
+                    log.warning(warning['*'])
+
         if 'error' in info:
             if info['error']['code'] in {u'internal_api_error_DBConnectionError',
                                          u'internal_api_error_DBQueryError'}:
