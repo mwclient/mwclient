@@ -957,7 +957,7 @@ class Site(object):
 
         offset = 0
         while offset is not None:
-            results = self.raw_api('ask', query='{query}&parameters=offset%3D{offset}'.format(
+            results = self.raw_api('ask', query='{query}|offset={offset}'.format(
                 query=query, offset=offset), http_method='GET', **kwargs)
 
             offset = results.get('query-continue-offset')
