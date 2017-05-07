@@ -507,7 +507,7 @@ class Site(object):
                 # MW 1.27+
                 try:
                     kwargs['lgtoken'] = login["tokens"]["logintoken"]
-                except : # fallback to MW < 1.27 authentication
+                except:  # fallback to MW < 1.27 authentication
                     pass
 
                 login = self.post('login', **kwargs)
@@ -993,4 +993,4 @@ class Site(object):
 
             offset = results.get('query-continue-offset')
             for key, value in results['query']['results'].iteritems():
-                yield {key:value}
+                yield {key: value}
