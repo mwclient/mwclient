@@ -489,13 +489,14 @@ class Site(object):
                 # If the wiki is read protected, it is not possible
                 # to get the wiki version using the API.
                 # We fallback to the old way if we fail.
-                loginkwargs = {'meta':'tokens'}
+                loginkwargs = {'meta': 'tokens'}
                 # we cannot use api() as api() is adding "userinfo" to the query
                 # and this raises an readapideniederrot if the wiki is read protected.
                 # we fallback to raw_api.
-                login=self.raw_api('query',http_method='GET',**loginkwargs)
-                try: #MW 1.27+
-                    kwargs['lgtoken']=login["tokens"]["logintoken"];
+                login = self.raw_api('query', http_method='GET', **loginkwargs)
+                # MW 1.27+
+                try:
+                    kwargs['lgtoken'] = login["tokens"]["logintoken"]
                 except : # fallback to MW < 1.27 authentication
                     pass
 
