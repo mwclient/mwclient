@@ -993,4 +993,4 @@ class Site(object):
 
             offset = results.get('query-continue-offset')
             for key, value in results['query']['results'].iteritems():
-                yield {key: value}
+                yield {key:value}
