@@ -482,12 +482,26 @@ class Site(object):
                 'lgname': self.credentials[0],
                 'lgpassword': self.credentials[1]
             }
-            if self.version[:2] >= (1, 27):
-                kwargs['lgtoken'] = self.get_token('login')
             if self.credentials[2]:
                 kwargs['lgdomain'] = self.credentials[2]
+            # Try to login using the scheme for MW 1.27+ .
+            # If the wiki is read protected, it is not possible
+            # to get the wiki version using the API.
+            # We fallback to the old way if we fail.
+            loginkwargs = {'meta': 'tokens'}
             while True:
+                # we cannot use api() as api() is adding "userinfo" to the query
+                # and this raises an readapideniederrot if the wiki is read protected.
+                # we fallback to raw_api.
+                login = self.raw_api('query', http_method='GET', **loginkwargs)
+                # MW 1.27+
+                try:
+                    kwargs['lgtoken'] = login["tokens"]["logintoken"]
+                except:  # fallback to MW < 1.27 authentication
+                    pass
+
                 login = self.post('login', **kwargs)
+
                 if login['login']['result'] == 'Success':
                     break
                 elif login['login']['result'] == 'NeedToken':
@@ -958,8 +972,8 @@ class Site(object):
         offset = 0
         while offset is not None:
             results = self.raw_api('ask', query='{query}|offset={offset}'.format(
-                query=query, offset=offset, http_method='GET'), **kwargs)
+                query=query, offset=offset), http_method='GET', **kwargs)
 
             offset = results.get('query-continue-offset')
-            for result in results['query']['results']:
-                yield result
+            for key, value in results['query']['results'].iteritems():
+                yield {key: value}
