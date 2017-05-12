@@ -990,12 +990,15 @@ class Site(object):
         while offset is not None:
             results = self.raw_api('ask', query='{query}|offset={offset}'.format(
                 query=query, offset=offset), http_method='GET', **kwargs)
-
-            offset = results.get('query-continue-offset')
-            answer = results.get('query').get('results')
-            if (answer):
-                for key, value in six.iteritems(answer):
-                    yield {key: value}
-            else:
+            if results.get('error'):  # malformed query, maybe should raise an exception
                 offset = None
                 yield {}
+            elif results.get('query'):
+                answer = results.get('query').get('results')
+                if (answer):
+                    offset = results.get('query-continue-offset')
+                    for key, value in six.iteritems(answer):
+                        yield {key: value}
+                else:
+                    offset = None
+                    yield {}
