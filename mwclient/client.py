@@ -999,6 +999,6 @@ class Site(object):
                     offset = results.get('query-continue-offset')
                     for key, value in six.iteritems(answer):
                         yield {key: value}
-                else:
+                else:  # query returns no results
                     offset = None
                     yield {}
