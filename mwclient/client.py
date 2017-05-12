@@ -992,5 +992,10 @@ class Site(object):
                 query=query, offset=offset), http_method='GET', **kwargs)
 
             offset = results.get('query-continue-offset')
-            for key, value in results['query']['results'].iteritems():
-                yield {key: value}
+            answer = results.get('query').get('results')
+            if (answer):
+                for key, value in six.iteritems(answer):
+                    yield {key: value}
+            else:
+                offset = None
+                yield {}
