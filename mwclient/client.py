@@ -985,7 +985,7 @@ class Site(object):
             to the query.
             The dictionnary is empty if either:
                - the query is valid but there are no answers,
-               - or if the query is not valid).
+               - or if the query is not valid.
 
         Examples:
 
@@ -993,8 +993,8 @@ class Site(object):
             >>> answer = site.ask(query)
             >>> for a in answer:
             >>>     for key,value in a.iteritems() # or a.items() in python 3
-            >>>         print(k)
-            >>>         print(v)
+            >>>         print(key)
+            >>>         print(value)
         """
         kwargs = {}
         if title is None:
