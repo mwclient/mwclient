@@ -980,7 +980,21 @@ class Site(object):
         API doc: https://semantic-mediawiki.org/wiki/Ask_API
 
         Returns:
-            Generator for retrieving all search results
+            Generator for retrieving all search results.
+            Iterating over the generator gives a dictionnary containing the answers
+            to the query.
+            The dictionnary is empty if either:
+               - the query is valid but there are no answers,
+               - or if the query is not valid).
+
+        Examples:
+
+            >>> query = "[[Category:my cat]]|[[Has name::a name]]|?Has property"
+            >>> answer = site.ask(query)
+            >>> for a in answer:
+            >>>     for key,value in a.iteritems() # or a.items() in python 3
+            >>>         print(k)
+            >>>         print(v)
         """
         kwargs = {}
         if title is None:
