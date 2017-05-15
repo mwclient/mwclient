@@ -992,7 +992,7 @@ class Site(object):
             >>> query = "[[Category:my cat]]|[[Has name::a name]]|?Has property"
             >>> answer = site.ask(query)
             >>> for a in answer:
-            >>>     for key,value in a.iteritems() # or a.items() in python 3
+            >>>     for key,value in a.iteritems() # or a.items() in python 3.
             >>>         print(key)
             >>>         print(value)
         """
