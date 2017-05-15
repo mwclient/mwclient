@@ -498,18 +498,7 @@ class Site(object):
             except KeyError:
                 log.debug('Failed to get login token, MediaWiki is older than 1.27.')
 
-            loginkwargs = {'meta': 'tokens'}
             while True:
-                # we cannot use api() as api() is adding "userinfo" to the query
-                # and this raises an readapideniederrot if the wiki is read protected.
-                # we fallback to raw_api.
-                login = self.raw_api('query', http_method='GET', **loginkwargs)
-                # MW 1.27+
-                try:
-                    kwargs['lgtoken'] = login["tokens"]["logintoken"]
-                except:  # fallback to MW < 1.27 authentication
-                    pass
-
                 login = self.post('login', **kwargs)
 
                 if login['login']['result'] == 'Success':
