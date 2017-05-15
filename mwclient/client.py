@@ -969,7 +969,21 @@ class Site(object):
         API doc: https://semantic-mediawiki.org/wiki/Ask_API
 
         Returns:
-            Generator for retrieving all search results
+            Generator for retrieving all search results.
+            Iterating over the generator gives a dictionnary containing the answers
+            to the query.
+            The dictionnary is empty if either:
+               - the query is valid but there are no answers,
+               - or if the query is not valid.
+
+        Examples:
+
+            >>> query = "[[Category:my cat]]|[[Has name::a name]]|?Has property"
+            >>> answer = site.ask(query)
+            >>> for a in answer:
+            >>>     for key,value in a.iteritems() # or a.items() in python 3.
+            >>>         print(key)
+            >>>         print(value)
         """
         kwargs = {}
         if title is None:
@@ -979,7 +993,15 @@ class Site(object):
         while offset is not None:
             results = self.raw_api('ask', query='{query}|offset={offset}'.format(
                 query=query, offset=offset), http_method='GET', **kwargs)
-
-            offset = results.get('query-continue-offset')
-            for key, value in results['query']['results'].iteritems():
-                yield {key: value}
+            if results.get('error'):  # malformed query, maybe should raise an exception
+                offset = None
+                yield {}
+            elif results.get('query'):
+                answer = results.get('query').get('results')
+                if (answer):
+                    offset = results.get('query-continue-offset')
+                    for key, value in six.iteritems(answer):
+                        yield {key: value}
+                else:  # query returns no results
+                    offset = None
+                    yield {}
