@@ -536,6 +536,8 @@ class Site(object):
                 # protected and we're trying to fetch a login token.
                 info = self.raw_api('query', 'GET', meta='tokens', type=type)
 
+                self.handle_api_result(info)
+
                 # Note that for read protected wikis, we don't know the version when
                 # fetching the login token. If it's < 1.27, the request below will
                 # raise a KeyError that we should catch.
