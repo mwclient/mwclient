@@ -302,10 +302,15 @@ class Site(object):
                     log.warning(warning['*'])
 
         if 'error' in info:
-            if info['error']['code'] in {u'internal_api_error_DBConnectionError',
-                                         u'internal_api_error_DBQueryError'}:
+            if info['error'].get('code') in {u'internal_api_error_DBConnectionError',
+                                             u'internal_api_error_DBQueryError'}:
                 sleeper.sleep()
                 return False
+
+            if 'query' in info['error']:
+                # Semantic Mediawiki does not follow the standard error format
+                raise errors.APIError(None, info['error']['query'], kwargs)
+
             if '*' in info['error']:
                 raise errors.APIError(info['error']['code'],
                                       info['error']['info'], info['error']['*'])
