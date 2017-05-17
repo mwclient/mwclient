@@ -976,19 +976,17 @@ class Site(object):
         API doc: https://semantic-mediawiki.org/wiki/Ask_API
 
         Returns:
-            Generator for retrieving all search results.
-            Iterating over the generator gives a dictionary containing the answers
-            to the query.
-            The dictionary is empty if the query is valid but there are no answers.
+            Generator for retrieving all search results, with each answer as a dictionary.
+            If the query is invalid, an APIError is raised. A valid query with zero
+            results will not raise any error.
 
         Examples:
 
             >>> query = "[[Category:my cat]]|[[Has name::a name]]|?Has property"
-            >>> answer = site.ask(query)
-            >>> for a in answer:
-            >>>     for key, value in a.items()
-            >>>         print(key)
-            >>>         print(value)
+            >>> for answer in site.ask(query):
+            >>>     for title, data in answer.items()
+            >>>         print(title)
+            >>>         print(data)
         """
         kwargs = {}
         if title is None:
@@ -998,12 +996,8 @@ class Site(object):
         while offset is not None:
             results = self.raw_api('ask', query=u'{query}|offset={offset}'.format(
                 query=query, offset=offset), http_method='GET', **kwargs)
-            if self.handle_api_result(results):
-                answer = results['query'].get('results')
-                if answer:
-                    offset = results.get('query-continue-offset')
-                    for key, value in answer.items():
-                        yield {key: value}
-                else:  # query returns no results
-                    offset = None
-                    yield {}
+            self.handle_api_result(results)  # raises APIError on error
+            offset = results.get('query-continue-offset')
+            answers = results['query'].get('results') or {}
+            for key, value in answers.items():
+                yield {key: value}

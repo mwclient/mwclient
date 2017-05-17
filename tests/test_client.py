@@ -299,14 +299,14 @@ class TestClient(TestCase):
         site = self.stdSetup()
         self.httpShouldReturn(json.dumps({
             'error': {
-                'query': 'Certains « <nowiki>[[</nowiki> » dans votre requête n’ont pas été clos par des « ]] » correspondants.'
+                'query': u'Certains « <nowiki>[[</nowiki> » dans votre requête n’ont pas été clos par des « ]] » correspondants.'
             }
         }), method='GET')
         with pytest.raises(mwclient.errors.APIError) as excinfo:
             list(site.ask('test'))
 
         assert excinfo.value.code is None
-        assert excinfo.value.info == 'Certains « <nowiki>[[</nowiki> » dans votre requête n’ont pas été clos par des « ]] » correspondants.'
+        assert excinfo.value.info == u'Certains « <nowiki>[[</nowiki> » dans votre requête n’ont pas été clos par des « ]] » correspondants.'
         assert len(responses.calls) == 1
 
     @responses.activate
