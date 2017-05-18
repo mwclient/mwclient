@@ -1,34 +1,7 @@
 # Release Notes for mwclient
 
-## Unreleased
-
-This is the development version of mwclient. You can review the
-[full list of changes since v0.8.2](https://github.com/mwclient/mwclient/compare/v0.8.2...master).
-
-## Changes in version 0.8.2
-
-Mwclient 0.8.2 was released on 23 October 2016.
-Release notes can be found [here](https://github.com/mwclient/mwclient/releases/tag/v0.8.2).
-
-## Changes in version 0.8.1
-
-Mwclient 0.8.1 was released on 5 February 2016.
-Release notes can be found [here](https://github.com/mwclient/mwclient/releases/tag/v0.8.1).
-
-## Changes in version 0.8.0
-
-Mwclient 0.8.0 was released on 10 January 2016.
-Release notes can be found [here](https://github.com/mwclient/mwclient/releases/tag/v0.8.0).
-
-## Changes in version 0.7.2
-
-Mwclient 0.7.2 was released on 18 July 2015.
-Release notes can be found [here](https://github.com/mwclient/mwclient/releases/tag/v0.7.2).
-
-## Changes in version 0.7.1
-
-Mwclient 0.7.1 was released on 23 November 2014.
-Release notes can be found [here](https://github.com/mwclient/mwclient/releases/tag/v0.7.1).
+See [GitHub releases](https://github.com/mwclient/mwclient/releases/) for
+release notes for mwclient 0.7.1+.
 
 ## Changes in version 0.7.0
 
