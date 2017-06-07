@@ -307,6 +307,13 @@ class Site(object):
                 sleeper.sleep()
                 return False
 
+            # should the above dict instead be a list?
+            if (info['error'].get('code') == u'mwoauth-invalid-authorization' and
+                'Nonce already used' in info['error'].get('info')):
+                log.warning('retrying due to nonce error https://phabricator.wikimedia.org/T106066')
+                sleeper.sleep()
+                return False
+
             if 'query' in info['error']:
                 # Semantic Mediawiki does not follow the standard error format
                 raise errors.APIError(None, info['error']['query'], kwargs)
