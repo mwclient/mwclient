@@ -507,7 +507,7 @@ class Site(object):
             # have to try. If the attempt fails, we try the old method.
             try:
                 kwargs['lgtoken'] = self.get_token('login')
-            except KeyError:
+            except (errors.APIError, KeyError):
                 log.debug('Failed to get login token, MediaWiki is older than 1.27.')
 
             while True:
