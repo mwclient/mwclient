@@ -9,7 +9,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 
 setup(name='mwclient',
-      version='0.8.5',  # Use bumpversion to update
+      version='0.8.6',  # Use bumpversion to update
       description='MediaWiki API client',
       long_description=README,
       classifiers=[
