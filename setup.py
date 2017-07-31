@@ -29,6 +29,6 @@ setup(name='mwclient',
       install_requires=['requests_oauthlib', 'six'],
       setup_requires=['pytest-runner'],
       tests_require=['pytest', 'pytest-pep8', 'pytest-cache', 'pytest-cov',
-                     'responses>=0.3.0', 'mock'],
+                     'responses>=0.6.0', 'mock'],
       zip_safe=True
       )
