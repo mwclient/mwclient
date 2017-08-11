@@ -415,7 +415,7 @@ class Site(object):
                             http_method=http_method)
 
         try:
-            return json.loads(res)
+            return json.loads(res, object_pairs_hook=OrderedDict)
         except ValueError:
             if res.startswith('MediaWiki API is not enabled for this site.'):
                 raise errors.APIDisabledError
