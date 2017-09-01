@@ -1,7 +1,8 @@
 
-.. figure:: docs/source/logo.png
+.. figure:: docs/source/logo.svg
    :alt: Logo
    :align: center
+   :width: 270px
 
 mwclient
 ========
