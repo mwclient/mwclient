@@ -1113,6 +1113,13 @@ class Site(object):
                 query=query, offset=offset), http_method='GET', **kwargs)
             self.handle_api_result(results)  # raises APIError on error
             offset = results.get('query-continue-offset')
-            answers = results['query'].get('results') or {}
-            for key, value in answers.items():
-                yield {key: value}
+            answers = results['query'].get('results', [])
+
+            if isinstance(answers, dict):
+                # In older versions of Semantic MediaWiki (at least until 2.3.0)
+                # a list was returned. In newer versions an object is returned
+                # with the page title as key.
+                answers = [answer for answer in answers.values()]
+
+            for answer in answers:
+                yield answer
