@@ -52,7 +52,7 @@ class TestCase(unittest.TestCase):
             responses.add_callback(mock, url, callback=callback)
         else:
             responses.add(mock, url, body=body, content_type='application/json',
-                          headers=headers, status=status)
+                          adding_headers=headers, status=status)
 
     def stdSetup(self):
         self.httpShouldReturn(self.metaResponseAsJson())
