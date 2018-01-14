@@ -102,3 +102,7 @@ class InvalidResponse(MwClientError):
 
     def __str__(self):
         return self.message
+
+
+class InvalidPageTitle(MwClientError):
+    pass

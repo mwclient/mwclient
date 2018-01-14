@@ -10,7 +10,7 @@ import mock
 import mwclient
 from mwclient.page import Page
 from mwclient.client import Site
-from mwclient.errors import APIError, AssertUserFailedError, ProtectedPageError
+from mwclient.errors import APIError, AssertUserFailedError, ProtectedPageError, InvalidPageTitle
 
 try:
     import json
@@ -82,9 +82,8 @@ class TestPage(unittest.TestCase):
                 }
             }
         }
-        page = Page(mock_site, title)
-
-        assert page.exists is False
+        with pytest.raises(InvalidPageTitle):
+            page = Page(mock_site, title)
 
     @mock.patch('mwclient.client.Site')
     def test_pageprops(self, mock_site):

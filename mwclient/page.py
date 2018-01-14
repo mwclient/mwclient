@@ -36,6 +36,9 @@ class Page(object):
             info = six.next(six.itervalues(info['query']['pages']))
         self._info = info
 
+        if 'invalid' in info:
+            raise mwclient.errors.InvalidPageTitle(info.get('invalidreason'))
+
         self.namespace = info.get('ns', 0)
         self.name = info.get('title', u'')
         if self.namespace:
@@ -45,7 +48,7 @@ class Page(object):
 
         self.touched = parse_timestamp(info.get('touched'))
         self.revision = info.get('lastrevid', 0)
-        self.exists = 'missing' not in info and 'invalid' not in info
+        self.exists = 'missing' not in info
         self.length = info.get('length')
         self.protection = {
             i['type']: (i['level'], i['expiry'])
