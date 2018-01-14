@@ -67,6 +67,26 @@ class TestPage(unittest.TestCase):
         assert page.exists is True
 
     @mock.patch('mwclient.client.Site')
+    def test_invalid_title(self, mock_site):
+        # Check that API page.exists is False for invalid title
+
+        title = '[Test]'
+        mock_site.get.return_value = {
+            "query": {
+                "pages": {
+                    "-1": {
+                        "title": "[Test]",
+                        "invalidreason": "The requested page title contains invalid characters: \"[\".",
+                        "invalid": ""
+                    }
+                }
+            }
+        }
+        page = Page(mock_site, title)
+
+        assert page.exists is False
+
+    @mock.patch('mwclient.client.Site')
     def test_pageprops(self, mock_site):
         # Check that variouse page props are read correctly from API response
 

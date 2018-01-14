@@ -45,7 +45,7 @@ class Page(object):
 
         self.touched = parse_timestamp(info.get('touched'))
         self.revision = info.get('lastrevid', 0)
-        self.exists = 'missing' not in info
+        self.exists = 'missing' not in info and 'invalid' not in info
         self.length = info.get('length')
         self.protection = {
             i['type']: (i['level'], i['expiry'])
