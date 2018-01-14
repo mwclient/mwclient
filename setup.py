@@ -12,7 +12,7 @@ needs_pytest = set(['pytest', 'test', 'ptr']).intersection(sys.argv)
 pytest_runner = ['pytest-runner'] if needs_pytest else []
 
 setup(name='mwclient',
-      version='0.8.6',  # Use bumpversion to update
+      version='0.8.7',  # Use bumpversion to update
       description='MediaWiki API client',
       long_description=README,
       classifiers=[
