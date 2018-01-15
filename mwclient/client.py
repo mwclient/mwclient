@@ -45,16 +45,19 @@ class Site(object):
 
         >>> site = mwclient.Site('vim.wikia.com', path='/')
         >>> site = mwclient.Site('sourceforge.net', path='/apps/mediawiki/mwclient/')
+        # with http
+        >>> site = mwclient.Site('vim.wikia.com', path='/', scheme='http')
 
     """
     api_limit = 500
 
-    def __init__(self, host, path='/w/', ext='.php', pool=None, retry_timeout=30,
+    def __init__(self, scheme='https', host, path='/w/', ext='.php', pool=None, retry_timeout=30,
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
                  max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
                  reqs=None, consumer_token=None, consumer_secret=None, access_token=None,
                  access_secret=None, client_certificate=None, custom_headers=None):
         # Setup member variables
+        self.scheme = scheme
         self.host = host
         self.path = path
         self.ext = ext
@@ -358,7 +361,8 @@ class Site(object):
             headers['Accept-Encoding'] = 'gzip'
         sleeper = self.sleepers.make((script, data))
 
-        scheme = 'https'
+        #scheme = 'http'
+        scheme = self.scheme
         host = self.host
         if isinstance(host, (list, tuple)):
             scheme, host = host
