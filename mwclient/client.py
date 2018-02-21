@@ -1009,7 +1009,6 @@ class Site(object):
             for key, value in answers.items():
                 yield {key: value}
 
-
     def cargo_query(self, tables, fields, where=None, join_on=None, group_by=None, having=None, order_by=None, limit=50, http_method='GET'):
         '''
         Run a cargo query.
@@ -1040,6 +1039,6 @@ class Site(object):
 
         results = self.raw_api('cargoquery', tables=tables, fields=fields, where=where, join_on=join_on, group_by=group_by, having=having, order_by=order_by, limit=limit, http_method='GET')
         self.handle_api_result(results) # raises APIError on error
-        answers = results['cargoquery']
-        for answer in answers:
-            yield answer['title']
+
+        for result in results['cargoquery']:
+            yield result
