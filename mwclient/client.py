@@ -1038,7 +1038,7 @@ class Site(object):
         fields = ','.join(fixed_fields)
 
         results = self.raw_api('cargoquery', tables=tables, fields=fields, where=where, join_on=join_on, group_by=group_by, having=having, order_by=order_by, limit=limit, http_method='GET')
-        self.handle_api_result(results) # raises APIError on error
+        self.handle_api_result(results)  # raises APIError on error
 
         for result in results['cargoquery']:
             yield result['title']
