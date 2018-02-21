@@ -1041,4 +1041,4 @@ class Site(object):
         self.handle_api_result(results) # raises APIError on error
 
         for result in results['cargoquery']:
-            yield result
+            yield result['title']
