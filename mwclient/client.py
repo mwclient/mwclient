@@ -1008,3 +1008,37 @@ class Site(object):
             answers = results['query'].get('results') or {}
             for key, value in answers.items():
                 yield {key: value}
+
+    def cargoquery(self, tables, fields, where=None, join_on=None, group_by=None, having=None, order_by=None, limit=50, http_method='GET'):
+        '''
+        Run a cargo query.
+
+        API doc: http://discoursedb.org/w/api.php?action=help&modules=cargoquery
+
+        Returns:
+            A generaror for all query results, with each answer as an OrderedDict.
+            If the query is invalid, an APIError is raised. A valid query with zero
+            results will not raise any error.
+
+        Example:
+            >>> for answer in cargo_query(tables=myTable, fields='title, someField', where='someField="someValue"'):
+            >>>     for key, value in answer.items():
+            >>>         print(key)
+            >>>         print(value)
+        '''
+
+        # Fixes a bug with the Cargo api where fields starting with an underscore
+        # only get shown if they get assigned a display name.
+        fixed_fields = []
+        for field in fields.split(','):
+            field = field.strip()
+            if field[:1] == '_' and '=' not in field:
+                field = field + '=' + field[1:]
+            fixed_fields.append(field)
+        fields = ','.join(fixed_fields)
+
+        results = self.raw_api('cargoquery', tables=tables, fields=fields, where=where, join_on=join_on, group_by=group_by, having=having, order_by=order_by, limit=limit, http_method='GET')
+        self.handle_api_result(results)  # raises APIError on error
+
+        for result in results['cargoquery']:
+            yield result['title']
