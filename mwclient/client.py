@@ -1009,7 +1009,7 @@ class Site(object):
             for key, value in answers.items():
                 yield {key: value}
 
-    def cargo_query(self, tables, fields, where=None, join_on=None, group_by=None, having=None, order_by=None, limit=50, http_method='GET'):
+    def cargoquery(self, tables, fields, where=None, join_on=None, group_by=None, having=None, order_by=None, limit=50, http_method='GET'):
         '''
         Run a cargo query.
 
