@@ -17,7 +17,7 @@ from requests_oauthlib import OAuth1
 import mwclient.errors as errors
 import mwclient.listing as listing
 from mwclient.sleep import Sleepers
-from mwclient.util import parse_timestamp
+from mwclient.util import parse_timestamp, read_in_chunks
 
 try:
     import gzip
@@ -118,6 +118,9 @@ class Site(object):
 
         # Initialization status
         self.initialized = False
+
+        # Upload chunk size in bytes
+        self.chunk_size = 1048576
 
         if do_init:
             try:
@@ -612,20 +615,34 @@ class Site(object):
         if not image.can('upload'):
             raise errors.InsufficientPermission(filename)
 
-        predata = {}
-
         if comment is None:
-            predata['comment'] = description
+            comment = description
+            text = None
         else:
-            predata['comment'] = comment
-            predata['text'] = description
+            comment = comment
+            text = description
+
+        if file is not None:
+            if not hasattr(file, 'read'):
+                file = open(file, 'rb')
+
+            content_size = file.seek(0, 2)
+            file.seek(0)
+
+            if self.version[:2] >= (1, 20) and content_size > self.chunk_size:
+                return self.chunk_upload(file, filename, ignore, comment, text)
+
+        predata = {
+            'action': 'upload',
+            'format': 'json',
+            'filename': filename,
+            'comment': comment,
+            'text': text,
+            'token': image.get_token('edit'),
+        }
 
         if ignore:
             predata['ignorewarnings'] = 'true'
-        predata['token'] = image.get_token('edit')
-        predata['action'] = 'upload'
-        predata['format'] = 'json'
-        predata['filename'] = filename
         if url:
             predata['url'] = url
 
@@ -645,11 +662,7 @@ class Site(object):
             # Since the filename in Content-Disposition is not interpreted,
             # we can send some ascii-only dummy name rather than the real
             # filename, which might contain non-ascii.
-            file = ('fake-filename', file)
-            # End of workaround
-            # ----------------------------------------------------------------
-
-            files = {'file': file}
+            files = {'file': ('fake-filename', file)}
 
         sleeper = self.sleepers.make()
         while True:
@@ -658,7 +671,72 @@ class Site(object):
             if not info:
                 info = {}
             if self.handle_api_result(info, kwargs=predata, sleeper=sleeper):
-                return info.get('upload', {})
+                response = info.get('upload', {})
+                break
+        if file is not None:
+            file.close()
+        return response
+
+    def chunk_upload(self, file, filename, ignorewarnings, comment, text):
+        """Upload a file to the site in chunks.
+
+        This method is called by `Site.upload` if you are connecting to a newer
+        MediaWiki installation, so it's normally not necessary to call this
+        method directly.
+
+        Args:
+            file (file-like object): File object or stream to upload.
+            params (dict): Dict containing upload parameters.
+        """
+        image = self.Images[filename]
+
+        content_size = file.seek(0, 2)
+        file.seek(0)
+
+        params = {
+            'action': 'upload',
+            'format': 'json',
+            'stash': 1,
+            'offset': 0,
+            'filename': filename,
+            'filesize': content_size,
+            'token': image.get_token('edit'),
+        }
+        if ignorewarnings:
+            params['ignorewarnings'] = 'true'
+
+        sleeper = self.sleepers.make()
+        offset = 0
+        for chunk in read_in_chunks(file, self.chunk_size):
+            while True:
+                data = self.raw_call('api', params, files={'chunk': chunk})
+                info = json.loads(data)
+                if self.handle_api_result(info, kwargs=params, sleeper=sleeper):
+                    response = info.get('upload', {})
+                    break
+
+            offset += chunk.tell()
+            chunk.close()
+            log.debug('%s: Uploaded %d of %d bytes', filename, offset, content_size)
+            params['filekey'] = response['filekey']
+            if response['result'] == 'Continue':
+                params['offset'] = response['offset']
+            elif response['result'] == 'Success':
+                file.close()
+                break
+            else:
+                # Some kind or error or warning occured. In any case, we do not
+                # get the parameters we need to continue, so we should return
+                # the response now.
+                file.close()
+                return response
+
+        del params['action']
+        del params['stash']
+        del params['offset']
+        params['comment'] = comment
+        params['text'] = text
+        return self.post('upload', **params)
 
     def parse(self, text=None, title=None, page=None, prop=None,
               redirects=False, mobileformat=False):
