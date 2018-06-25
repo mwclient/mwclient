@@ -53,7 +53,7 @@ class Site(object):
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
                  max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
                  reqs=None, consumer_token=None, consumer_secret=None, access_token=None,
-                 access_secret=None, client_certificate=None, custom_headers=None):
+                 access_secret=None, client_certificate=None, custom_headers=None, ssl=True):
         # Setup member variables
         self.host = host
         self.path = path
@@ -63,6 +63,7 @@ class Site(object):
         self.max_lag = text_type(max_lag)
         self.force_login = force_login
         self.requests = reqs or {}
+        self.ssl = ssl
 
         if consumer_token is not None:
             auth = OAuth1(consumer_token, consumer_secret, access_token, access_secret)
@@ -361,7 +362,7 @@ class Site(object):
             headers['Accept-Encoding'] = 'gzip'
         sleeper = self.sleepers.make((script, data))
 
-        scheme = 'https'
+        scheme = 'https' if self.ssl else 'http'
         host = self.host
         if isinstance(host, (list, tuple)):
             scheme, host = host
