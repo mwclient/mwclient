@@ -39,6 +39,10 @@ mwclient
    :target: http://isitmaintained.com/project/tldr-pages/tldr
    :alt: Issue statistics
 
+.. image:: https://img.shields.io/gitter/room/mwclient/mwclient.svg
+   :target: https://gitter.im/mwclient/mwclient
+   :alt: Gitter chat
+
 mwclient is a lightweight Python client library to the `MediaWiki API <https://mediawiki.org/wiki/API>`_
 which provides access to most API functionality.
 It works with Python 2.7, 3.3 and above, and supports MediaWiki 1.16 and above.
