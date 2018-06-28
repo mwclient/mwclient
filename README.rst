@@ -23,10 +23,6 @@ mwclient
    :target: https://pypi.python.org/pypi/mwclient
    :alt: Latest version
 
-.. image:: https://img.shields.io/pypi/dw/mwclient.svg
-   :target: https://pypi.python.org/pypi/mwclient
-   :alt: Downloads
-
 .. image:: https://img.shields.io/github/license/mwclient/mwclient.svg
    :target: http://opensource.org/licenses/MIT
    :alt: MIT license
