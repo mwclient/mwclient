@@ -6,7 +6,7 @@ import sys
 from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.rst')).read()
+README = open(os.path.join(here, 'README.md')).read()
 
 needs_pytest = set(['pytest', 'test', 'ptr']).intersection(sys.argv)
 pytest_runner = ['pytest-runner'] if needs_pytest else []
@@ -15,6 +15,7 @@ setup(name='mwclient',
       version='0.8.7',  # Use bumpversion to update
       description='MediaWiki API client',
       long_description=README,
+      long_description_content_type='text/markdown',
       classifiers=[
           'Programming Language :: Python',
           'Programming Language :: Python :: 2.7',
