@@ -46,13 +46,19 @@ class List(object):
         if self.max_items is not None:
             if self.count >= self.max_items:
                 raise StopIteration
-        try:
-            item = six.next(self._iter)
-        except StopIteration:
-            if self.last:
-                raise
-            self.load_chunk()
-            item = six.next(self._iter)
+
+        # For filered lists, we might have to do several requests
+        # to get the next element due to miser mode.
+        # See: https://github.com/mwclient/mwclient/issues/194
+        while True:
+            try:
+                item = six.next(self._iter)
+                if item is not None:
+                    break
+            except StopIteration:
+                if self.last:
+                    raise
+                self.load_chunk()
 
         self.count += 1
         if 'timestamp' in item:
@@ -93,7 +99,11 @@ class List(object):
         if not data:
             # Non existent page
             raise StopIteration
-        self.set_iter(data)
+
+        # Process response if not empty.
+        # See: https://github.com/mwclient/mwclient/issues/194
+        if 'query' in data:
+            self.set_iter(data)
 
         if data.get('continue'):
             # New style continuation, added in MediaWiki 1.21
