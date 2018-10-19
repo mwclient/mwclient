@@ -326,18 +326,33 @@ class Page(object):
             **kwargs
         )
 
-    def categories(self, generator=True):
+    def categories(self, generator=True, show=None):
         """List categories used on the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Categories
 
+        Args:
+            generator (bool): Return generator (Default: True)
+            show (str): Set to 'hidden' to only return hidden categories
+                or '!hidden' to only return non-hidden ones.
+
+        Returns:
+            mwclient.listings.PagePropertyGenerator
         """
+        prefix = mwclient.listing.List.get_prefix('cl', generator)
+        kwargs = dict(mwclient.listing.List.generate_kwargs(
+            prefix, show=show
+        ))
+
         if generator:
-            return mwclient.listing.PagePropertyGenerator(self, 'categories', 'cl')
+            return mwclient.listing.PagePropertyGenerator(
+                self, 'categories', 'cl', **kwargs
+            )
         else:
             # TODO: return sortkey if wanted
-            return mwclient.listing.PageProperty(self, 'categories', 'cl',
-                                                 return_values='title')
+            return mwclient.listing.PageProperty(
+                self, 'categories', 'cl', return_values='title', **kwargs
+            )
 
     def embeddedin(self, namespace=None, filterredir='all', limit=None, generator=True):
         """List pages that transclude the current page.
@@ -349,7 +364,7 @@ class Page(object):
             filterredir (str): How to filter redirects, either 'all' (default),
                 'redirects' or 'nonredirects'.
             limit (int): Maximum amount of pages to return per request
-            generator (bool): Use generator
+            generator (bool): Return generator (Default: True)
 
         Returns:
             mwclient.listings.List: Page iterator

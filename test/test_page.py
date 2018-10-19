@@ -10,6 +10,7 @@ import mock
 import mwclient
 from mwclient.page import Page
 from mwclient.client import Site
+from mwclient.listing import Category
 from mwclient.errors import APIError, AssertUserFailedError, ProtectedPageError, InvalidPageTitle
 
 try:
@@ -228,6 +229,7 @@ class TestPageApiArgs(unittest.TestCase):
 
         self.site.get.return_value = {'query': {'pages': {'1': {'title': title}}}}
         self.site.rights = ['read']
+        self.site.api_limit = 500
 
         self.page = Page(self.site, title)
 
@@ -337,6 +339,44 @@ class TestPageApiArgs(unittest.TestCase):
 
         assert pp_error.value.code == 'protectedpage'
         assert str(pp_error.value) == 'The "editprotected" right is required to edit this page'
+
+    def test_get_page_categories(self):
+        # Check that page.categories() works, and that a correct API call is made
+
+        self.site.get.return_value = {
+            "batchcomplete": "",
+            "query": {
+                "pages": {
+                    "1009371": {
+                        "pageid": 1009371,
+                        "ns": 14,
+                        "title": "Category:1879 births",
+                    },
+                    "1005547": {
+                        "pageid": 1005547,
+                        "ns": 14,
+                        "title": "Category:1955 deaths",
+                    }
+                }
+            }
+        }
+
+        cats = list(self.page.categories())
+        args = self.get_last_api_call_args(http_method='GET')
+
+        assert {
+            'generator': 'categories',
+            'titles': self.page.page_title,
+            'iiprop': 'timestamp|user|comment|url|size|sha1|metadata|archivename',
+            'inprop': 'protection',
+            'prop': 'info|imageinfo',
+            'gcllimit': repr(self.page.site.api_limit),
+        } == args
+
+        assert set([c.name for c in cats]) == set([
+            'Category:1879 births',
+            'Category:1955 deaths',
+        ])
 
 
 if __name__ == '__main__':
