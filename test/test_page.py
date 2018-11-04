@@ -230,6 +230,7 @@ class TestPageApiArgs(unittest.TestCase):
         self.site.get.return_value = {'query': {'pages': {'1': {'title': title}}}}
         self.site.rights = ['read']
         self.site.api_limit = 500
+        self.site.version = (1, 32, 0)
 
         self.page = Page(self.site, title)
 
@@ -261,7 +262,8 @@ class TestPageApiArgs(unittest.TestCase):
             'rvdir': 'older',
             'titles': self.page.page_title,
             'rvprop': 'content|timestamp',
-            'rvlimit': '1'
+            'rvlimit': '1',
+            'rvslots': 'main',
         }
 
     def test_get_page_text_cached(self):

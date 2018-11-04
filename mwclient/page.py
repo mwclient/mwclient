@@ -130,7 +130,7 @@ class Page(object):
                       category=DeprecationWarning, stacklevel=2)
         return self.text(*args, **kwargs)
 
-    def text(self, section=None, expandtemplates=False, cache=True):
+    def text(self, section=None, expandtemplates=False, cache=True, slot='main'):
         """Get the current wikitext of the page, or of a specific section.
 
         If the page does not exist, an empty string is returned. By
@@ -157,10 +157,13 @@ class Page(object):
             return self._textcache[key]
 
         revs = self.revisions(prop='content|timestamp', limit=1, section=section,
-                              expandtemplates=expandtemplates)
+                              expandtemplates=expandtemplates, slots=slot)
         try:
             rev = next(revs)
-            text = rev['*']
+            if 'slots' in rev:
+                text = rev['slots'][slot]
+            else:
+                text = rev['*']
             self.last_rev_time = rev['timestamp']
         except StopIteration:
             text = u''
@@ -439,7 +442,7 @@ class Page(object):
                   dir='older', user=None, excludeuser=None, limit=50,
                   prop='ids|timestamp|flags|comment|user',
                   expandtemplates=False, section=None,
-                  diffto=None):
+                  diffto=None, slots=None):
         """List revisions of the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Revisions
@@ -460,13 +463,21 @@ class Page(object):
             diffto (str): Revision ID to diff each revision to. Use "prev",
                           "next" and "cur" for the previous, next and current
                           revision respectively.
+            slots (str): The content slot (Mediawiki >= 1.32) to retrieve
+                content from.
 
         Returns:
             mwclient.listings.List: Revision iterator
         """
         kwargs = dict(mwclient.listing.List.generate_kwargs('rv', startid=startid, endid=endid,
                                                             start=start, end=end, user=user,
-                                                            excludeuser=excludeuser, diffto=diffto))
+                                                            excludeuser=excludeuser, diffto=diffto,
+                                                            slots=slots))
+
+        if self.site.version[:2] < (1, 32) and 'rvslots' in kwargs:
+            # https://github.com/mwclient/mwclient/issues/199
+            del kwargs['rvslots']
+
         kwargs['rvdir'] = dir
         kwargs['rvprop'] = prop
         if expandtemplates:
