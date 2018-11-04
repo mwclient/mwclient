@@ -24,7 +24,7 @@ try:
 except ImportError:
     gzip = None
 
-__ver__ = '0.9.1'
+__ver__ = '0.9.2'
 
 log = logging.getLogger(__name__)
 
