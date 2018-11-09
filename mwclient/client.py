@@ -352,6 +352,7 @@ class Site(object):
             data (dict): Post data
             files (dict): Files to upload
             retry_on_error (bool): Retry on connection error
+            http_method (str): The HTTP method, defaults to 'POST'
 
         Returns:
             The raw text response.
@@ -372,12 +373,16 @@ class Site(object):
 
         while True:
             try:
+                args = {'files': files, 'headers': headers}
+                for k, v in self.requests.items():
+                    args[k] = v
                 if http_method == 'GET':
-                    stream = self.connection.get(url, params=data, files=files,
-                                                 headers=headers, **self.requests)
+                    args['params'] = data
                 else:
-                    stream = self.connection.post(url, data=data, files=files,
-                                                  headers=headers, **self.requests)
+                    args['data'] = data
+
+                stream = self.connection.request(http_method, url, **args)
+
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
                     log.warning('Database lag exceeds max lag. '
