@@ -63,6 +63,8 @@ class Site(object):
         self.max_lag = text_type(max_lag)
         self.force_login = force_login
         self.requests = reqs or {}
+        if 'timeout' not in self.requests:
+            self.requests['timeout'] = 30  # seconds
 
         if consumer_token is not None:
             auth = OAuth1(consumer_token, consumer_secret, access_token, access_secret)
