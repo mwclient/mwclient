@@ -6,7 +6,7 @@ Page operations
 Start by :ref:`connecting <connecting>` to your site:
 
     >>> from mwclient import Site
-    >>> site = mwclient.Site('en.wikipedia.org')
+    >>> site = Site('en.wikipedia.org')
 
 For information about authenticating, please see
 :ref:`the section on authenticating <auth>`.
