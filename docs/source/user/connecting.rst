@@ -9,12 +9,12 @@ Begin by importing the Site class:
 
 Then try to connect to a site:
 
-    >>> site = mwclient.Site('test.wikipedia.org')
+    >>> site = Site('test.wikipedia.org')
 
 By default, mwclient will connect using https. If your site doesn't support
 https, you need to explicitly request http like so:
 
-    >>> site = mwclient.Site(('http', 'test.wikipedia.org'))
+    >>> site = Site(('http', 'test.wikipedia.org'))
 
 .. _endpoint:
 
@@ -27,7 +27,7 @@ Wikimedia wikis. If you get a 404 Not Found or a
 :class:`mwclient.errors.InvalidResponse` error upon connecting, your site might
 use a different script path. You can specify it using the ``path`` argument:
 
-    >>> site = mwclient.Site('my-awesome-wiki.org', path='/wiki/', )
+    >>> site = Site('my-awesome-wiki.org', path='/wiki/', )
 
 .. _$wgScriptPath: https://www.mediawiki.org/wiki/Manual:$wgScriptPath
 
@@ -40,7 +40,7 @@ If you are connecting to a Wikimedia site, you should follow the
 `Wikimedia User-Agent policy`_ and identify your tool like so:
 
     >>> ua = 'MyCoolTool/0.2 run by User:Xyz'
-    >>> site = mwclient.Site('test.wikipedia.org', clients_useragent=ua)
+    >>> site = Site('test.wikipedia.org', clients_useragent=ua)
 
 Note that Mwclient appends ' - MwClient/{version} ({url})' to your string.
 
@@ -83,7 +83,7 @@ a `owner-only consumer`_. Once you have obtained the *consumer token* (also
 called *consumer key*), the *consumer secret*, the *access token* and the
 *access secret*, you can authenticate like so:
 
-    >>> site = mwclient.Site('test.wikipedia.org',
+    >>> site = Site('test.wikipedia.org',
                              consumer_token='my_consumer_token',
                              consumer_secret='my_consumer_secret',
                              access_token='my_access_token',
@@ -110,13 +110,13 @@ HTTP authentication
 If your server is configured to use HTTP authentication, you can
 authenticate using the ``httpauth`` parameter. For Basic HTTP authentication:
 
-    >>> site = mwclient.Site('awesome.site', httpauth=('my_username', 'my_password'))
+    >>> site = Site('awesome.site', httpauth=('my_username', 'my_password'))
 
 You can also pass in any other :ref:`authentication mechanism <requests:authentication>`
 based on the :class:`requests.auth.AuthBase`, such as Digest authentication:
 
 	>>> from requests.auth import HTTPDigestAuth
-	>>> site = mwclient.Site('awesome.site', httpauth=HTTPDigestAuth('my_username', 'my_password'))
+	>>> site = Site('awesome.site', httpauth=HTTPDigestAuth('my_username', 'my_password'))
 
 SSL client certificate authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -124,11 +124,11 @@ SSL client certificate authentication
 If your server requires a SSL client certificate to authenticate, you can
 pass the ``client_certificate`` parameter:
 
-    >>> site = mwclient.Site('awesome.site', client_certificate='/path/to/client-and-key.pem')
+    >>> site = Site('awesome.site', client_certificate='/path/to/client-and-key.pem')
     
 This parameter being a proxy to :class:`requests`' cert_ parameter, you can also specify a tuple (certificate, key) like:
 
-    >>> site = mwclient.Site('awesome.site', client_certificate=('client.pem', 'key.pem'))
+    >>> site = Site('awesome.site', client_certificate=('client.pem', 'key.pem'))
     
 Please note that the private key must not be encrypted.
 
