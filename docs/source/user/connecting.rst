@@ -84,10 +84,10 @@ called *consumer key*), the *consumer secret*, the *access token* and the
 *access secret*, you can authenticate like so:
 
     >>> site = Site('test.wikipedia.org',
-                             consumer_token='my_consumer_token',
-                             consumer_secret='my_consumer_secret',
-                             access_token='my_access_token',
-                             access_secret='my_access_secret')
+                    consumer_token='my_consumer_token',
+                    consumer_secret='my_consumer_secret',
+                    access_token='my_access_token',
+                    access_secret='my_access_secret')
 
 
 .. _owner-only consumer: https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
