@@ -161,7 +161,7 @@ class Page(object):
         try:
             rev = next(revs)
             if 'slots' in rev:
-                text = rev['slots'][slot]
+                text = rev['slots'][slot]['*']
             else:
                 text = rev['*']
             self.last_rev_time = rev['timestamp']
