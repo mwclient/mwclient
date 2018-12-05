@@ -44,6 +44,17 @@ See the :class:`API reference <mwclient.image.Image>` for more options.
     To check if a file exists locally *or* in a shared repo, you could test if
     ``image.imageinfo != {}``.
 
+Downloading a file
+------------------
+
+The :meth:`Image.download() <mwclient.image.Image.download>` method can be used to download
+the full size file. Pass it a file object and it will stream the image to it,
+avoiding the need for keeping the whole file in memory:
+
+    >>> file = site.images['Example.jpg']
+    >>> with open('Example.jpg', 'wb') as fd:
+    ...     image.download(fd)
+
 Uploading a file
 ----------------
 

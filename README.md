@@ -26,7 +26,7 @@
 mwclient is a lightweight Python client library to the
 [MediaWiki API](https://mediawiki.org/wiki/API)
 which provides access to most API functionality.
-It works with Python 2.7, 3.3 and above,
+It works with Python 2.7 as well as 3.4 and above,
 and supports MediaWiki 1.16 and above.
 For functions not available in the current MediaWiki,
 a `MediaWikiVersionError` is raised.
@@ -50,15 +50,15 @@ Please see the [changelog
 document](https://github.com/mwclient/mwclient/blob/master/CHANGELOG.md)
 for a list of changes.
 
-## Getting started
+## Documentation
 
-See the
-[user guide](http://mwclient.readthedocs.io/en/latest/user/index.html)
-to get started using mwclient.
+Up-to-date documentation is hosted [at Read the Docs](http://mwclient.readthedocs.io/en/latest/).
+It includes a user guide to get started using mwclient, a reference guide,
+implementation and development notes.
 
-For more information, see the
-[REFERENCE.md](https://github.com/mwclient/mwclient/blob/master/REFERENCE.md) file
-and the [documentation on the wiki](https://github.com/mwclient/mwclient/wiki).
+There is also some documentation on the [GitHub wiki](https://github.com/mwclient/mwclient/wiki)
+that hasn't been ported yet.
+If you want to help, you're welcome!
 
 ## Contributing
 
@@ -106,24 +106,3 @@ $ make html
 When writing docstrings, try to adhere to the
 [Google style](https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html).
 
-# Implementation notes
-
-Most properties and generators accept the same parameters as the API,
-without their two-letter prefix. Exceptions to this rule:
-
-- `Image.imageinfo` is the imageinfo of the latest image.
-   Earlier versions can be fetched using `imagehistory()`
-- `Site.all*`: parameter `[ap]from` renamed to `start`
-- `categorymembers` is implemented as `Category.members`
-- `deletedrevs` is `deletedrevisions`
-- `usercontribs` is `usercontributions`
-- First parameters of `search` and `usercontributions`
-  are `search` and `user` respectively
-
-Properties and generators are implemented as Python generators.
-Their limit parameter is only an indication
-of the number of items in one chunk.
-It is not the total limit.
-Doing `list(generator(limit = limit))` will return ALL items of generator,
-and not be limited by the limit value.
-Default chunk size is generally the maximum chunk size.
