@@ -1,5 +1,5 @@
 This file is intended to be a reference to mwclient.
-The current version is mwclient 0.6.5.
+The current version is mwclient 0.9.3.
 
 The mwclient framework provides access to the MediaWiki API.
 It provides the functions of the MediaWiki API in a Pythonic manner.
