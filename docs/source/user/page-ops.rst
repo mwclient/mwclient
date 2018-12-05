@@ -14,7 +14,7 @@ For information about authenticating, please see
 Editing or creating a page
 --------------------------
 
-To get the wikitext for a specific page:
+To get the content of a specific page:
 
     >>> page = site.pages['Greater guinea pig']
     >>> text = page.text()
@@ -61,6 +61,21 @@ is handled under the hood so you don't have to worry about it.
     ...     dt = datetime.fromtimestamp(mktime(revision['timestamp']))
     ...     print '{}'.format(dt.strftime('%F %T'))
 
+Categories
+----------
+
+Categories can be retrieved in the same way as pages, but you can also use
+:meth:`Site.categories() <mwclient.client.Site.categories>` and skip the namespace prefix.
+The returned :class:`Category <mwclient.listing.Category>` object
+supports the same methods as the :class:`Page <mwclient.page.Page>`
+object, but also provides an extra function, :meth:`members() <mwclient.listing.Category.members>`,
+to list all members of a category.
+
+The Category object can also be used itself as an iterator to yield all its members:
+
+    >>> category = site.categories['Python']
+    >>> for page in category:
+    >>>     print(page.name)
 
 Other page operations
 ---------------------
