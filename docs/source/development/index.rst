@@ -4,9 +4,8 @@ Development
 ===========
 
 Mwclient development is coordinated at https://github.com/mwclient/mwclient.
-Patches are very welcome. There's currently no chat room or mailing list
-for the project, but don't hesitate to use the issue tracker at GitHub for
-general discussions.
+Patches are very welcome. If there's something you want to discuss first,
+we have a `Gitter chatroom <https://gitter.im/mwclient/mwclient>`_.
 
 Development environment
 -----------------------
@@ -28,26 +27,56 @@ and automated) testing:
 
     $ pip install -e .
 
-Running tests
--------------
+Test suite
+----------
 
-To run the automated tests, install the test dependencies and run `pytest <http://pytest.org/>`_:
+mwclient ships with a test suite based on `pytest <https://pytest.org>`_.
+While it's far from complete, it can somtimes alert you if you break things.
+
+The easiest way to run the tests is:
+
+.. code:: bash
+
+    $ python setup.py test
+
+This will make an in-place build and download test dependencies locally if needed.
+Tests will run faster, however, if do an
+`editable install <https://pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs>`_
+and run pytest directly:
 
 .. code:: bash
 
     $ pip install pytest pytest-pep8 responses
+    $ pip install -e .
     $ py.test
 
-To run tests with different Python versions in isolated virtualenvs, you can use `Tox <https://tox.testrun.org/>`_:
+If you want to test with different Python versions in isolated virtualenvs,
+you can use `Tox <https://tox.testrun.org/>`_. A `tox.ini` file is included.
 
 .. code:: bash
 
     $ pip install tox
     $ tox
 
+If you would like to expand the test suite by adding more tests, please go ahead!
 
-Note that the test suite is quite limited yet.
-If you'd like to expand it by adding more tests, please go ahead!
+Updating/expanding the documenation
+-----------------------------------
+
+Documentation consists of both a manually compiled user guide
+(under ``docs/user``) and a reference guide generated from the docstrings,
+using Sphinx autodoc with the napoleon extension.
+Documentation is built automatically on `ReadTheDocs <https://mwclient.readthedocs.io/>`_
+after each commit.
+To build the documentation locally for testing:
+
+.. code:: bash
+
+    $ cd docs
+    $ make html
+
+When writing docstrings, try to adhere to the
+`Google style <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`_.
 
 Making a pull request
 ---------------------
