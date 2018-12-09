@@ -98,14 +98,16 @@ class NoWriteApi(MwClientError):
 class InvalidResponse(MwClientError):
 
     def __init__(self, response_text=None):
-        self.message = 'Did not get a valid JSON response from the server. Check that ' + \
-                       'you used the correct hostname. If you did, the server might ' + \
-                       'be wrongly configured or experiencing temporary problems.'
+        super(InvalidResponse, self).__init__(
+            'Did not get a valid JSON response from the server. Check that ' +
+            'you used the correct hostname. If you did, the server might ' +
+            'be wrongly configured or experiencing temporary problems.',
+            response_text
+        )
         self.response_text = response_text
-        super(InvalidResponse, self).__init__(self.message, response_text)
 
     def __str__(self):
-        return self.message
+        return self.args[0]
 
 
 class InvalidPageTitle(MwClientError):
