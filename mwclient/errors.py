@@ -65,18 +65,17 @@ class OAuthAuthorizationError(LoginError):
         return self.info
 
 
-class AssertUserFailedError(LoginError):
+class AssertUserFailedError(MwClientError):
 
     def __init__(self):
-        self.message = 'By default, mwclient protects you from ' + \
-                       'accidentally editing without being logged in. If you ' + \
-                       'actually want to edit without logging in, you can set ' + \
-                       'force_login on the Site object to False.'
-
-        LoginError.__init__(self)
+        super(AssertUserFailedError, self).__init__(
+            'By default, mwclient protects you from accidentally editing ' +
+            'without being logged in. If you actually want to edit without ' +
+            'logging in, you can set force_login on the Site object to False.'
+        )
 
     def __str__(self):
-        return self.message
+        return self.args[0]
 
 
 class EmailError(MwClientError):
