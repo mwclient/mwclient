@@ -101,6 +101,7 @@ To use old-school login, call the login method:
     >>> site.login('my_username', 'my_password')
 
 If login fails, a :class:`mwclient.errors.LoginError` will be thrown.
+See :meth:`mwclient.client.Site.login` for all options.
 
 .. _http-auth:
 
@@ -125,11 +126,16 @@ If your server requires a SSL client certificate to authenticate, you can
 pass the ``client_certificate`` parameter:
 
     >>> site = Site('awesome.site', client_certificate='/path/to/client-and-key.pem')
-    
+
 This parameter being a proxy to :class:`requests`' cert_ parameter, you can also specify a tuple (certificate, key) like:
 
     >>> site = Site('awesome.site', client_certificate=('client.pem', 'key.pem'))
-    
+
 Please note that the private key must not be encrypted.
 
   .. _cert: http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
+
+Logging out
+^^^^^^^^^^^
+
+There is no logout method because merely exiting the script deletes all cookies, achieving the same effect.

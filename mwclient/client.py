@@ -496,7 +496,29 @@ class Site(object):
         return info
 
     def login(self, username=None, password=None, cookies=None, domain=None):
-        """Login to the wiki."""
+        """
+        Login to the wiki using a username and password. The method returns
+        nothing if the login was successful, but raises and error if it was not.
+
+        Args:
+            username (str): MediaWiki username
+            password (str): MediaWiki password
+            cookies (dict): Custom cookies to include with the log-in request.
+            domain (str): Sends domain name for authentication; used by some
+                MediaWiki plug-ins like the 'LDAP Authentication' extension.
+
+        Raises:
+            LoginError (mwclient.errors.LoginError): Login failed, the reason can be
+                obtained from e.code and e.info (where e is the exception object) and
+                will be one of the API:Login errors. The most common error code is
+                "Failed", indicating a wrong username or password.
+
+            MaximumRetriesExceeded: API call to log in failed and was retried until all
+                retries were exhausted. This will not occur if the credentials are merely
+                incorrect. See MaximumRetriesExceeded for possible reasons.
+
+            APIError: An API error occurred. Rare, usually indicates an internal server error.
+        """
 
         if username and password:
             self.credentials = (username, password, domain)
