@@ -19,7 +19,7 @@
 [code-health-img]: https://landscape.io/github/mwclient/mwclient/master/landscape.svg?style=flat
 [latest-version-img]: https://img.shields.io/pypi/v/mwclient.svg
 [mit-license-img]: https://img.shields.io/github/license/mwclient/mwclient.svg
-[documentation-status-img]: https://readthedocs.org/projects/mwclient/badge/?version=master
+[documentation-status-img]: https://readthedocs.org/projects/mwclient/badge/
 [issue-statistics-img]: http://isitmaintained.com/badge/resolution/tldr-pages/tldr.svg
 [gitter-chat-img]: https://img.shields.io/gitter/room/mwclient/mwclient.svg
 
