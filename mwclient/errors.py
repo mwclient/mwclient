@@ -52,17 +52,22 @@ class FileExists(EditError):
 
 
 class LoginError(MwClientError):
-    pass
 
-
-class OAuthAuthorizationError(LoginError):
-
-    def __init__(self, code, info):
+    def __init__(self, site, code, info):
+        super(LoginError, self).__init__(
+            site,
+            {'result': code, 'reason': info}  # For backwards-compability
+        )
+        self.site = site
         self.code = code
         self.info = info
 
     def __str__(self):
         return self.info
+
+
+class OAuthAuthorizationError(LoginError):
+    pass
 
 
 class AssertUserFailedError(MwClientError):

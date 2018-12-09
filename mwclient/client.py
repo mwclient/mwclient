@@ -129,7 +129,7 @@ class Site(object):
                 self.site_init()
             except errors.APIError as e:
                 if e.args[0] == 'mwoauth-invalid-authorization':
-                    raise errors.OAuthAuthorizationError(e.code, e.info)
+                    raise errors.OAuthAuthorizationError(self, e.code, e.info)
 
                 # Private wiki, do init after login
                 if e.args[0] not in {u'unknown_action', u'readapidenied'}:
@@ -530,7 +530,8 @@ class Site(object):
                 elif login['login']['result'] == 'Throttled':
                     sleeper.sleep(int(login['login'].get('wait', 5)))
                 else:
-                    raise errors.LoginError(self, login['login'])
+                    raise errors.LoginError(self, login['login']['result'],
+                                            login['login']['reason'])
 
         self.site_init()
 
