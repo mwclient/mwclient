@@ -31,7 +31,7 @@ Test suite
 ----------
 
 mwclient ships with a test suite based on `pytest <https://pytest.org>`_.
-While it's far from complete, it can somtimes alert you if you break things.
+While it's far from complete, it can sometimes alert you if you break things.
 
 The easiest way to run the tests is:
 
@@ -40,7 +40,7 @@ The easiest way to run the tests is:
     $ python setup.py test
 
 This will make an in-place build and download test dependencies locally if needed.
-Tests will run faster, however, if do an
+Tests will run faster, however, if you do an
 `editable install <https://pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs>`_
 and run pytest directly:
 
