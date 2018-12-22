@@ -28,6 +28,8 @@ __ver__ = '0.9.3'
 
 log = logging.getLogger(__name__)
 
+USER_AGENT = 'mwclient/{} ({})'.format(__ver__, 'https://github.com/mwclient/mwclient')
+
 
 class Site(object):
     """A MediaWiki site identified by its hostname.
@@ -95,14 +97,13 @@ class Site(object):
             if client_certificate:
                 self.connection.cert = client_certificate
 
-            prefix = '{} - '.format(clients_useragent) if clients_useragent else ''
-            self.connection.headers['User-Agent'] = (
-                '{prefix}MwClient/{ver} ({url})'.format(
-                    prefix=prefix,
-                    ver=__ver__,
-                    url='https://github.com/mwclient/mwclient'
-                )
-            )
+            # Set User-Agent header field
+            if clients_useragent:
+                ua = clients_useragent + ' ' + USER_AGENT
+            else:
+                ua = USER_AGENT
+            self.connection.headers['User-Agent'] = ua
+
             if custom_headers:
                 self.connection.headers.update(custom_headers)
         else:

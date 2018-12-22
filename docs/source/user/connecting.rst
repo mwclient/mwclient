@@ -37,12 +37,19 @@ Specifying a user agent
 -----------------------
 
 If you are connecting to a Wikimedia site, you should follow the
-`Wikimedia User-Agent policy`_ and identify your tool like so:
+`Wikimedia User-Agent policy`_.
+The user agent should contain the tool name, the tool version
+and a way to contact you:
 
-    >>> ua = 'MyCoolTool/0.2 run by User:Xyz'
+    >>> ua = 'MyCoolTool/0.2 (xyz@example.org)'
     >>> site = Site('test.wikipedia.org', clients_useragent=ua)
 
-Note that Mwclient appends ' - MwClient/{version} ({url})' to your string.
+It should follow the pattern
+``{tool_name}/{tool_version} ({contact})``. The contact info can also
+be your user name and the tool version may be omitted:
+``RudolphBot (User:Santa Claus)``.
+
+Note that MwClient appends its own user agent to the end of your string.
 
 .. _Wikimedia User-Agent policy: https://meta.wikimedia.org/wiki/User-Agent_policy
 
