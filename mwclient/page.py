@@ -123,13 +123,6 @@ class Page(object):
     def get_token(self, type, force=False):
         return self.site.get_token(type, force, title=self.name)
 
-    def edit(self, *args, **kwargs):
-        """Deprecated. Use page.text() instead"""
-        warnings.warn("page.edit() was deprecated in mwclient 0.7.0 "
-                      "and will be removed in 0.9.0, please use page.text() instead.",
-                      category=DeprecationWarning, stacklevel=2)
-        return self.text(*args, **kwargs)
-
     def text(self, section=None, expandtemplates=False, cache=True, slot='main'):
         """Get the current wikitext of the page, or of a specific section.
 
