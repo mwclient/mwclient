@@ -55,7 +55,7 @@ class Site(object):
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
                  max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
                  reqs=None, consumer_token=None, consumer_secret=None, access_token=None,
-                 access_secret=None, client_certificate=None, custom_headers=None):
+                 access_secret=None, client_certificate=None, custom_headers=None, scheme='https'):
         # Setup member variables
         self.host = host
         self.path = path
@@ -65,6 +65,7 @@ class Site(object):
         self.max_lag = text_type(max_lag)
         self.force_login = force_login
         self.requests = reqs or {}
+        self.scheme = scheme
         if 'timeout' not in self.requests:
             self.requests['timeout'] = 30  # seconds
 
@@ -367,7 +368,7 @@ class Site(object):
             headers['Accept-Encoding'] = 'gzip'
         sleeper = self.sleepers.make((script, data))
 
-        scheme = 'https'
+        scheme = self.scheme
         host = self.host
         if isinstance(host, (list, tuple)):
             scheme, host = host
