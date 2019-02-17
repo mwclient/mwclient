@@ -156,8 +156,7 @@ class Page(object):
         if cache and key in self._textcache:
             return self._textcache[key]
 
-        revs = self.revisions(prop='content|timestamp', limit=1, section=section,
-                              expandtemplates=expandtemplates, slots=slot)
+        revs = self.revisions(prop='content|timestamp', limit=1, section=section, slots=slot)
         try:
             rev = next(revs)
             if 'slots' in rev:
@@ -170,6 +169,10 @@ class Page(object):
             self.last_rev_time = None
         if not expandtemplates:
             self.edit_time = time.gmtime()
+        else:
+            # The 'rvexpandtemplates' option was removed in MediaWiki 1.32, so we have to make
+            # an extra API call. See: https://github.com/mwclient/mwclient/issues/214
+            text = self.site.expandtemplates(text)
 
         if cache:
             self._textcache[key] = text

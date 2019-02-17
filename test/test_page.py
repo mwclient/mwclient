@@ -289,7 +289,8 @@ class TestPageApiArgs(unittest.TestCase):
         text = self.page.text(expandtemplates=True)
         args = self.get_last_api_call_args(http_method='GET')
 
-        assert args['rvexpandtemplates'] == '1'
+        assert self.site.expandtemplates.call_count == 1
+        assert args.get('rvexpandtemplates') is None
 
     def test_assertuser_true(self):
         # Check that assert=user is sent when force_login=True
