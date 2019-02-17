@@ -953,8 +953,7 @@ class Site(object):
                                                    toponly='1' if toponly else None))
         return listing.List(self, 'recentchanges', 'rc', limit=limit, **kwargs)
 
-    def revisions(self, revids, prop='ids|timestamp|flags|comment|user',
-                  expandtemplates=False, diffto='prev'):
+    def revisions(self, revids, prop='ids|timestamp|flags|comment|user'):
         """Get data about a list of revisions.
 
         See also the `Page.revisions()` method.
@@ -969,10 +968,6 @@ class Site(object):
         Args:
             revids (list): A list of (max 50) revisions.
             prop (str): Which properties to get for each revision.
-            expandtemplates (bool): Expand templates in `rvprop=content` output.
-            diffto (str): Revision ID to diff each revision to. Use "prev",
-                          "next" and "cur" for the previous, next and current
-                          revision respectively.
 
         Returns:
             A list of revisions
@@ -982,10 +977,6 @@ class Site(object):
             'rvprop': prop,
             'revids': '|'.join(map(text_type, revids))
         }
-        if expandtemplates:
-            kwargs['rvexpandtemplates'] = '1'
-        if diffto:
-            kwargs['rvdiffto'] = diffto
 
         revisions = []
         pages = self.get('query', **kwargs).get('query', {}).get('pages', {}).values()
