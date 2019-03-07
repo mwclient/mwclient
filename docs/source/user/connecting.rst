@@ -116,8 +116,8 @@ authenticate using the ``httpauth`` parameter. For Basic HTTP authentication:
 You can also pass in any other :ref:`authentication mechanism <requests:authentication>`
 based on the :class:`requests.auth.AuthBase`, such as Digest authentication:
 
-	>>> from requests.auth import HTTPDigestAuth
-	>>> site = Site('awesome.site', httpauth=HTTPDigestAuth('my_username', 'my_password'))
+    >>> from requests.auth import HTTPDigestAuth
+    >>> site = Site('awesome.site', httpauth=HTTPDigestAuth('my_username', 'my_password'))
 
 SSL client certificate authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
