@@ -13,11 +13,14 @@ if __name__ == "__main__":
 
 class TestUtil(unittest.TestCase):
 
+    def test_parse_missing_timestamp(self):
+        assert time.struct_time((0, 0, 0, 0, 0, 0, 0, 0, 0)) == parse_timestamp(None)
+
     def test_parse_empty_timestamp(self):
-        assert (0, 0, 0, 0, 0, 0, 0, 0, 0) == parse_timestamp('0000-00-00T00:00:00Z')
+        assert time.struct_time((0, 0, 0, 0, 0, 0, 0, 0, 0)) == parse_timestamp('0000-00-00T00:00:00Z')
 
     def test_parse_nonempty_timestamp(self):
-        assert time.struct_time([2015, 1, 2, 20, 18, 36, 4, 2, -1]) == parse_timestamp('2015-01-02T20:18:36Z')
+        assert time.struct_time((2015, 1, 2, 20, 18, 36, 4, 2, -1)) == parse_timestamp('2015-01-02T20:18:36Z')
 
 if __name__ == '__main__':
     unittest.main()
