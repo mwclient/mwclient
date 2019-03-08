@@ -95,7 +95,7 @@ class TestClient(TestCase):
         # The version specified in setup.py should equal the one specified in client.py
         version = pkg_resources.require("mwclient")[0].version
 
-        assert version == mwclient.__ver__
+        assert version == mwclient.__version__
 
     @responses.activate
     def test_https_as_default(self):

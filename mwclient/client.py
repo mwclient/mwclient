@@ -24,7 +24,7 @@ try:
 except ImportError:
     gzip = None
 
-__ver__ = '0.9.3'
+__version__ = '0.9.3'
 
 log = logging.getLogger(__name__)
 
@@ -99,7 +99,7 @@ class Site(object):
             self.connection.headers['User-Agent'] = (
                 '{prefix}MwClient/{ver} ({url})'.format(
                     prefix=prefix,
-                    ver=__ver__,
+                    ver=__version__,
                     url='https://github.com/mwclient/mwclient'
                 )
             )

@@ -24,7 +24,7 @@
 """
 
 from mwclient.errors import *  # pylint: disable=unused-import
-from mwclient.client import Site, __ver__  # pylint: disable=unused-import
+from mwclient.client import Site, __version__  # pylint: disable=unused-import
 import logging
 import warnings
 
