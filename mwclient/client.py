@@ -24,11 +24,11 @@ try:
 except ImportError:
     gzip = None
 
-__ver__ = '0.9.3'
+__version__ = '0.9.3'
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = 'mwclient/{} ({})'.format(__ver__, 'https://github.com/mwclient/mwclient')
+USER_AGENT = 'mwclient/{} ({})'.format(__version__, 'https://github.com/mwclient/mwclient')
 
 
 class Site(object):

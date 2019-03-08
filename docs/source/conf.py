@@ -22,7 +22,7 @@ import os
 sys.path.insert(0, os.path.abspath('../..'))
 import sphinx_rtd_theme
 import mwclient
-from mwclient import __ver__
+from mwclient import __version__
 
 # -- General configuration ------------------------------------------------
 
@@ -62,7 +62,7 @@ copyright = u'{0}, Bryan Tong Minh'.format(datetime.datetime.now().year)
 # built documents.
 #
 # The short X.Y version.
-version = __ver__
+version = __version__
 # The full version, including alpha/beta/rc tags.
 release = version
 
