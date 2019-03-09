@@ -277,12 +277,27 @@ class Page(object):
                                 token=self.get_token('move'), reason=reason, **data)
         return result['move']
 
-    def delete(self, reason='', watch=False, unwatch=False, oldimage=False):
-        """Delete page.
+    def delete(self, reason='', watch=False, unwatch=False, oldimage=False,
+               watchlist=None):
+        """Deletes the page.
 
-        If user does not have permission to delete page, an InsufficientPermission
-        exception is raised.
+        API doc: https://www.mediawiki.org/wiki/API:Delete
 
+        Args:
+            reason (str): The reason for the deletion.
+            watch (bool): Adds the page to the users watchlist.
+            unwatch (bool): Removes the page from the users watchlist.
+            oldimage (str): The name of the old image to delete.
+            watchlist (str): Add or remove the page from the users watchlist. Should be
+                one of the following: `watch`, `unwatch`, `preferences`, `nochange`.
+
+        Returns:
+            dict: The API response.
+
+        Raises:
+            :exc:`~mwclient.errors.InsufficientPermission`: If the user does not have
+                permission to delete the page.
+            :exc:`~mwclient.errors.NoWriteApi`: If the wikis write API is disabled.
         """
         if not self.can('delete'):
             raise mwclient.errors.InsufficientPermission(self)
@@ -291,14 +306,20 @@ class Page(object):
             raise mwclient.errors.NoWriteApi(self)
 
         data = {}
-        if watch:
-            data['watch'] = '1'
-        if unwatch:
-            data['unwatch'] = '1'
+        if watchlist:
+            data['watchlist'] = watchlist
+        else:
+            if watch:
+                warnings.warn("The 'watch' parameter has been deprecated. Use "
+                              "'watchlist=\"watch\"' instead.", DeprecationWarning)
+                data['watchlist'] = 'watch'
+            if unwatch:
+                warnings.warn("The 'unwatch' parameter has been deprecated. Use "
+                              "'watchlist=\"unwatch\"' instead.", DeprecationWarning)
+                data['watchlist'] = 'unwatch'
         if oldimage:
             data['oldimage'] = oldimage
-        result = self.site.post('delete', title=self.name,
-                                token=self.get_token('delete'),
+        result = self.site.post('delete', title=self.name, token=self.get_token('delete'),
                                 reason=reason, **data)
         return result['delete']
 
