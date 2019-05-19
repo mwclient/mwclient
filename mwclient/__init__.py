@@ -23,8 +23,9 @@
  OTHER DEALINGS IN THE SOFTWARE.
 """
 
-from mwclient.errors import *  # pylint: disable=unused-import
-from mwclient.client import Site, __ver__  # pylint: disable=unused-import
+from mwclient.errors import *   # pylint: disable=unused-import
+from mwclient.client import Site, WikiBaseSite, __ver__  # pylint: disable=unused-import
+from mwclient import entity
 import logging
 import warnings
 

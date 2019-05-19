@@ -5,6 +5,7 @@ import warnings
 from mwclient.util import parse_timestamp
 import mwclient.listing
 import mwclient.errors
+from mwclient.entity import Item
 
 
 class Page(object):
@@ -63,6 +64,9 @@ class Page(object):
 
         self.last_rev_time = None
         self.edit_time = None
+
+        # caching wikibase_item
+        self._wikibase_item = None
 
     def redirects_to(self):
         """ Returns the redirect target page, or None if the page is not a redirect page."""
@@ -505,3 +509,26 @@ class Page(object):
         else:
             return mwclient.listing.PageProperty(self, 'templates', prefix,
                                                  return_values='title', **kwargs)
+
+    @property
+    def wikibase_item(self):
+        """Item linked to a Page.
+
+        if a wikibase item is linked to a page it returns this item,
+        None otherwise."""
+        if self._wikibase_item is None:
+            info = self.site.api('query',
+                                 prop='pageprops',
+                                 titles=self.name,
+                                 ppprop='wikibase_item')['query']['pages']
+            wb_entity = None
+            for pageid in info:
+                if 'pageprops' in info[pageid]:
+                    # pageprops key is not in info if page don't have
+                    # a wikibase_item property
+                    wb_entity = info[pageid]['pageprops']['wikibase_item']
+            if wb_entity is not None:
+                self._wikibase_item = Item(
+                    self.site.wikibase_repository,
+                    wb_entity)
+        return self._wikibase_item
