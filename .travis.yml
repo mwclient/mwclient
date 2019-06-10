@@ -17,9 +17,11 @@ matrix:
 install:
   - python setup.py install
   - pip install coveralls
+  - pip install flake8
 
 script:
   - python setup.py test
+  - flake8 mwclient
 
 after_success:
   - coveralls
