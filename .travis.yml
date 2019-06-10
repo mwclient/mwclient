@@ -1,23 +1,16 @@
 # http://about.travis-ci.org/docs/user/languages/python/
-
-sudo: false
+dist: xenial
 language: python
-
-matrix:
-  include:
-    - python: 2.7
-    - python: 3.4
-    - python: 3.5
-    - python: 3.6
-    - python: 3.7
-      dist: xenial
-      sudo: true
-      # Per https://github.com/travis-ci/travis-ci/issues/9815#issuecomment-426312699
+python:
+  - 2.7
+  - 3.4
+  - 3.5
+  - 3.6
+  - 3.7
 
 install:
   - python setup.py install
-  - pip install coveralls
-  - pip install flake8
+  - pip install coveralls flake8
 
 script:
   - python setup.py test
