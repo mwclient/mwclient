@@ -73,11 +73,11 @@ class OAuthAuthorizationError(LoginError):
 class AssertUserFailedError(MwClientError):
 
     def __init__(self):
-        super(AssertUserFailedError, self).__init__(
-            'By default, mwclient protects you from accidentally editing ' +
-            'without being logged in. If you actually want to edit without ' +
+        super(AssertUserFailedError, self).__init__((
+            'By default, mwclient protects you from accidentally editing '
+            'without being logged in. If you actually want to edit without '
             'logging in, you can set force_login on the Site object to False.'
-        )
+        ))
 
     def __str__(self):
         return self.args[0]
@@ -98,10 +98,10 @@ class NoWriteApi(MwClientError):
 class InvalidResponse(MwClientError):
 
     def __init__(self, response_text=None):
-        super(InvalidResponse, self).__init__(
-            'Did not get a valid JSON response from the server. Check that ' +
-            'you used the correct hostname. If you did, the server might ' +
-            'be wrongly configured or experiencing temporary problems.',
+        super(InvalidResponse, self).__init__((
+            'Did not get a valid JSON response from the server. Check that '
+            'you used the correct hostname. If you did, the server might '
+            'be wrongly configured or experiencing temporary problems.'),
             response_text
         )
         self.response_text = response_text
