@@ -46,7 +46,7 @@ and run pytest directly:
 
 .. code:: bash
 
-    $ pip install pytest pytest-pep8 responses
+    $ pip install pytest flake8 responses
     $ pip install -e .
     $ py.test
 
