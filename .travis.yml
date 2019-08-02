@@ -1,18 +1,24 @@
-# http://about.travis-ci.org/docs/user/languages/python/
 language: python
 python:
-  - 2.7
-  - 3.5
-  - 3.6
-  - 3.7
-
+- 2.7
+- 3.5
+- 3.6
+- 3.7
 install:
-  - python setup.py install
-  - pip install coveralls flake8
-
+- python setup.py install
+- pip install coveralls flake8
 script:
-  - python setup.py test
-  - flake8 mwclient
-
+- python setup.py test
+- flake8 mwclient
 after_success:
-  - coveralls
+- coveralls
+deploy:
+  provider: pypi
+  user: danmichaelo
+  password:
+    secure: iRaoF9UNIIzwNR2SP60zL7Ub33lgCTYddk4JkpfNNjz/olZaUEGTbrpttq1wQ9thzwYBgp6PbwspgEdIQWOgDLlT75XowkeLpp7UzRNwKjf7gUVaMJuAYtmhbofaWZFGft3zSbsDEt19z8mqepQXSUUN7dcfH4QVUvishElQT5k=
+  distributions: "sdist bdist_wheel"
+  on:
+    tags: true
+    repo: mwclient/mwclient
+    python: '3.7'
