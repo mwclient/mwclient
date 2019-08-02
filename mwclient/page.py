@@ -226,6 +226,11 @@ class Page(object):
         if 'newtimestamp' in result['edit'].keys():
             self.last_rev_time = parse_timestamp(result['edit'].get('newtimestamp'))
 
+        # Workaround for https://phabricator.wikimedia.org/T211233
+        for cookie in self.site.connection.cookies:
+            if 'PostEditRevision' in cookie.name:
+                self.site.connection.cookies.clear(cookie.domain, cookie.path, cookie.name)
+
         # clear the page text cache
         self._textcache = {}
         return result['edit']
