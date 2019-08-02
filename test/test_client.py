@@ -141,7 +141,7 @@ class TestClient(TestCase):
 
         self.httpShouldReturn(self.metaResponseAsJson(), scheme='http')
 
-        site = mwclient.Site(('http', 'test.wikipedia.org'))
+        site = mwclient.Site('test.wikipedia.org', scheme='http')
 
         assert len(responses.calls) == 1
 
