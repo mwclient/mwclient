@@ -1,7 +1,6 @@
 import six
 from six import text_type
 import time
-import warnings
 from mwclient.util import parse_timestamp
 import mwclient.listing
 import mwclient.errors
