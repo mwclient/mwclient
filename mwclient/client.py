@@ -371,6 +371,11 @@ class Site(object):
         scheme = self.scheme
         host = self.host
         if isinstance(host, (list, tuple)):
+            warnings.warn(
+                'Specifying host as a tuple is deprecated as of mwclient 0.10.0. '
+                + 'Please use the new scheme argument instead.',
+                DeprecationWarning
+            )
             scheme, host = host
 
         url = '{scheme}://{host}{path}{script}{ext}'.format(scheme=scheme, host=host,
