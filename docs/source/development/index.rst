@@ -46,7 +46,7 @@ and run pytest directly:
 
 .. code:: bash
 
-    $ pip install pytest pytest-cov flake8 responses
+    $ pip install pytest pytest-cov flake8 responses mock
     $ pip install -e .
     $ py.test
 
