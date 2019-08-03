@@ -64,10 +64,10 @@ class Page(object):
         self.edit_time = None
 
     def redirects_to(self):
-        """ Returns the redirect target page, or None if the page is not a redirect page."""
-        info = self.site.get('query', prop='pageprops', titles=self.name, redirects='')['query']
-        if 'redirects' in info:
-            for page in info['redirects']:
+        """ Get the redirect target page, or None if the page is not a redirect."""
+        info = self.site.get('query', prop='pageprops', titles=self.name, redirects='')
+        if 'redirects' in info['query']:
+            for page in info['query']['redirects']:
                 if page['from'] == self.name:
                     return Page(self.site, page['to'])
             return None
@@ -75,7 +75,7 @@ class Page(object):
             return None
 
     def resolve_redirect(self):
-        """ Returns the redirect target page, or the current page if it's not a redirect page."""
+        """ Get the redirect target page, or the current page if its not a redirect."""
         target_page = self.redirects_to()
         if target_page is None:
             return self
@@ -132,9 +132,9 @@ class Page(object):
         lives as long as the instance does.
 
         Args:
-            section (int): numbered section or `None` to get the whole page (default: `None`)
-            expandtemplates (bool): set to `True` to expand templates (default: `False`)
-            cache (bool): set to `False` to disable caching (default: `True`)
+            section (int): Section number, to only get text from a single section.
+            expandtemplates (bool): Expand templates (default: `False`)
+            cache (bool): Use in-memory caching (default: `True`)
         """
 
         if not self.can('read'):
@@ -148,7 +148,8 @@ class Page(object):
         if cache and key in self._textcache:
             return self._textcache[key]
 
-        revs = self.revisions(prop='content|timestamp', limit=1, section=section, slots=slot)
+        revs = self.revisions(prop='content|timestamp', limit=1, section=section,
+                              slots=slot)
         try:
             rev = next(revs)
             if 'slots' in rev:
@@ -162,8 +163,8 @@ class Page(object):
         if not expandtemplates:
             self.edit_time = time.gmtime()
         else:
-            # The 'rvexpandtemplates' option was removed in MediaWiki 1.32, so we have to make
-            # an extra API call. See: https://github.com/mwclient/mwclient/issues/214
+            # The 'rvexpandtemplates' option was removed in MediaWiki 1.32, so we have to
+            # make an extra API call, see https://github.com/mwclient/mwclient/issues/214
             text = self.site.expandtemplates(text)
 
         if cache:
@@ -229,7 +230,8 @@ class Page(object):
         # Workaround for https://phabricator.wikimedia.org/T211233
         for cookie in self.site.connection.cookies:
             if 'PostEditRevision' in cookie.name:
-                self.site.connection.cookies.clear(cookie.domain, cookie.path, cookie.name)
+                self.site.connection.cookies.clear(cookie.domain, cookie.path,
+                                                   cookie.name)
 
         # clear the page text cache
         self._textcache = {}
@@ -435,8 +437,8 @@ class Page(object):
         if generator:
             return mwclient.listing.PagePropertyGenerator(self, 'links', 'pl', **kwargs)
         else:
-            return mwclient.listing.PageProperty(self, 'links', 'pl', return_values='title',
-                                                 **kwargs)
+            return mwclient.listing.PageProperty(self, 'links', 'pl',
+                                                 return_values='title', **kwargs)
 
     def revisions(self, startid=None, endid=None, start=None, end=None,
                   dir='older', user=None, excludeuser=None, limit=50,
@@ -459,22 +461,21 @@ class Page(object):
             prop (str): Which properties to get for each revision,
                 default: 'ids|timestamp|flags|comment|user'
             expandtemplates (bool): Expand templates in rvprop=content output
-            section (int): If rvprop=content is set, only retrieve the contents of this section.
-            diffto (str): Revision ID to diff each revision to. Use "prev",
-                          "next" and "cur" for the previous, next and current
-                          revision respectively.
-            slots (str): The content slot (Mediawiki >= 1.32) to retrieve
-                content from.
-            uselang (str): Language to use for parsed edit comments and other
-                           localized messages.
+            section (int): Section number. If rvprop=content is set, only the contents
+                of this section will be retrieved.
+            diffto (str): Revision ID to diff each revision to. Use "prev", "next" and
+                "cur" for the previous, next and current revision respectively.
+            slots (str): The content slot (Mediawiki >= 1.32) to retrieve content from.
+            uselang (str): Language to use for parsed edit comments and other localized
+                messages.
 
         Returns:
             mwclient.listings.List: Revision iterator
         """
-        kwargs = dict(mwclient.listing.List.generate_kwargs('rv', startid=startid, endid=endid,
-                                                            start=start, end=end, user=user,
-                                                            excludeuser=excludeuser, diffto=diffto,
-                                                            slots=slots))
+        kwargs = dict(mwclient.listing.List.generate_kwargs(
+            'rv', startid=startid, endid=endid, start=start, end=end, user=user,
+            excludeuser=excludeuser, diffto=diffto, slots=slots
+        ))
 
         if self.site.version[:2] < (1, 32) and 'rvslots' in kwargs:
             # https://github.com/mwclient/mwclient/issues/199

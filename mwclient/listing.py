@@ -208,13 +208,15 @@ class Category(mwclient.page.Page, GeneratorList):
                 dir='asc', start=None, end=None, generator=True):
         prefix = self.get_prefix('cm', generator)
         kwargs = dict(self.generate_kwargs(prefix, prop=prop, namespace=namespace,
-                                           sort=sort, dir=dir, start=start, end=end, title=self.name))
+                                           sort=sort, dir=dir, start=start, end=end,
+                                           title=self.name))
         return self.get_list(generator)(self.site, 'categorymembers', 'cm', **kwargs)
 
 
 class PageList(GeneratorList):
 
-    def __init__(self, site, prefix=None, start=None, namespace=0, redirects='all', end=None):
+    def __init__(self, site, prefix=None, start=None, namespace=0, redirects='all',
+                 end=None):
         self.namespace = namespace
 
         kwargs = {}
@@ -279,10 +281,12 @@ class PageList(GeneratorList):
         for ns in self.site.namespaces:
             if ns == 0:
                 continue
-            if name.startswith(u'%s:' % self.site.namespaces[ns].replace(' ', '_')):
+            namespace = u'%s:' % self.site.namespaces[ns].replace(' ', '_')
+            if name.startswith(namespace):
                 return ns
             elif ns in self.site.default_namespaces:
-                if name.startswith(u'%s:' % self.site.default_namespaces[ns].replace(' ', '_')):
+                namespace = u'%s:' % self.site.default_namespaces[ns].replace(' ', '_')
+                if name.startswith(namespace):
                     return ns
         return 0
 

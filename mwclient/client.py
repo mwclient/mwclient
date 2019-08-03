@@ -28,7 +28,8 @@ __version__ = '0.10.0'
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = 'mwclient/{} ({})'.format(__version__, 'https://github.com/mwclient/mwclient')
+USER_AGENT = 'mwclient/{} ({})'.format(__version__,
+                                       'https://github.com/mwclient/mwclient')
 
 
 class Site(object):
@@ -55,7 +56,8 @@ class Site(object):
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
                  max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
                  reqs=None, consumer_token=None, consumer_secret=None, access_token=None,
-                 access_secret=None, client_certificate=None, custom_headers=None, scheme='https'):
+                 access_secret=None, client_certificate=None, custom_headers=None,
+                 scheme='https'):
         # Setup member variables
         self.host = host
         self.path = path
@@ -319,7 +321,8 @@ class Site(object):
                 info['error'].get('code') == u'mwoauth-invalid-authorization'
                 and 'Nonce already used' in info['error'].get('info')
             ):
-                log.warning('retrying due to nonce error https://phabricator.wikimedia.org/T106066')
+                log.warning('Retrying due to nonce error, see'
+                            'https://phabricator.wikimedia.org/T106066')
                 sleeper.sleep()
                 return False
 
@@ -337,8 +340,12 @@ class Site(object):
     @staticmethod
     def _query_string(*args, **kwargs):
         kwargs.update(args)
-        qs1 = [(k, v) for k, v in six.iteritems(kwargs) if k not in {'wpEditToken', 'token'}]
-        qs2 = [(k, v) for k, v in six.iteritems(kwargs) if k in {'wpEditToken', 'token'}]
+        qs1 = [
+            (k, v) for k, v in six.iteritems(kwargs) if k not in {'wpEditToken', 'token'}
+        ]
+        qs2 = [
+            (k, v) for k, v in six.iteritems(kwargs) if k in {'wpEditToken', 'token'}
+        ]
         return OrderedDict(qs1 + qs2)
 
     def raw_call(self, script, data, files=None, retry_on_error=True, http_method='POST'):
@@ -475,8 +482,8 @@ class Site(object):
 
             >>> try:
             ...     site.email('SomeUser', 'Some message', 'Some subject')
-            ... except mwclient.errors.NoSpecifiedEmailError as e:
-            ...     print 'The user does not accept email, or has not specified an email address.'
+            ... except mwclient.errors.NoSpecifiedEmail:
+            ...     print('User does not accept email, or has no email address.')
 
         Args:
             user (str): User name of the recipient
@@ -488,8 +495,8 @@ class Site(object):
             Dictionary of the JSON response
 
         Raises:
-            NoSpecifiedEmailError (mwclient.errors.NoSpecifiedEmailError): if recipient does not accept email
-            EmailError (mwclient.errors.EmailError): on other errors
+            NoSpecifiedEmail (mwclient.errors.NoSpecifiedEmail): User doesn't accept email
+            EmailError (mwclient.errors.EmailError): Other email errors
         """
 
         token = self.get_token('email')
@@ -526,7 +533,8 @@ class Site(object):
                 retries were exhausted. This will not occur if the credentials are merely
                 incorrect. See MaximumRetriesExceeded for possible reasons.
 
-            APIError: An API error occurred. Rare, usually indicates an internal server error.
+            APIError: An API error occurred. Rare, usually indicates an internal server
+                error.
         """
 
         if username and password:
@@ -648,7 +656,9 @@ class Site(object):
             raise TypeError('filename must be specified')
 
         if len([x for x in [file, filekey, url] if x is not None]) != 1:
-            raise TypeError("exactly one of 'file', 'filekey' and 'url' must be specified")
+            raise TypeError(
+                "exactly one of 'file', 'filekey' and 'url' must be specified"
+            )
 
         image = self.Images[filename]
         if not image.can('upload'):
@@ -871,16 +881,18 @@ class Site(object):
                prop='id|user|by|timestamp|expiry|reason|flags'):
         """Retrieve blocks as a generator.
 
-        Each block is a dictionary containing:
-
-        - user: the username or IP address of the user
-        - id: the ID of the block
-        - timestamp: when the block was added
-        - expiry: when the block runs out (infinity for indefinite blocks)
-        - reason: the reason they are blocked
-        - allowusertalk: key is present (empty string) if the user is allowed to edit their user talk page
-        - by: the administrator who blocked the user
-        - nocreate: key is present (empty string) if the user's ability to create accounts has been disabled.
+        Returns:
+            mwclient.listings.List: Generator yielding dicts, each dict containing:
+                - user: The username or IP address of the user
+                - id: The ID of the block
+                - timestamp: When the block was added
+                - expiry: When the block runs out (infinity for indefinite blocks)
+                - reason: The reason they are blocked
+                - allowusertalk: Key is present (empty string) if the user is allowed to
+                    edit their user talk page
+                - by: the administrator who blocked the user
+                - nocreate: key is present (empty string) if the user's ability to create
+                    accounts has been disabled.
 
         """
 
@@ -898,7 +910,8 @@ class Site(object):
         return listing.List(self, 'deletedrevs', 'dr', limit=limit, **kwargs)
 
     def exturlusage(self, query, prop=None, protocol='http', namespace=None, limit=None):
-        r"""Retrieve the list of pages that link to a particular domain or URL, as a generator.
+        r"""Retrieve the list of pages that link to a particular domain or URL,
+         as a generator.
 
         This API call mirrors the Special:LinkSearch function on-wiki.
 
@@ -909,24 +922,26 @@ class Site(object):
 
         See <https://meta.wikimedia.org/wiki/Help:Linksearch> for details.
 
-        The generator returns dictionaries containing three keys:
-        - url: the URL linked to.
-        - ns: namespace of the wiki page
-        - pageid: the ID of the wiki page
-        - title: the page title.
+        Returns:
+            mwclient.listings.List: Generator yielding dicts, each dict containing:
+                - url: The URL linked to.
+                - ns: Namespace of the wiki page
+                - pageid: The ID of the wiki page
+                - title: The page title.
 
         """
 
         kwargs = dict(listing.List.generate_kwargs('eu', query=query, prop=prop,
-                                                   protocol=protocol, namespace=namespace))
+                                                   protocol=protocol,
+                                                   namespace=namespace))
         return listing.List(self, 'exturlusage', 'eu', limit=limit, **kwargs)
 
     def logevents(self, type=None, prop=None, start=None, end=None,
                   dir='older', user=None, title=None, limit=None, action=None):
         """Retrieve logevents as a generator."""
-        kwargs = dict(listing.List.generate_kwargs('le', prop=prop, type=type, start=start,
-                                                   end=end, dir=dir, user=user,
-                                                   title=title, action=action))
+        kwargs = dict(listing.List.generate_kwargs('le', prop=prop, type=type,
+                                                   start=start, end=end, dir=dir,
+                                                   user=user, title=title, action=action))
         return listing.List(self, 'logevents', 'le', limit=limit, **kwargs)
 
     def checkuserlog(self, user=None, target=None, limit=10, dir='older',
@@ -1031,7 +1046,7 @@ class Site(object):
     def usercontributions(self, user, start=None, end=None, dir='older', namespace=None,
                           prop=None, show=None, limit=None, uselang=None):
         """
-        List the contributions made by a given user to the wiki, à la Special:Contributions.
+        List the contributions made by a given user to the wiki.
 
         API doc: https://www.mediawiki.org/wiki/API:Usercontribs
         """

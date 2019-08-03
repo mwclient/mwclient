@@ -23,8 +23,8 @@
  OTHER DEALINGS IN THE SOFTWARE.
 """
 
-from mwclient.errors import *  # noqa: F401, F403 # pylint: disable=unused-import
-from mwclient.client import Site, __version__  # noqa: F401 # pylint: disable=unused-import
+from mwclient.errors import *  # noqa: F401, F403
+from mwclient.client import Site, __version__  # noqa: F401
 import logging
 import warnings
 

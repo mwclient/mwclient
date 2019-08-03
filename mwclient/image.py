@@ -5,8 +5,14 @@ import mwclient.page
 class Image(mwclient.page.Page):
 
     def __init__(self, site, name, info=None):
-        super(Image, self).__init__(site, name, info,
-                                    extra_properties={'imageinfo': (('iiprop', 'timestamp|user|comment|url|size|sha1|metadata|archivename'), )})
+        super(Image, self).__init__(
+            site, name, info, extra_properties={
+                'imageinfo': (
+                    ('iiprop',
+                     'timestamp|user|comment|url|size|sha1|metadata|archivename'),
+                )
+            }
+        )
         self.imagerepository = self._info.get('imagerepository', '')
         self.imageinfo = self._info.get('imageinfo', ({}, ))[0]
 
@@ -16,8 +22,10 @@ class Image(mwclient.page.Page):
 
         API doc: https://www.mediawiki.org/wiki/API:Imageinfo
         """
-        return mwclient.listing.PageProperty(self, 'imageinfo', 'ii',
-                                             iiprop='timestamp|user|comment|url|size|sha1|metadata|archivename')
+        return mwclient.listing.PageProperty(
+            self, 'imageinfo', 'ii',
+            iiprop='timestamp|user|comment|url|size|sha1|metadata|archivename'
+        )
 
     def imageusage(self, namespace=None, filterredir='all', redirect=False,
                    limit=None, generator=True):
@@ -27,10 +35,14 @@ class Image(mwclient.page.Page):
         API doc: https://www.mediawiki.org/wiki/API:Imageusage
         """
         prefix = mwclient.listing.List.get_prefix('iu', generator)
-        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, title=self.name, namespace=namespace, filterredir=filterredir))
+        kwargs = dict(mwclient.listing.List.generate_kwargs(
+            prefix, title=self.name, namespace=namespace, filterredir=filterredir
+        ))
         if redirect:
             kwargs['%sredirect' % prefix] = '1'
-        return mwclient.listing.List.get_list(generator)(self.site, 'imageusage', 'iu', limit=limit, return_values='title', **kwargs)
+        return mwclient.listing.List.get_list(generator)(
+            self.site, 'imageusage', 'iu', limit=limit, return_values='title', **kwargs
+        )
 
     def duplicatefiles(self, limit=None):
         """
