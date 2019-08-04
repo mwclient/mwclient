@@ -72,6 +72,7 @@ To build the documentation locally for testing:
 
 .. code:: bash
 
+    $ pip install Sphinx sphinx-rtd-theme
     $ cd docs
     $ make html
 
