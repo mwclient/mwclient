@@ -1,12 +1,12 @@
-<div align="center"><img src="docs/source/logo.svg" width="300"/></div>
-
-# mwclient
+<div align="center">
+    <img src="docs/source/logo.png"/>
+    <h1>mwclient</h1>
+</div>
 
 [![Build status][build-status-img]](https://travis-ci.org/mwclient/mwclient)
 
 
 [![Test coverage][test-coverage-img]](https://coveralls.io/r/mwclient/mwclient)
-[![Code health][code-health-img]](https://landscape.io/github/mwclient/mwclient/master)
 [![Latest version][latest-version-img]](https://pypi.python.org/pypi/mwclient)
 [![MIT license][mit-license-img]](http://opensource.org/licenses/MIT)
 [![Documentation status][documentation-status-img]](http://mwclient.readthedocs.io/en/latest/)
@@ -16,7 +16,6 @@
 
 [build-status-img]: https://img.shields.io/travis/mwclient/mwclient.svg
 [test-coverage-img]: https://img.shields.io/coveralls/mwclient/mwclient.svg
-[code-health-img]: https://landscape.io/github/mwclient/mwclient/master/landscape.svg?style=flat
 [latest-version-img]: https://img.shields.io/pypi/v/mwclient.svg
 [mit-license-img]: https://img.shields.io/github/license/mwclient/mwclient.svg
 [documentation-status-img]: https://readthedocs.org/projects/mwclient/badge/
