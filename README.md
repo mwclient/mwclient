@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="docs/source/logo.png"/>
+    <img alt="mwclient logo" src="docs/source/logo.png"/>
     <h1>mwclient</h1>
 </div>
 
