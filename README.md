@@ -4,8 +4,6 @@
 </div>
 
 [![Build status][build-status-img]](https://travis-ci.org/mwclient/mwclient)
-
-
 [![Test coverage][test-coverage-img]](https://coveralls.io/r/mwclient/mwclient)
 [![Latest version][latest-version-img]](https://pypi.python.org/pypi/mwclient)
 [![MIT license][mit-license-img]](http://opensource.org/licenses/MIT)
