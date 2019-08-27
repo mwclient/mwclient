@@ -171,7 +171,8 @@ class Page(object):
             self._textcache[key] = text
         return text
 
-    def save(self, text, summary=u'', minor=False, bot=True, section=None, **kwargs):
+    def save(self, text, summary=u'', minor=False, bot=True, section=None,
+             edit_type='replace', **kwargs):
         """Update the text of a section or the whole page by performing an edit operation.
         """
         if not self.site.logged_in and self.site.force_login:
@@ -204,9 +205,21 @@ class Page(object):
             data['assert'] = 'user'
 
         def do_edit():
-            result = self.site.post('edit', title=self.name, text=text,
-                                    summary=summary, token=self.get_token('edit'),
-                                    **data)
+            result = None
+            if edit_type == 'replace':
+                result = self.site.post('edit', title=self.name, text=text,
+                                        summary=summary, token=self.get_token('edit'),
+                                        **data)
+            elif edit_type == 'append':
+                result = self.site.post('edit', title=self.name, appendtext=text,
+                                        summary=summary, token=self.get_token('edit'),
+                                        **data)
+            elif edit_type == 'prepend':
+                result = self.site.post('edit', title=self.name, prependtext=text,
+                                        summary=summary, token=self.get_token('edit'),
+                                        **data)
+            else:
+                raise mwclient.errors.InvalidParameter('edit_type', edit_type)
             if result['edit'].get('result').lower() == 'failure':
                 raise mwclient.errors.EditError(self, result['edit'])
             return result
@@ -236,6 +249,12 @@ class Page(object):
         # clear the page text cache
         self._textcache = {}
         return result['edit']
+
+    def touch(self):
+        """Perform a "null edit" on the page to update the wiki's cached data of it."""
+        if not self.exists:
+            return
+        self.save('', edit_type='append')
 
     def handle_edit_error(self, e, summary):
         if e.code == 'editconflict':

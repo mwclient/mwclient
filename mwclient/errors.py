@@ -112,3 +112,13 @@ class InvalidResponse(MwClientError):
 
 class InvalidPageTitle(MwClientError):
     pass
+
+
+class InvalidParameter(MwClientError):
+    
+    def __init__(self, param, value):
+        self.param = param
+        self.value = value
+    
+    def __str__(self):
+        return '{} is not a valid value for {}'.format(self.value, self.param)
