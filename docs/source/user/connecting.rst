@@ -14,7 +14,7 @@ Then try to connect to a site:
 By default, mwclient will connect using https. If your site doesn't support
 https, you need to explicitly request http like so:
 
-    >>> site = Site(('http', 'test.wikipedia.org'))
+    >>> site = Site('test.wikipedia.org', scheme='http')
 
 .. _endpoint:
 

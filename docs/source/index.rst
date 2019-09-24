@@ -27,7 +27,7 @@ Quickstart
 
 .. code-block:: python
 
-    >>> site = mwclient.Site(('https', 'en.wikipedia.org'))
+    >>> site = mwclient.Site('en.wikipedia.org')
     >>> page = site.pages[u'Leipäjuusto']
     >>> page.text()
     u'{{Unreferenced|date=September 2009}}\n[[Image:Leip\xe4juusto cheese with cloudberry jam.jpg|thumb|Leip\xe4juusto with [[cloudberry]] jam]]\n\'\'\'Leip\xe4juusto\'\'\' (bread cheese) or \'\'juustoleip\xe4\'\', which is also known in English as \'\'\'Finnish squeaky cheese\'\'\', is a fresh [[cheese]] traditionally made from cow\'s [[beestings]], rich milk from a cow that has recently calved.'
