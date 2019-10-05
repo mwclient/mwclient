@@ -171,10 +171,28 @@ class Page(object):
             self._textcache[key] = text
         return text
 
-    def save(self, text, summary=u'', minor=False, bot=True, section=None,
-             edit_type='replace', **kwargs):
+    def save(self, *args, **kwargs):
+        """Alias for edit, for maintaining backwards compatibility."""
+        return self.edit(*args, **kwargs)
+
+    def edit(self, text, summary=u'', minor=False, bot=True, section=None, **kwargs):
         """Update the text of a section or the whole page by performing an edit operation.
         """
+        return self._edit(summary, minor, bot, section, text=text, **kwargs)
+
+    def append(self, text, summary=u'', minor=False, bot=True, section=None,
+                    **kwargs):
+        """Append text to the text of a section or the whole page by performing an edit operation.
+        """
+        return self._edit(summary, minor, bot, section, appendtext=text, **kwargs)
+
+    def prepend(self, text, summary=u'', minor=False, bot=True, section=None,
+                     **kwargs):
+        """Prepend text to the text of a section or the whole page by performing an edit operation.
+        """
+        return self._edit(summary, minor, bot, section, prependtext=text, **kwargs)
+
+    def _edit(self, summary, minor, bot, section, **kwargs):
         if not self.site.logged_in and self.site.force_login:
             raise mwclient.errors.AssertUserFailedError()
         if self.site.blocked:
@@ -205,21 +223,9 @@ class Page(object):
             data['assert'] = 'user'
 
         def do_edit():
-            result = None
-            if edit_type == 'replace':
-                result = self.site.post('edit', title=self.name, text=text,
-                                        summary=summary, token=self.get_token('edit'),
+            result = self.site.post('edit', title=self.name, summary=summary,
+                                    token=self.get_token('edit'),
                                         **data)
-            elif edit_type == 'append':
-                result = self.site.post('edit', title=self.name, appendtext=text,
-                                        summary=summary, token=self.get_token('edit'),
-                                        **data)
-            elif edit_type == 'prepend':
-                result = self.site.post('edit', title=self.name, prependtext=text,
-                                        summary=summary, token=self.get_token('edit'),
-                                        **data)
-            else:
-                raise mwclient.errors.InvalidParameter('edit_type', edit_type)
             if result['edit'].get('result').lower() == 'failure':
                 raise mwclient.errors.EditError(self, result['edit'])
             return result
@@ -250,12 +256,6 @@ class Page(object):
         self._textcache = {}
         return result['edit']
 
-    def touch(self):
-        """Perform a "null edit" on the page to update the wiki's cached data of it."""
-        if not self.exists:
-            return
-        self.save('', edit_type='append')
-
     def handle_edit_error(self, e, summary):
         if e.code == 'editconflict':
             raise mwclient.errors.EditError(self, summary, e.info)
@@ -269,6 +269,16 @@ class Page(object):
             raise mwclient.errors.AssertUserFailedError()
         else:
             raise e
+
+    def touch(self):
+        """Perform a "null edit" on the page to update the wiki's cached data of it.
+        This is useful in contrast to purge when needing to update stored data on a wiki,
+        for example Semantic MediaWiki properties or Cargo table values, since purge
+        only forces update of a page's displayed values and not its store.
+        """
+        if not self.exists:
+            return
+        self.append('')
 
     def move(self, new_title, reason='', move_talk=True, no_redirect=False):
         """Move (rename) page to new_title.
