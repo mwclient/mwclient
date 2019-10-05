@@ -113,7 +113,7 @@ class Page(object):
             True
 
         """
-        level = self.protection.get(action, (action, ))[0]
+        level = self.protection.get(action, (action,))[0]
         if level == 'sysop':
             level = 'editprotected'
 
@@ -181,13 +181,13 @@ class Page(object):
         return self._edit(summary, minor, bot, section, text=text, **kwargs)
 
     def append(self, text, summary=u'', minor=False, bot=True, section=None,
-                    **kwargs):
+               **kwargs):
         """Append text to the text of a section or the whole page by performing an edit operation.
         """
         return self._edit(summary, minor, bot, section, appendtext=text, **kwargs)
 
     def prepend(self, text, summary=u'', minor=False, bot=True, section=None,
-                     **kwargs):
+                **kwargs):
         """Prepend text to the text of a section or the whole page by performing an edit operation.
         """
         return self._edit(summary, minor, bot, section, prependtext=text, **kwargs)
@@ -225,10 +225,11 @@ class Page(object):
         def do_edit():
             result = self.site.post('edit', title=self.name, summary=summary,
                                     token=self.get_token('edit'),
-                                        **data)
+                                    **data)
             if result['edit'].get('result').lower() == 'failure':
                 raise mwclient.errors.EditError(self, result['edit'])
             return result
+
         try:
             result = do_edit()
         except mwclient.errors.APIError as e:
