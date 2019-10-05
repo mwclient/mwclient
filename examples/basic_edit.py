@@ -60,12 +60,12 @@ if site.writeapi:
     image.delete('Testing history deletion', oldimage=archivename)
     print('History:', list(image.imagehistory()))
 
-text = page.edit()
+text = page.text()
 text += u'\n[[Image:%s-test-image.png]]' % prefix
-page.save(text, 'Adding image')
+page.edit(text, 'Adding image')
 print('Images:', list(page.images(generator=False)))
-
 print('Cleaning up')
+
 image.delete('Cleanup')
 page.delete('Cleanup')
 
