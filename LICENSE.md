@@ -1,4 +1,6 @@
-Copyright (c) 2006-2013 Bryan Tong Minh
+## MIT License
+
+Copyright (c) Bryan Tong Minh, Dan Michael O. Heggø and contributors
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
