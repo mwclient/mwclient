@@ -215,7 +215,7 @@ class TestPage(unittest.TestCase):
         # For now, mwclient will just raise an EditError.
         # <https://github.com/mwclient/mwclient/issues/33>
         with pytest.raises(mwclient.errors.EditError):
-            page.save('Some text')
+            page.edit('Some text')
 
 
 class TestPageApiArgs(unittest.TestCase):
@@ -303,7 +303,7 @@ class TestPageApiArgs(unittest.TestCase):
         self.site.api.return_value = {
             'edit': {'result': 'Ok'}
         }
-        self.page.save('Some text')
+        self.page.edit('Some text')
         args = self.get_last_api_call_args()
 
         assert args['assert'] == 'user'
@@ -318,7 +318,7 @@ class TestPageApiArgs(unittest.TestCase):
         self.site.api.return_value = {
             'edit': {'result': 'Ok'}
         }
-        self.page.save('Some text')
+        self.page.edit('Some text')
         args = self.get_last_api_call_args()
 
         assert 'assert' not in args

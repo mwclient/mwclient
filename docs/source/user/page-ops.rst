@@ -28,7 +28,7 @@ page, use `page.exists`:
 
 Edit the text as you like before saving it back to the wiki:
 
-    >>> page.save(text, 'Edit summary')
+    >>> page.edit(text, 'Edit summary')
 
 If the page didn't exist, this operation will create it.
 

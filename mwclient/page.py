@@ -182,13 +182,13 @@ class Page(object):
 
     def append(self, text, summary=u'', minor=False, bot=True, section=None,
                **kwargs):
-        """Append text to the text of a section or the whole page by performing an edit operation.
+        """Append text to a section or the whole page by performing an edit operation.
         """
         return self._edit(summary, minor, bot, section, appendtext=text, **kwargs)
 
     def prepend(self, text, summary=u'', minor=False, bot=True, section=None,
                 **kwargs):
-        """Prepend text to the text of a section or the whole page by performing an edit operation.
+        """Prepend text to a section or the whole page by performing an edit operation.
         """
         return self._edit(summary, minor, bot, section, prependtext=text, **kwargs)
 
