@@ -630,7 +630,10 @@ class Site(object):
             )
         return True
 
-    def get_user(self, username=None, userid=None, usprop='registration|groups|blockinfo'):
+    def get_user(
+        self, username=None, userid=None,
+        usprop='registration|groups|blockinfo'
+    ):
         if (not username and not userid) or (username and userid):
             raise Exception('username OR userid are required')
 
@@ -653,7 +656,10 @@ class Site(object):
     def unblock_user(self, username=None, userid=None, reason=None, tags=None):
         return self._block_unblock_user(False, username, userid, reason, tags)
 
-    def _block_unblock_user(self, block=True, username=None, userid=None, reason=None, tags=None):
+    def _block_unblock_user(
+        self, block=True, username=None, userid=None,
+        reason=None, tags=None
+    ):
         if (not username and not userid) or (username and userid):
             raise Exception('username OR userid are required')
         kwargs = {
