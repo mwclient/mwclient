@@ -50,6 +50,9 @@ class Site(object):
         >>> site = mwclient.Site('sourceforge.net', path='/apps/mediawiki/mwclient/')
 
     """
+    AVAILABLE_TOKENS_TYPES = {
+        'watch', 'patrol', 'rollback', 'userrights', 'login', 'createaccount', 'csrf'
+    }
     api_limit = 500
 
     def __init__(self, host, path='/w/', ext='.php', pool=None, retry_timeout=30,
@@ -579,7 +582,7 @@ class Site(object):
         if self.version is None or self.version[:2] >= (1, 24):
             # The 'csrf' (cross-site request forgery) token introduced in 1.24 replaces
             # the majority of older tokens, like edittoken and movetoken.
-            if type not in {'watch', 'patrol', 'rollback', 'userrights', 'login'}:
+            if type not in self.AVAILABLE_TOKENS_TYPES:
                 type = 'csrf'
 
         if type not in self.tokens:
@@ -611,6 +614,150 @@ class Site(object):
                         self.tokens[type] = i['%stoken' % type]
 
         return self.tokens[type]
+
+    def create_user(self, username, password, **kwargs):
+        if 'createtoken' not in kwargs:
+            kwargs['createtoken'] = self.get_token('createaccount')
+        if 'retype' not in kwargs:
+            kwargs['retype'] = password
+        if 'continue' not in kwargs and 'createreturnurl' not in kwargs:
+            # FIXME should be great if API didn't require this...
+            kwargs['createreturnurl'] = '%s://%s' % (self.scheme, self.host)
+        info = self.post('createaccount', username=username, password=password, **kwargs)
+        if info['createaccount']['status'] == 'FAIL':
+            raise Exception('Unable to createaccount [%s]: %s' % (
+                info['createaccount']['messagecode'], info['createaccount']['message'])
+            )
+        return True
+
+    def get_user(self, username=None, userid=None, usprop='registration|groups|blockinfo'):
+        if (not username and not userid) or (username and userid):
+            raise Exception('username OR userid are required')
+
+        kwargs = {
+            'list': 'users',
+            'usprop': usprop,
+        }
+        if username:
+            kwargs['ususers'] = username
+        elif userid:
+            kwargs['ususerids'] = userid
+        resp = self.get('query', **kwargs)
+        if 'missing' in resp['query']['users'][0]:
+            raise errors.MwClientNotFound('User not found')
+        return resp['query']['users'][0]
+
+    def block_user(self, username=None, userid=None, reason=None, tags=None):
+        return self._block_unblock_user(True, username, userid, reason, tags)
+
+    def unblock_user(self, username=None, userid=None, reason=None, tags=None):
+        return self._block_unblock_user(False, username, userid, reason, tags)
+
+    def _block_unblock_user(self, block=True, username=None, userid=None, reason=None, tags=None):
+        if (not username and not userid) or (username and userid):
+            raise Exception('username OR userid are required')
+        kwargs = {
+            'token': self.get_token('csrf'),
+        }
+        if username:
+            kwargs['user'] = username
+        if userid:
+            kwargs['userid'] = userid
+        if reason:
+            kwargs['reason'] = reason
+        if tags:
+            kwargs['tags'] = '|'.join(tags)
+        return self.post('block' if block else 'unblock', **kwargs)
+
+    def get_user_groups(self, username=None, userid=None):
+        if (not username and not userid) or (username and userid):
+            raise Exception('username OR userid are required')
+
+        kwargs = {
+            'list': 'users',
+            'usprop': 'groups',
+        }
+        if username:
+            kwargs['ususers'] = username
+        elif userid:
+            kwargs['ususerids'] = userid
+
+        resp = self.get('query', **kwargs)
+
+        if 'missing' in resp['query']['users'][0]:
+            raise errors.MwClientNotFound('User not found')
+        return resp['query']['users'][0].get('groups', [])
+
+    def add_user_groups(
+        self, username=None, userid=None, groups=None,
+        expiry=None, reason=None, tags=None
+    ):
+        return self._set_user_groups(
+            username=username, userid=userid,
+            added_groups=groups, expiry=expiry, reason=reason,
+            tags=tags
+        )
+
+    def remove_user_groups(
+        self, username=None, userid=None, groups=None,
+        expiry=None, reason=None, tags=None
+    ):
+        return self._set_user_groups(
+            username=username, userid=userid,
+            removed_groups=groups, expiry=expiry, reason=reason,
+            tags=tags
+        )
+
+    def set_user_groups(
+        self, username=None, userid=None, groups=None,
+        expiry=None, reason=None, tags=None
+    ):
+        groups = set(groups)
+        current_groups = set(self.get_user_groups(username=username, userid=userid))
+        removed_groups = current_groups - groups
+        added_groups = groups - current_groups
+        return self._set_user_groups(
+            username=username, userid=userid,
+            added_groups=added_groups,
+            removed_groups=removed_groups, expiry=expiry, reason=reason,
+            tags=tags
+        )
+
+    def _set_user_groups(
+        self, username=None, userid=None,
+        added_groups=None, removed_groups=None, expiry=None, reason=None, tags=None
+    ):
+        if not added_groups and not removed_groups:
+            return False
+        if (not username and not userid) or (username and userid):
+            raise Exception('username OR userid are required')
+
+        kwargs = {
+            'token': self.get_token('userrights'),
+        }
+        if username:
+            kwargs['user'] = username
+        if userid:
+            kwargs['userid'] = userid
+        if added_groups:
+            kwargs['add'] = '|'.join(added_groups)
+            if expiry:
+                try:
+                    iterator = iter(expiry)
+                except TypeError:
+                    expiry = '%s' % expiry
+                else:
+                    expiry = ['%s' % e for e in iterator]
+                kwargs['expiry'] = '|'.join(expiry)
+
+        if removed_groups:
+            kwargs['remove'] = '|'.join(removed_groups)
+
+        if reason:
+            kwargs['reason'] = reason
+        if tags:
+            kwargs['tags'] = '|'.join(tags)
+        return self.post('userrights', **kwargs)
 
     def upload(self, file=None, filename=None, description='', ignore=False,
                file_size=None, url=None, filekey=None, comment=None):

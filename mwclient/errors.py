@@ -14,6 +14,10 @@ class MaximumRetriesExceeded(MwClientError):
     pass
 
 
+class MwClientNotFound(MwClientError):
+    pass
+
+
 class APIError(MwClientError):
 
     def __init__(self, code, info, kwargs):

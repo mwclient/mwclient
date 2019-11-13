@@ -643,5 +643,219 @@ class TestClientGetTokens(TestCase):
 
         assert self.site.tokens['edit'] == 'sometoken'
 
+
+class TestUser(TestCase):
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_create_user(self, raw_api, site_init):
+        createaccount_token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'createaccounttoken': createaccount_token}}
+                }
+            elif 'username' in kwargs:
+                assert kwargs['createtoken'] == createaccount_token
+                assert kwargs['retype'] == kwargs['password']
+                assert kwargs.get('createreturnurl')
+                return {
+                    'createaccount': {'status': 'PASS'}
+                }
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        password = 'password'
+        url = '%s://%s' % (site.scheme, site.host)
+        site.create_user(username='myusername', password=password)
+
+        call_args = raw_api.call_args_list
+        assert len(call_args) == 2
+        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='createaccount')
+        assert call_args[1] == mock.call('createaccount', 'POST',
+                                         username='myusername', password=password,
+                                         retype=password, createreturnurl=url,
+                                         createtoken=createaccount_token)
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_get_user(self, raw_api, site_init):
+        def side_effect(*args, **kwargs):
+            if kwargs.get('list') == 'users':
+                return {
+                    'query': {
+                        'users': [{
+                            'userid': 1,
+                            'user': 'myusername',
+                            'groups': ['*', 'user']
+                        }]
+                    }
+                }
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        site.get_user(username='myusername')
+
+        call_kwargs = {
+            'ususers': 'myusername',
+            'list': 'users',
+            'continue': '',
+            'meta': 'userinfo',
+            'uiprop': 'blockinfo|hasmsg',
+            'usprop': 'registration|groups|blockinfo'
+        }
+        call_args = raw_api.call_args_list
+        assert len(call_args) == 1
+        assert call_args[0] == mock.call('query', 'GET', **call_kwargs)
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_block_user(self, raw_api, site_init):
+        csrf_token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'csrftoken': csrf_token}}
+                }
+            else:
+                return {
+                    'block': {
+                        'user': 'myusername',
+                        'userID': 1,
+                        'expiry': 'infinite',
+                        'id': 1,
+                        'reason': kwargs['reason']
+                    }
+                }
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        site.block_user(username='myusername', reason='Test')
+
+        call_args = raw_api.call_args_list
+        assert len(call_args) == 2
+        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='csrf')
+        assert call_args[1] == mock.call('block', 'POST',
+                                         user='myusername', reason='Test', token=csrf_token)
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_unblock_user(self, raw_api, site_init):
+        csrf_token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'csrftoken': csrf_token}}
+                }
+            else:
+                return {}
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        site.unblock_user(username='myusername', reason='Test')
+
+        call_args = raw_api.call_args_list
+        assert len(call_args) == 2
+        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='csrf')
+        assert call_args[1] == mock.call('unblock', 'POST',
+                                         user='myusername', reason='Test', token=csrf_token)
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_get_user_groups(self, raw_api, site_init):
+        def side_effect(*args, **kwargs):
+            if kwargs.get('list') == 'users':
+                return {
+                    'query': {
+                        'users': [{
+                            'userid': 1,
+                            'user': 'myusername',
+                            'groups': ['*', 'user']
+                        }]
+                    }
+                }
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        groups = site.get_user_groups(username='myusername')
+
+        call_kwargs = {
+            'ususers': 'myusername',
+            'list': 'users',
+            'continue': '',
+            'meta': 'userinfo',
+            'uiprop': 'blockinfo|hasmsg',
+            'usprop': 'groups'
+        }
+        call_args = raw_api.call_args_list
+        assert len(call_args) == 1
+        assert call_args[0] == mock.call('query', 'GET', **call_kwargs)
+        assert groups == ['*', 'user']
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_set_user_groups(self, raw_api, site_init):
+        token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'userrightstoken': token}}
+                }
+            elif kwargs.get('list') == 'users':
+                return {
+                    'query': {
+                        'users': [{
+                            'userid': 1,
+                            'user': 'myusername',
+                            'groups': ['*', 'user', 'bot', 'interface-admin']
+                        }]
+                    }
+                }
+            else:
+                return {}
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        site.set_user_groups(username='myusername',
+                             groups=['*', 'user', 'bureaucrat', 'sysop'])
+
+        get_groups_call_kwargs = {
+            'ususers': 'myusername',
+            'list': 'users',
+            'continue': '',
+            'meta': 'userinfo',
+            'uiprop': 'blockinfo|hasmsg',
+            'usprop': 'groups'
+        }
+        set_groups_call_kwargs = {
+            'user': 'myusername',
+            'remove': 'bot|interface-admin',
+            'add': 'bureaucrat|sysop',
+            'token': token,
+        }
+        call_args = raw_api.call_args_list
+        assert len(call_args) == 3
+        assert call_args[0] == mock.call('query', 'GET', **get_groups_call_kwargs)
+        assert call_args[1] == mock.call('query', 'GET', meta='tokens', type='userrights')
+        mock_call = mock.call('userrights', 'POST', **set_groups_call_kwargs)
+        assert 'add' in call_args[2].kwargs
+        assert 'remove' in call_args[2].kwargs
+        add_kwargs = set(call_args[2].kwargs.pop('add').split('|'))
+        remove_kwargs = set(call_args[2].kwargs.pop('remove').split('|'))
+        assert add_kwargs == set(mock_call.kwargs.pop('add').split('|'))
+        assert remove_kwargs == set(mock_call.kwargs.pop('remove').split('|'))
+        assert call_args[2] == mock_call
+
+
 if __name__ == '__main__':
     unittest.main()
