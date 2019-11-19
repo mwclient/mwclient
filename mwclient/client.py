@@ -2,6 +2,7 @@
 import warnings
 import logging
 from six import text_type
+from six import string_types
 import six
 
 from collections import OrderedDict
@@ -653,9 +654,11 @@ class Site(object):
             kwargs['createreturnurl'] = '%s://%s' % (self.scheme, self.host)
         info = self.post('createaccount', username=username, password=password, **kwargs)
         if info['createaccount']['status'] == 'FAIL':
-            raise errors.UserCreateError(info['createaccount']['messagecode'],
-                                         info['createaccount']['message'],
-                                         kwargs=kwargs)
+            raise errors.UserCreateError(
+                info['createaccount'].get('messagecode', 'unknown'),
+                info['createaccount'].get('message', 'No reason...'),
+                kwargs=kwargs
+            )
         return True
 
     def get_user(
@@ -883,9 +886,7 @@ class Site(object):
             username=username, userid=userid,
             removed_groups=groups, reason=reason, tags=tags
         )
-        if res:
-            return res.get('removed', [])
-        return []
+        return res.get('removed', []) if res else []
 
     def set_user_groups(
         self, username=None, userid=None, groups=None,
@@ -930,10 +931,10 @@ class Site(object):
             removed_groups=removed_groups, expiry=expiry, reason=reason,
             tags=tags
         )
-        if not res:
-            return {'added': [], 'removed': []}
-        return {'added': res.get('added', []),
-                'removed': res.get('removed', [])}
+        return (
+            {'added': res.get('added', []), 'removed': res.get('removed', [])} if res
+            else {'added': [], 'removed': []}
+        )
 
     def _set_user_groups(
         self, username=None, userid=None,
@@ -960,13 +961,16 @@ class Site(object):
         if added_groups:
             kwargs['add'] = '|'.join(added_groups)
             if expiry:
-                try:
-                    iterator = iter(expiry)
-                except TypeError:
-                    expiry = '%s' % expiry
+                if isinstance(expiry, string_types):
+                    kwargs['expiry'] = expiry
                 else:
-                    expiry = ['%s' % e for e in iterator]
-                kwargs['expiry'] = '|'.join(expiry)
+                    try:
+                        iterator = iter(expiry)
+                    except TypeError:
+                        expiry = ['%s' % expiry]
+                    else:
+                        expiry = ['%s' % e for e in iterator]
+                    kwargs['expiry'] = '|'.join(expiry)
 
         if removed_groups:
             kwargs['remove'] = '|'.join(removed_groups)
