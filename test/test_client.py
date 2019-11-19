@@ -674,7 +674,8 @@ class TestUser(TestCase):
 
         call_args = raw_api.call_args_list
         assert len(call_args) == 2
-        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='createaccount')
+        assert call_args[0] == mock.call('query', 'GET',
+                                         meta='tokens', type='createaccount')
         assert call_args[1] == mock.call('createaccount', 'POST',
                                          username='myusername', password=password,
                                          retype=password, createreturnurl=url,
@@ -742,7 +743,8 @@ class TestUser(TestCase):
         assert len(call_args) == 2
         assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='csrf')
         assert call_args[1] == mock.call('block', 'POST',
-                                         user='myusername', reason='Test', token=csrf_token)
+                                         user='myusername', reason='Test',
+                                         token=csrf_token)
 
     @mock.patch('mwclient.client.Site.site_init')
     @mock.patch('mwclient.client.Site.raw_api')
@@ -755,7 +757,12 @@ class TestUser(TestCase):
                     'query': {'tokens': {'csrftoken': csrf_token}}
                 }
             else:
-                return {}
+                return {
+                    'id': 1,
+                    'user': 'myusername',
+                    'userID': 1,
+                    'reason': kwargs['reason']
+                }
 
         raw_api.side_effect = side_effect
 
@@ -766,7 +773,8 @@ class TestUser(TestCase):
         assert len(call_args) == 2
         assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='csrf')
         assert call_args[1] == mock.call('unblock', 'POST',
-                                         user='myusername', reason='Test', token=csrf_token)
+                                         user='myusername', reason='Test',
+                                         token=csrf_token)
 
     @mock.patch('mwclient.client.Site.site_init')
     @mock.patch('mwclient.client.Site.raw_api')

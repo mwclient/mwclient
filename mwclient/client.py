@@ -50,8 +50,8 @@ class Site(object):
         >>> site = mwclient.Site('sourceforge.net', path='/apps/mediawiki/mwclient/')
 
     """
-    AVAILABLE_TOKENS_TYPES = {
-        'watch', 'patrol', 'rollback', 'userrights', 'login', 'createaccount', 'csrf'
+    AVAILABLE_TOKEN_TYPES = {
+        'createaccount', 'csrf', 'login', 'patrol', 'rollback', 'userrights', 'watch'
     }
     api_limit = 500
 
@@ -582,7 +582,7 @@ class Site(object):
         if self.version is None or self.version[:2] >= (1, 24):
             # The 'csrf' (cross-site request forgery) token introduced in 1.24 replaces
             # the majority of older tokens, like edittoken and movetoken.
-            if type not in self.AVAILABLE_TOKENS_TYPES:
+            if type not in self.AVAILABLE_TOKEN_TYPES:
                 type = 'csrf'
 
         if type not in self.tokens:
@@ -616,26 +616,75 @@ class Site(object):
         return self.tokens[type]
 
     def create_user(self, username, password, **kwargs):
+        """
+         Creates user on the wiki with at least a username and a password.
+
+             >>> try:
+             ...     exists = site.create_user('SomeUser', 'Some password',
+             ...                               **my_extra_kwargs)
+             ... except mwclient.errors.CreateError as e:
+             ...     exists = e.code == 'userexists':
+             ...     if not exists:
+             ...         print('Can not create user: %s' % e)
+             ... if exists:
+             ...     user = site.get_user('SomeUser')
+
+         Args:
+             username (str): User name of the user to create
+             password (str): User password of the user to create
+             **kwargs (dict): Other required fields depending on your mediawiki conf
+                              eg: an email
+
+         Returns:
+             Bool (True) if user has beend created, else raise UserCreateError
+
+         Raises:
+             UserCreateError (mwclient.errors.UserCreateError): User can not be created
+                                                                for some reason
+             APIError (mwclient.errors.APIError): Other API errors
+        """
+
         if 'createtoken' not in kwargs:
             kwargs['createtoken'] = self.get_token('createaccount')
         if 'retype' not in kwargs:
             kwargs['retype'] = password
         if 'continue' not in kwargs and 'createreturnurl' not in kwargs:
-            # FIXME should be great if API didn't require this...
+            # should be great if API didn't require this...
             kwargs['createreturnurl'] = '%s://%s' % (self.scheme, self.host)
         info = self.post('createaccount', username=username, password=password, **kwargs)
         if info['createaccount']['status'] == 'FAIL':
-            raise Exception('Unable to createaccount [%s]: %s' % (
-                info['createaccount']['messagecode'], info['createaccount']['message'])
-            )
+            raise errors.UserCreateError(info['createaccount']['messagecode'],
+                                         info['createaccount']['message'],
+                                         kwargs=kwargs)
         return True
 
     def get_user(
         self, username=None, userid=None,
         usprop='registration|groups|blockinfo'
     ):
+        """
+         Retrieves user informations
+         (registration, groups and blockinfo infos by default).
+
+             >>> try:
+             ...     site.get_user('SomeUser')
+             ... except mwclient.errors.UserNotFound:
+             ...     print('User seems to not exist')
+
+         Args:
+             username (str): User name to retrieve, OR
+             userid (int): User ID to retrieve
+
+         Returns:
+             Dictionary of the JSON user informations response
+
+         Raises:
+             ValueError: username and userid params are both not set or set
+             UserNotFound (mwclient.errors.UserNotFound): User has not been found
+             APIError (mwclient.errors.APIError): Other API errors
+        """
         if (not username and not userid) or (username and userid):
-            raise Exception('username OR userid are required')
+            raise ValueError('username OR userid are required')
 
         kwargs = {
             'list': 'users',
@@ -647,21 +696,67 @@ class Site(object):
             kwargs['ususerids'] = userid
         resp = self.get('query', **kwargs)
         if 'missing' in resp['query']['users'][0]:
-            raise errors.MwClientNotFound('User not found')
+            raise errors.UserNotFound(kwargs=kwargs)
         return resp['query']['users'][0]
 
     def block_user(self, username=None, userid=None, reason=None, tags=None):
+        """
+         Blocks an user
+
+             >>> try:
+             ...     site.block_user('SomeUser')
+             ... except mwclient.errors.APIError:
+             ...     print('Can not block the user: %s' % e)
+
+         Args:
+             username (str): User name to block, OR
+             userid (int): User ID to block
+
+         Returns:
+             Dictionary of the JSON block informations response
+             (see https://www.mediawiki.org/wiki/API:Block)
+
+         Raises:
+             ValueError: username and userid params are both not set or set
+             APIError (mwclient.errors.APIError): API errors (see codes available
+                       on https://www.mediawiki.org/wiki/API:Block#Possible_errors)
+        """
         return self._block_unblock_user(True, username, userid, reason, tags)
 
     def unblock_user(self, username=None, userid=None, reason=None, tags=None):
+        """
+         Unblocks an user
+
+             >>> try:
+             ...     site.unblock_user('SomeUser')
+             ... except mwclient.errors.APIError:
+             ...     print('Can not unblock the user: %s' % e)
+
+         Args:
+             username (str): User name to unblock, OR
+             userid (int): User ID to unblock
+
+         Returns:
+             Dictionary of the JSON unblock informations response
+             (see https://www.mediawiki.org/wiki/API:Block)
+
+         Raises:
+             ValueError: username and userid params are both not set or set
+             APIError (mwclient.errors.APIError): API errors (see codes available
+                       on https://www.mediawiki.org/wiki/API:Block#Possible_errors)
+        """
         return self._block_unblock_user(False, username, userid, reason, tags)
 
     def _block_unblock_user(
         self, block=True, username=None, userid=None,
         reason=None, tags=None
     ):
+        """
+        Blocks or unblocks a user. You should not use this protected method: prefers
+        the use of block_user or unblock_user. See docs of theses public methods.
+        """
         if (not username and not userid) or (username and userid):
-            raise Exception('username OR userid are required')
+            raise ValueError('username OR userid are required')
         kwargs = {
             'token': self.get_token('csrf'),
         }
@@ -673,11 +768,38 @@ class Site(object):
             kwargs['reason'] = reason
         if tags:
             kwargs['tags'] = '|'.join(tags)
-        return self.post('block' if block else 'unblock', **kwargs)
+        action = 'block' if block else 'unblock'
+        resp = self.post(action, **kwargs)
+        if resp:
+            if action == 'block' and action in resp:
+                return resp[action]
+            elif action == 'unblock' and 'id' in resp:
+                return resp
+        raise errors.APIError('unkown', 'Can not %s user' % action, kwargs=kwargs)
 
     def get_user_groups(self, username=None, userid=None):
+        """
+         Retrieves groups the user belongs to
+
+             >>> try:
+             ...     site.get_user_groups('SomeUser')
+             ... except mwclient.errors.APIError:
+             ...     print('Can not retrieves user\'s groups: %s' % e)
+
+         Args:
+             username (str): User name to unblock, OR
+             userid (int): User ID to unblock
+
+         Returns:
+             List of the current groups names the user belongs to.
+
+         Raises:
+             ValueError: username and userid params are both not set or set
+             UserNotFound (mwclient.errors.UserNotFound): wanted user doest not exists
+             APIError (mwclient.errors.APIError): other API errors
+        """
         if (not username and not userid) or (username and userid):
-            raise Exception('username OR userid are required')
+            raise ValueError('username OR userid are required')
 
         kwargs = {
             'list': 'users',
@@ -691,52 +813,142 @@ class Site(object):
         resp = self.get('query', **kwargs)
 
         if 'missing' in resp['query']['users'][0]:
-            raise errors.MwClientNotFound('User not found')
+            raise errors.UserNotFound(kwargs=kwargs)
         return resp['query']['users'][0].get('groups', [])
 
     def add_user_groups(
         self, username=None, userid=None, groups=None,
         expiry=None, reason=None, tags=None
     ):
-        return self._set_user_groups(
+        """
+         Adds groups to the user
+
+             >>> try:
+             ...     site.add_user_groups('SomeUser', groups=['sysop', 'bureaucrat'])
+             ... except mwclient.errors.APIError:
+             ...     print('Can not add groups to user: %s' % e)
+
+         Args:
+             username (str): User name to unblock, OR
+             userid (int): User ID to unblock
+             groups (list): group's names to add to the user
+             expiry (date): optionnal - expiration date of current membership(s)
+             reason (string); optionnal - reason why those groups are added
+             tags (list): list of tags to apply to the entry in the user rights log
+
+         Returns:
+             list of group really added
+
+         Raises:
+             ValueError: username and userid params are both not set or set
+             UserNotFound (mwclient.errors.UserNotFound): wanted user doest not exists
+             APIError (mwclient.errors.APIError): other API errors
+        """
+        res = self._set_user_groups(
             username=username, userid=userid,
-            added_groups=groups, expiry=expiry, reason=reason,
-            tags=tags
+            added_groups=groups, expiry=expiry, reason=reason, tags=tags
         )
+        if res:
+            return res.get('added', [])
+        return []
 
     def remove_user_groups(
         self, username=None, userid=None, groups=None,
-        expiry=None, reason=None, tags=None
+        reason=None, tags=None
     ):
-        return self._set_user_groups(
+        """
+         Removes groups to the user
+
+             >>> try:
+             ...     site.remove_user_groups('SomeUser', groups=['sysop', 'bureaucrat'])
+             ... except mwclient.errors.APIError:
+             ...     print('Can not remove groups to user: %s' % e)
+
+         Args:
+             username (str): User name to unblock, OR
+             userid (int): User ID to unblock
+             groups (list): group's names to remove to the user
+             reason (string); optionnal - reason why those groups are removed
+             tags (list): list of tags to apply to the entry in the user rights log
+
+         Returns:
+             list of group really removed
+
+         Raises:
+             ValueError: username and userid params are both not set or set
+             UserNotFound (mwclient.errors.UserNotFound): wanted user doest not exists
+             APIError (mwclient.errors.APIError): other API errors
+        """
+        res = self._set_user_groups(
             username=username, userid=userid,
-            removed_groups=groups, expiry=expiry, reason=reason,
-            tags=tags
+            removed_groups=groups, reason=reason, tags=tags
         )
+        if res:
+            return res.get('removed', [])
+        return []
 
     def set_user_groups(
         self, username=None, userid=None, groups=None,
         expiry=None, reason=None, tags=None
     ):
+        """
+         Set groups to the user (add and remove groups depending current memberships)
+
+             >>> try:
+             ...     res = site.set_user_groups('SomeUser',
+             ...                                groups=['sysop', 'bureaucrat'])
+             ... except mwclient.errors.APIError:
+             ...     print('Can not add groups to user: %s' % e)
+             ... else:
+             ...     print('really added groups: %s ; really removed groups: %s',
+             ...            res['added'], res['removed'])
+
+         Args:
+             username (str): User name to unblock, OR
+             userid (int): User ID to unblock
+             groups (list): ALL group's names the user must belongs too
+                            (group's names which are not listed here will be removed from
+                            the user's memberships)
+             reason (string); optionnal - reason why those groups are added / removed
+             tags (list): list of tags to apply to the entry in the user rights log
+
+         Returns:
+             dict {'added': <list>, 'removed': <list>} with really affected groups
+
+         Raises:
+             ValueError: username and userid params are both not set or set
+             UserNotFound (mwclient.errors.UserNotFound): wanted user doest not exists
+             APIError (mwclient.errors.APIError): other API errors
+        """
         groups = set(groups)
         current_groups = set(self.get_user_groups(username=username, userid=userid))
         removed_groups = current_groups - groups
         added_groups = groups - current_groups
-        return self._set_user_groups(
+        res = self._set_user_groups(
             username=username, userid=userid,
             added_groups=added_groups,
             removed_groups=removed_groups, expiry=expiry, reason=reason,
             tags=tags
         )
+        if not res:
+            return {'added': [], 'removed': []}
+        return {'added': res.get('added', []),
+                'removed': res.get('removed', [])}
 
     def _set_user_groups(
         self, username=None, userid=None,
         added_groups=None, removed_groups=None, expiry=None, reason=None, tags=None
     ):
+        """
+         Add and/or remove groups to the user. Please do not use this protected method:
+         you sould use [add|remove|set]_user_groups instead.
+         Please refers to those methods doc string
+        """
+
         if not added_groups and not removed_groups:
             return False
         if (not username and not userid) or (username and userid):
-            raise Exception('username OR userid are required')
+            raise ValueError('username OR userid are required')
 
         kwargs = {
             'token': self.get_token('userrights'),
@@ -763,7 +975,16 @@ class Site(object):
             kwargs['reason'] = reason
         if tags:
             kwargs['tags'] = '|'.join(tags)
-        return self.post('userrights', **kwargs)
+
+        try:
+            res = self.post('userrights', **kwargs)
+        except errors.APIError as e:
+            if e.code == 'nosuchuser':
+                raise errors.UserNotFound(code=e.code, kwargs=kwargs)
+            raise
+        else:
+            res = res.get('userrights', {})
+            return {'added': res.get('added', []), 'removed': res.get('removed', [])}
 
     def upload(self, file=None, filename=None, description='', ignore=False,
                file_size=None, url=None, filekey=None, comment=None):

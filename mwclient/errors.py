@@ -14,16 +14,42 @@ class MaximumRetriesExceeded(MwClientError):
     pass
 
 
-class MwClientNotFound(MwClientError):
-    pass
-
-
 class APIError(MwClientError):
 
     def __init__(self, code, info, kwargs):
         self.code = code
         self.info = info
         super(APIError, self).__init__(code, info, kwargs)
+
+
+class NotFound(APIError):
+
+    def __init__(self, entity_type, code='missing', info=None, kwargs=None):
+        if not info:
+            info = 'Entity "%s" has not been found.' % entity_type
+        self.entity_type = entity_type
+        super(NotFound, self).__init__(code, info, kwargs)
+
+
+class CreateError(APIError):
+
+    def __init__(self, entity_type, code=None, info=None, kwargs=None):
+        if not info:
+            info = 'Entity "%s" can not been created.' % entity_type
+        self.entity_type = entity_type
+        super(CreateError, self).__init__(code, info, kwargs)
+
+
+class UserNotFound(NotFound):
+
+    def __init__(self, *args, **kwargs):
+        super(UserNotFound, self).__init__('User', *args, **kwargs)
+
+
+class UserCreateError(CreateError):
+
+    def __init__(self, *args, **kwargs):
+        super(UserCreateError, self).__init__('User', *args, **kwargs)
 
 
 class InsufficientPermission(MwClientError):
