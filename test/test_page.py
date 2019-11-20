@@ -6,12 +6,16 @@ import pytest
 import logging
 import requests
 import responses
-import mock
 import mwclient
 from mwclient.page import Page
 from mwclient.client import Site
 from mwclient.listing import Category
 from mwclient.errors import APIError, AssertUserFailedError, ProtectedPageError, InvalidPageTitle
+
+try:
+    import mock
+except ImportError:
+    import unittest.mock as mock
 
 try:
     import json

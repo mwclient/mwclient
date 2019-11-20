@@ -9,9 +9,13 @@ import logging
 import requests
 import responses
 import pkg_resources  # part of setuptools
-import mock
 import time
 from requests_oauthlib import OAuth1
+
+try:
+    import mock
+except ImportError:
+    import unittest.mock as mock
 
 try:
     import json

@@ -6,9 +6,13 @@ import pytest
 import logging
 import requests
 import responses
-import mock
 import mwclient
 from mwclient.listing import List, GeneratorList
+
+try:
+    import mock
+except ImportError:
+    import unittest.mock as mock
 
 try:
     import json
