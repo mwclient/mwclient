@@ -655,8 +655,8 @@ class Site(object):
         info = self.post('createaccount', username=username, password=password, **kwargs)
         if info['createaccount']['status'] == 'FAIL':
             raise errors.UserCreateError(
-                info['createaccount'].get('messagecode', 'unknown'),
-                info['createaccount'].get('message', 'No reason...'),
+                info['createaccount'].get('messagecode'),
+                info['createaccount'].get('message'),
                 kwargs=kwargs
             )
         return True
@@ -699,7 +699,7 @@ class Site(object):
             kwargs['ususerids'] = userid
         resp = self.get('query', **kwargs)
         if 'missing' in resp['query']['users'][0]:
-            raise errors.UserNotFound(kwargs=kwargs)
+            raise errors.UserNotFound(code='missing', info=None, kwargs=kwargs)
         return resp['query']['users'][0]
 
     def block_user(self, username=None, userid=None, reason=None, tags=None):
@@ -790,8 +790,8 @@ class Site(object):
              ...     print('Can not retrieves user\'s groups: %s' % e)
 
          Args:
-             username (str): User name to unblock, OR
-             userid (int): User ID to unblock
+             username (str): User name concerned, OR
+             userid (int): User ID concerned
 
          Returns:
              List of the current groups names the user belongs to.
@@ -816,7 +816,7 @@ class Site(object):
         resp = self.get('query', **kwargs)
 
         if 'missing' in resp['query']['users'][0]:
-            raise errors.UserNotFound(kwargs=kwargs)
+            raise errors.UserNotFound(code='missing', info=None, kwargs=kwargs)
         return resp['query']['users'][0].get('groups', [])
 
     def add_user_groups(
@@ -832,8 +832,8 @@ class Site(object):
              ...     print('Can not add groups to user: %s' % e)
 
          Args:
-             username (str): User name to unblock, OR
-             userid (int): User ID to unblock
+             username (str): User name concerned, OR
+             userid (int): User ID concerned
              groups (list): group's names to add to the user
              expiry (date): optionnal - expiration date of current membership(s)
              reason (string); optionnal - reason why those groups are added
@@ -868,8 +868,8 @@ class Site(object):
              ...     print('Can not remove groups to user: %s' % e)
 
          Args:
-             username (str): User name to unblock, OR
-             userid (int): User ID to unblock
+             username (str): User name concerned, OR
+             userid (int): User ID concerned
              groups (list): group's names to remove to the user
              reason (string); optionnal - reason why those groups are removed
              tags (list): list of tags to apply to the entry in the user rights log
@@ -905,8 +905,8 @@ class Site(object):
              ...            res['added'], res['removed'])
 
          Args:
-             username (str): User name to unblock, OR
-             userid (int): User ID to unblock
+             username (str): User name concerned, OR
+             userid (int): User ID concerned
              groups (list): ALL group's names the user must belongs too
                             (group's names which are not listed here will be removed from
                             the user's memberships)
@@ -984,7 +984,7 @@ class Site(object):
             res = self.post('userrights', **kwargs)
         except errors.APIError as e:
             if e.code == 'nosuchuser':
-                raise errors.UserNotFound(code=e.code, kwargs=kwargs)
+                raise errors.UserNotFound(code=e.code, info=None, kwargs=kwargs)
             raise
         else:
             res = res.get('userrights', {})
