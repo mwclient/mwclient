@@ -6,10 +6,7 @@ import six
 
 from collections import OrderedDict
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+import json
 import requests
 from requests.auth import HTTPBasicAuth, AuthBase
 from requests_oauthlib import OAuth1
