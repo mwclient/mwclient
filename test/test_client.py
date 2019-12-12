@@ -11,12 +11,10 @@ import responses
 import pkg_resources  # part of setuptools
 import mock
 import time
+import json
 from requests_oauthlib import OAuth1
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+
 
 if __name__ == "__main__":
     print()

@@ -7,13 +7,11 @@ import logging
 import requests
 import responses
 import mock
+import json
 import mwclient
 from mwclient.listing import List, GeneratorList
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
+
 
 if __name__ == "__main__":
     print()
