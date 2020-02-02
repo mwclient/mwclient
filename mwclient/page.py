@@ -45,6 +45,9 @@ class Page(object):
         else:
             self.page_title = self.name
 
+        self.base_title = self.page_title.split('/')[0]
+        self.base_name = self.name.split('/')[0]
+
         self.touched = parse_timestamp(info.get('touched'))
         self.revision = info.get('lastrevid', 0)
         self.exists = 'missing' not in info
