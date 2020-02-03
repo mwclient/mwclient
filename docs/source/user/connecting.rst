@@ -53,7 +53,7 @@ Note that MwClient appends its own user agent to the end of your string.
 
 .. _Wikimedia User-Agent policy: https://meta.wikimedia.org/wiki/User-Agent_policy
 
-.. _auth:
+.. _errors:
 
 Errors and warnings
 -------------------
@@ -69,6 +69,8 @@ To print them to stdout:
 
 Errors are thrown as exceptions. All exceptions inherit
 :class:`mwclient.errors.MwClientError`.
+
+.. _auth:
 
 Authenticating
 --------------
@@ -98,7 +100,8 @@ called *consumer key*), the *consumer secret*, the *access token* and the
 
 
 .. _owner-only consumer: https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
-.. _old_login:
+
+.. _old-login:
 
 Old-school login
 ^^^^^^^^^^^^^^^^
@@ -126,6 +129,8 @@ based on the :class:`requests.auth.AuthBase`, such as Digest authentication:
     >>> from requests.auth import HTTPDigestAuth
     >>> site = Site('awesome.site', httpauth=HTTPDigestAuth('my_username', 'my_password'))
 
+.. _ssl-auth:
+
 SSL client certificate authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -141,6 +146,8 @@ This parameter being a proxy to :class:`requests`' cert_ parameter, you can also
 Please note that the private key must not be encrypted.
 
   .. _cert: http://docs.python-requests.org/en/master/user/advanced/#ssl-cert-verification
+
+.. _logout:
 
 Logging out
 ^^^^^^^^^^^
