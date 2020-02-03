@@ -1,4 +1,4 @@
-.. _`implementation-notes`:
+.. _implementation-notes:
 
 Implementation notes
 ====================
