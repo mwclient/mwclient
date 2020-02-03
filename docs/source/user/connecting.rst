@@ -1,4 +1,4 @@
-.. _`connecting`:
+.. _connecting:
 
 Connecting to your site
 =======================
