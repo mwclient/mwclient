@@ -21,7 +21,7 @@ try:
 except ImportError:
     gzip = None
 
-__version__ = '0.10.0'
+__version__ = '0.10.1'
 
 log = logging.getLogger(__name__)
 
@@ -376,7 +376,7 @@ class Site(object):
         host = self.host
         if isinstance(host, (list, tuple)):
             warnings.warn(
-                'Specifying host as a tuple is deprecated as of mwclient 0.10.0. '
+                'Specifying host as a tuple is deprecated as of mwclient 0.10.1. '
                 + 'Please use the new scheme argument instead.',
                 DeprecationWarning
             )
