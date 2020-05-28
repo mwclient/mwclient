@@ -217,7 +217,7 @@ class Page(object):
             data['starttimestamp'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
         if bot:
             data['bot'] = '1'
-        if section:
+        if section is not None:
             data['section'] = section
 
         data.update(kwargs)
