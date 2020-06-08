@@ -416,7 +416,7 @@ class Site(object):
                                         text=stream.text))
                     sleeper.sleep()
 
-            except requests.exceptions.ConnectionError:
+            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
                 # In the event of a network problem
                 # (e.g. DNS failure, refused connection, etc),
                 # Requests will raise a ConnectionError exception.
