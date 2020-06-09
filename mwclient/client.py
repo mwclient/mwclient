@@ -16,11 +16,6 @@ import mwclient.listing as listing
 from mwclient.sleep import Sleepers
 from mwclient.util import parse_timestamp, read_in_chunks
 
-try:
-    import gzip
-except ImportError:
-    gzip = None
-
 __version__ = '0.10.1'
 
 log = logging.getLogger(__name__)
@@ -368,7 +363,7 @@ class Site(object):
             The raw text response.
         """
         headers = {}
-        if self.compress and gzip:
+        if self.compress:
             headers['Accept-Encoding'] = 'gzip'
         sleeper = self.sleepers.make((script, data))
 
