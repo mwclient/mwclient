@@ -766,7 +766,7 @@ class Site(object):
                 file.close()
                 break
             else:
-                # Some kind or error or warning occured. In any case, we do not
+                # Some kind or error or warning occurred. In any case, we do not
                 # get the parameters we need to continue, so we should return
                 # the response now.
                 file.close()

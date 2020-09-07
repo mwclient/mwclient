@@ -134,7 +134,7 @@ based on the :class:`requests.auth.AuthBase`, such as Digest authentication:
 SSL client certificate authentication
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If your server requires a SSL client certificate to authenticate, you can
+If your server requires an SSL client certificate to authenticate, you can
 pass the ``client_certificate`` parameter:
 
     >>> site = Site('awesome.site', client_certificate='/path/to/client-and-key.pem')

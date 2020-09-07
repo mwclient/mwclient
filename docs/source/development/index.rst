@@ -60,8 +60,8 @@ you can use `Tox <https://tox.testrun.org/>`_. A `tox.ini` file is included.
 
 If you would like to expand the test suite by adding more tests, please go ahead!
 
-Updating/expanding the documenation
------------------------------------
+Updating/expanding the documentation
+------------------------------------
 
 Documentation consists of both a manually compiled user guide
 (under ``docs/user``) and a reference guide generated from the docstrings,
