@@ -5,6 +5,13 @@ python:
 - 3.6
 - 3.7
 - 3.8
+arch:
+  - amd64
+  - ppc64le
+jobs:
+  exclude:
+    - python: 2.7
+      arch: ppc64le
 install:
 - python setup.py install
 - pip install coveralls flake8
