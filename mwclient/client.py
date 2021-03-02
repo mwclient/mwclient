@@ -1160,7 +1160,7 @@ class Site(object):
         """
 
         kwargs = {}
-        if title is None:
+        if title is not None:
             kwargs['title'] = title
         if generatexml:
             kwargs['generatexml'] = '1'
