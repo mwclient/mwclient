@@ -1165,7 +1165,7 @@ class Site(object):
         if generatexml:
             kwargs['generatexml'] = '1'
 
-        result = self.get('expandtemplates', text=text, **kwargs)
+        result = self.post('expandtemplates', text=text, **kwargs)
 
         if generatexml:
             return result['expandtemplates']['*'], result['parsetree']['*']
