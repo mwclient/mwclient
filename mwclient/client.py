@@ -516,9 +516,9 @@ class Site(object):
         Login to the wiki using a username and bot password. The method returns
         nothing if the login was successful, but raises and error if it was not.
         If you use mediawiki >= 1.27 and try to login with normal account
-        (not botpassword account), you should use `clientlogin` because login
-        action is deprecated since 1.27 with normal account and should not be
-        working in a near future. See those pages to learn more:
+        (not botpassword account), you should use `clientlogin` instead, because login
+        action is deprecated since 1.27 with normal account and will stop
+        working in the near future. See these pages to learn more:
             - https://www.mediawiki.org/wiki/API:Login and
             - https://www.mediawiki.org/wiki/Manual:Bot_passwords
 
@@ -591,11 +591,11 @@ class Site(object):
         True if it's a success or the returned response if it's a multi-steps
         login process you started. In case of failure it raises some Errors.
 
-        Exemple for classic username / password clientlogin request:
+        Example for classic username / password clientlogin request:
             >>> try:
             ...     site.clientlogin(username='myusername', password='secret')
             ... except mwclient.errors.LoginError as e:
-            ...     print('Can not login to mediawiki: %s' % e)
+            ...     print('Could not login to MediaWiki: %s' % e)
 
         Args:
             cookies (dict): Custom cookies to include with the log-in request.
@@ -624,7 +624,7 @@ class Site(object):
                 error.
         """
 
-        self.require(1, 27, raise_error=(None if self.version is None else True))
+        self.require(1, 27)
 
         if cookies:
             self.connection.cookies.update(cookies)
