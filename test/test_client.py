@@ -465,6 +465,114 @@ class TestLogin(TestCase):
         assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='login')
         assert call_args[1] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword', lgtoken=login_token)
 
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_clientlogin_success(self, raw_api, site_init):
+        login_token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'logintoken': login_token}}
+                }
+            elif 'username' in kwargs:
+                assert kwargs['logintoken'] == login_token
+                assert kwargs.get('loginreturnurl')
+                return {
+                    'clientlogin': {'status': 'PASS'}
+                }
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        success = site.clientlogin(username='myusername', password='mypassword')
+        url = '%s://%s' % (site.scheme, site.host)
+
+        call_args = raw_api.call_args_list
+
+        assert success is True
+        assert len(call_args) == 2
+        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='login')
+        assert call_args[1] == mock.call(
+            'clientlogin', 'POST',
+            username='myusername',
+            password='mypassword',
+            loginreturnurl=url,
+            logintoken=login_token
+        )
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_clientlogin_fail(self, raw_api, site_init):
+        login_token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'logintoken': login_token}}
+                }
+            elif 'username' in kwargs:
+                assert kwargs['logintoken'] == login_token
+                assert kwargs.get('loginreturnurl')
+                return {
+                    'clientlogin': {'status': 'FAIL'}
+                }
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+
+        with pytest.raises(mwclient.errors.LoginError):
+            success = site.clientlogin(username='myusername', password='mypassword')
+
+        call_args = raw_api.call_args_list
+
+        assert len(call_args) == 2
+        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='login')
+        assert call_args[1] == mock.call(
+            'clientlogin', 'POST',
+            username='myusername',
+            password='mypassword',
+            loginreturnurl='%s://%s' % (site.scheme, site.host),
+            logintoken=login_token
+        )
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_clientlogin_continue(self, raw_api, site_init):
+        login_token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'logintoken': login_token}}
+                }
+            elif 'username' in kwargs:
+                assert kwargs['logintoken'] == login_token
+                assert kwargs.get('loginreturnurl')
+                return {
+                    'clientlogin': {'status': 'UI'}
+                }
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        success = site.clientlogin(username='myusername', password='mypassword')
+        url = '%s://%s' % (site.scheme, site.host)
+
+        call_args = raw_api.call_args_list
+
+        assert success == {'status': 'UI'}
+        assert len(call_args) == 2
+        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='login')
+        assert call_args[1] == mock.call(
+            'clientlogin', 'POST',
+            username='myusername',
+            password='mypassword',
+            loginreturnurl=url,
+            logintoken=login_token
+        )
+
 
 class TestClientApiMethods(TestCase):
 

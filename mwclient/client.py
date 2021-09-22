@@ -505,8 +505,19 @@ class Site(object):
 
     def login(self, username=None, password=None, cookies=None, domain=None):
         """
-        Login to the wiki using a username and password. The method returns
+        Login to the wiki using a username and bot password. The method returns
         nothing if the login was successful, but raises and error if it was not.
+        If you use mediawiki >= 1.27 and try to login with normal account
+        (not botpassword account), you should use `clientlogin` instead, because login
+        action is deprecated since 1.27 with normal account and will stop
+        working in the near future. See these pages to learn more:
+            - https://www.mediawiki.org/wiki/API:Login and
+            - https://www.mediawiki.org/wiki/Manual:Bot_passwords
+
+        Note: at least until v1.33.1, botpasswords accounts seem to not have
+              "userrights" permission. If you need to update user's groups,
+              this permission is required so you must use `client login`
+              with a user who has userrights permission (a bureaucrat for eg.).
 
         Args:
             username (str): MediaWiki username
@@ -565,6 +576,75 @@ class Site(object):
                                             login['login']['reason'])
 
         self.site_init()
+
+    def clientlogin(self, cookies=None, **kwargs):
+        """
+        Login to the wiki using a username and password. The method returns
+        True if it's a success or the returned response if it's a multi-steps
+        login process you started. In case of failure it raises some Errors.
+
+        Example for classic username / password clientlogin request:
+            >>> try:
+            ...     site.clientlogin(username='myusername', password='secret')
+            ... except mwclient.errors.LoginError as e:
+            ...     print('Could not login to MediaWiki: %s' % e)
+
+        Args:
+            cookies (dict): Custom cookies to include with the log-in request.
+            **kwargs (dict): Custom vars used for clientlogin as:
+                - loginmergerequestfields
+                - loginpreservestate
+                - loginreturnurl,
+                - logincontinue
+                - logintoken
+                - *: additional params depending on the available auth requests.
+                     to log with classic username / password, you need to add
+                     `username` and `password`
+                See https://www.mediawiki.org/wiki/API:Login#Method_2._clientlogin
+
+        Raises:
+            LoginError (mwclient.errors.LoginError): Login failed, the reason can be
+                obtained from e.code and e.info (where e is the exception object) and
+                will be one of the API:Login errors. The most common error code is
+                "Failed", indicating a wrong username or password.
+
+            MaximumRetriesExceeded: API call to log in failed and was retried until all
+                retries were exhausted. This will not occur if the credentials are merely
+                incorrect. See MaximumRetriesExceeded for possible reasons.
+
+            APIError: An API error occurred. Rare, usually indicates an internal server
+                error.
+        """
+
+        self.require(1, 27)
+
+        if cookies:
+            self.connection.cookies.update(cookies)
+
+        if kwargs:
+            # Try to login using the scheme for MW 1.27+. If the wiki is read protected,
+            # it is not possible to get the wiki version upfront using the API, so we just
+            # have to try. If the attempt fails, we try the old method.
+            if 'logintoken' not in kwargs:
+                try:
+                    kwargs['logintoken'] = self.get_token('login')
+                except (errors.APIError, KeyError):
+                    log.debug('Failed to get login token, MediaWiki is older than 1.27.')
+
+            if 'logincontinue' not in kwargs and 'loginreturnurl' not in kwargs:
+                # should be great if API didn't require this...
+                kwargs['loginreturnurl'] = '%s://%s' % (self.scheme, self.host)
+
+            while True:
+                login = self.post('clientlogin', **kwargs)
+                status = login['clientlogin'].get('status')
+                if status == 'PASS':
+                    return True
+                elif status in ('UI', 'REDIRECT'):
+                    return login['clientlogin']
+                else:
+                    raise errors.LoginError(self, status,
+                                            login['clientlogin'].get('message'))
 
     def get_token(self, type, force=False, title=None):
 
