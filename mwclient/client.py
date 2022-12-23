@@ -409,7 +409,7 @@ class Site(object):
                                 'Retrying in a moment.'
                                 .format(status=stream.status_code,
                                         text=stream.text))
-                    sleeper.sleep()
+                    sleeper.sleep(status_code=stream.status_code)
 
             except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
                 # In the event of a network problem

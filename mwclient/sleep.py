@@ -66,7 +66,7 @@ class Sleeper(object):
         self.retry_timeout = retry_timeout
         self.callback = callback
 
-    def sleep(self, min_time=0):
+    def sleep(self, min_time=0, status_code=None):
         """
         Sleeps for a minimum of `min_time` seconds. The actual sleeping time will increase
         with the number of retries.
@@ -77,7 +77,7 @@ class Sleeper(object):
         """
         self.retries += 1
         if self.retries > self.max_retries:
-            raise MaximumRetriesExceeded(self, self.args)
+            raise MaximumRetriesExceeded(self, self.args, status_code)
 
         self.callback(self, self.retries, self.args)
 
