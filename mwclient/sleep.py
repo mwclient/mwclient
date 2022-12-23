@@ -72,6 +72,7 @@ class Sleeper(object):
         with the number of retries.
         Args:
             min_time (int): The minimum sleeping time.
+            status_code (int): Status code of the original exception.
         Raises:
             MaximumRetriesExceeded: If the number of retries exceeds the maximum.
         """
