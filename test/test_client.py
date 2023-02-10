@@ -470,7 +470,7 @@ class TestLogin(TestCase):
     def test_clientlogin_success(self, raw_api, site_init):
         login_token = 'abc+\\'
 
-        def side_effect(*args, **kwargs):
+        def api_side_effect(*args, **kwargs):
             if kwargs.get('meta') == 'tokens':
                 return {
                     'query': {'tokens': {'logintoken': login_token}}
@@ -482,9 +482,11 @@ class TestLogin(TestCase):
                     'clientlogin': {'status': 'PASS'}
                 }
 
-        raw_api.side_effect = side_effect
+        raw_api.side_effect = api_side_effect
 
         site = mwclient.Site('test.wikipedia.org')
+        # this would be done by site_init usually, but we're mocking it
+        site.version = (1, 28, 0)
         success = site.clientlogin(username='myusername', password='mypassword')
         url = '%s://%s' % (site.scheme, site.host)
 
@@ -521,6 +523,8 @@ class TestLogin(TestCase):
         raw_api.side_effect = side_effect
 
         site = mwclient.Site('test.wikipedia.org')
+        # this would be done by site_init usually, but we're mocking it
+        site.version = (1, 28, 0)
 
         with pytest.raises(mwclient.errors.LoginError):
             success = site.clientlogin(username='myusername', password='mypassword')
@@ -557,6 +561,8 @@ class TestLogin(TestCase):
         raw_api.side_effect = side_effect
 
         site = mwclient.Site('test.wikipedia.org')
+        # this would be done by site_init usually, but we're mocking it
+        site.version = (1, 28, 0)
         success = site.clientlogin(username='myusername', password='mypassword')
         url = '%s://%s' % (site.scheme, site.host)
 
