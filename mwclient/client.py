@@ -1160,12 +1160,12 @@ class Site(object):
         """
 
         kwargs = {}
-        if title is None:
+        if title is not None:
             kwargs['title'] = title
         if generatexml:
             kwargs['generatexml'] = '1'
 
-        result = self.get('expandtemplates', text=text, **kwargs)
+        result = self.post('expandtemplates', text=text, **kwargs)
 
         if generatexml:
             return result['expandtemplates']['*'], result['parsetree']['*']
