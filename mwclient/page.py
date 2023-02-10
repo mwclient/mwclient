@@ -284,7 +284,8 @@ class Page(object):
             return
         self.append('')
 
-    def move(self, new_title, reason='', move_talk=True, no_redirect=False):
+    def move(self, new_title, reason='', move_talk=True, no_redirect=False,
+             move_subpages=False, ignore_warnings=False):
         """Move (rename) page to new_title.
 
         If user account is an administrator, specify no_redirect as True to not
@@ -305,6 +306,10 @@ class Page(object):
             data['movetalk'] = '1'
         if no_redirect:
             data['noredirect'] = '1'
+        if move_subpages:
+            data['movesubpages'] = '1'
+        if ignore_warnings:
+            data['ignorewarnings'] = '1'
         result = self.site.post('move', ('from', self.name), to=new_title,
                                 token=self.get_token('move'), reason=reason, **data)
         return result['move']
