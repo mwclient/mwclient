@@ -55,6 +55,22 @@ Note that MwClient appends its own user agent to the end of your string.
 
 .. _errors:
 
+Using a proxy
+-------------
+
+If you need to use a proxy, you can configure the :class:`requests.Session`
+using the `reqs` parameter of the :class:`~mwclient.client.Site`.
+
+.. code-block:: python
+
+    import mwclient
+
+    proxies = {
+      'http': 'http://10.10.1.10:3128',
+      'https': 'http://10.10.1.10:1080',
+    }
+    site = mwclient.Site('en.wikipedia.org', reqs={"proxy": proxies})
+
 Errors and warnings
 -------------------
 
