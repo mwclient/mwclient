@@ -403,6 +403,67 @@ class TestClient(TestCase):
 
         assert repr(site) == '<Site object \'test.wikipedia.org/w/\'>'
 
+    @mock.patch("time.sleep")
+    @responses.activate
+    def test_api_http_error(self, timesleep):
+        # Test error paths in raw_call, via raw_api as it's more
+        # convenient to call. This would be way nicer with pytest
+        # parametrization but you can't use parametrization inside
+        # unittest.TestCase :(
+        site = self.stdSetup()
+        # All HTTP errors should raise HTTPError with or without retries
+        self.httpShouldReturn(body="foo", status=401)
+        with pytest.raises(requests.exceptions.HTTPError):
+            site.raw_api("query", "GET")
+        # for a 4xx response we should *not* retry
+        assert timesleep.call_count == 0
+        with pytest.raises(requests.exceptions.HTTPError):
+            site.raw_api("query", "GET", retry_on_error=False)
+        self.httpShouldReturn(body="foo", status=503)
+        with pytest.raises(requests.exceptions.HTTPError):
+            site.raw_api("query", "GET")
+        # for a 5xx response we *should* retry
+        assert timesleep.call_count == 25
+        timesleep.reset_mock()
+        with pytest.raises(requests.exceptions.HTTPError):
+            site.raw_api("query", "GET", retry_on_error=False)
+        # check we did not retry
+        assert timesleep.call_count == 0
+        # stop sending bad statuses
+        self.httpShouldReturn(body="foo", status=200)
+        # ConnectionError should retry then pass through, takes
+        # advantage of responses raising ConnectionError if you
+        # hit a URL that hasn't been configured. Timeout follows
+        # the same path so we don't bother testing it separately
+        realhost = site.host
+        site.host = "notthere"
+        with pytest.raises(requests.exceptions.ConnectionError):
+            site.raw_api("query", "GET")
+        assert timesleep.call_count == 25
+        timesleep.reset_mock()
+        with pytest.raises(requests.exceptions.ConnectionError):
+            site.raw_api("query", "GET", retry_on_error=False)
+        # check we did not retry
+        assert timesleep.call_count == 0
+
+    @mock.patch("time.sleep")
+    @responses.activate
+    def test_api_dblag(self, timesleep):
+        site = self.stdSetup()
+        # db lag should retry then raise MaximumRetriesExceeded,
+        # even with retry_on_error set
+        self.httpShouldReturn(
+            body="foo",
+            status=200,
+            headers={"x-database-lag": "true", "retry-after": "5"}
+        )
+        with pytest.raises(mwclient.errors.MaximumRetriesExceeded):
+            site.raw_api("query", "GET")
+        assert timesleep.call_count == 25
+        timesleep.reset_mock()
+        with pytest.raises(mwclient.errors.MaximumRetriesExceeded):
+            site.raw_api("query", "GET", retry_on_error=False)
+        assert timesleep.call_count == 25
 
 class TestLogin(TestCase):
 

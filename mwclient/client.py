@@ -469,22 +469,23 @@ class Site(object):
                                                             ext=self.ext)
 
         while True:
+            toraise = None
+            wait_time = 0
+            args = {'files': files, 'headers': headers}
+            for k, v in self.requests.items():
+                args[k] = v
+            if http_method == 'GET':
+                args['params'] = data
+            else:
+                args['data'] = data
+
             try:
-                args = {'files': files, 'headers': headers}
-                for k, v in self.requests.items():
-                    args[k] = v
-                if http_method == 'GET':
-                    args['params'] = data
-                else:
-                    args['data'] = data
-
                 stream = self.connection.request(http_method, url, **args)
-
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
                     log.warning('Database lag exceeds max lag. '
                                 'Waiting for {} seconds'.format(wait_time))
-                    sleeper.sleep(wait_time)
+                    # fall through to the sleep
                 elif stream.status_code == 200:
                     return stream.text
                 elif stream.status_code < 500 or stream.status_code > 599:
@@ -496,16 +497,32 @@ class Site(object):
                                 'Retrying in a moment.'
                                 .format(status=stream.status_code,
                                         text=stream.text))
-                    sleeper.sleep()
+                    toraise = "stream"
+                    # fall through to the sleep
 
-            except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.Timeout
+            ) as err:
                 # In the event of a network problem
                 # (e.g. DNS failure, refused connection, etc),
                 # Requests will raise a ConnectionError exception.
                 if not retry_on_error:
                     raise
                 log.warning('Connection error. Retrying in a moment.')
-                sleeper.sleep()
+                toraise = err
+                # proceed to the sleep
+
+            # all retry paths come here
+            try:
+                sleeper.sleep(wait_time)
+            except errors.MaximumRetriesExceeded:
+                if toraise == "stream":
+                    stream.raise_for_status()
+                elif toraise:
+                    raise toraise
+                else:
+                    raise
 
     def raw_api(self, action, http_method='POST', retry_on_error=True, *args, **kwargs):
         """Send a call to the API.
