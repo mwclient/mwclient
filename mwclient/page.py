@@ -1,3 +1,5 @@
+import warnings
+
 import six
 from six import text_type
 import time
@@ -175,7 +177,15 @@ class Page(object):
         return text
 
     def save(self, *args, **kwargs):
-        """Alias for edit, for maintaining backwards compatibility."""
+        """Alias for :meth:`Page.edit`, for maintaining backwards compatibility.
+
+        .. deprecated:: 0.10.1
+           Use :meth:`Page.edit` instead.
+        """
+        warnings.warn(
+            'Page.save is deprecated since version 0.10.1. Use Page.edit instead.',
+            DeprecationWarning,
+        )
         return self.edit(*args, **kwargs)
 
     def edit(self, text, summary=u'', minor=False, bot=True, section=None, **kwargs):
