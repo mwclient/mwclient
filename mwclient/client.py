@@ -507,17 +507,16 @@ class Site(object):
                 log.warning('Connection error. Retrying in a moment.')
                 sleeper.sleep()
 
-    def raw_api(self, action, http_method='POST', *args, **kwargs):
+    def raw_api(self, action, http_method='POST', retry_on_error=True, *args, **kwargs):
         """Send a call to the API.
 
         Args:
             action (str): The MediaWiki API action to perform.
             http_method (str): The HTTP method to use in the request.
+            retry_on_error (bool): Whether to retry API call on connection errors.
             *args (Tuple[str, Any]): Arguments to be passed to the `api.php` script as
                 data.
-            **kwargs (Any): Arguments to be passed to the `api.php` script as data. Add
-                `retry_on_error=False`, to prevent automatic retries of failing API
-                requests.
+            **kwargs (Any): Arguments to be passed to the `api.php` script as data.
 
         Returns:
             The API response.
@@ -533,10 +532,6 @@ class Site(object):
                 performing the API request.
             requests.exceptions.Timeout: The API request timed out.
         """
-        try:
-            retry_on_error = kwargs.pop('retry_on_error')
-        except KeyError:
-            retry_on_error = True
         kwargs['action'] = action
         kwargs['format'] = 'json'
         data = self._query_string(*args, **kwargs)
