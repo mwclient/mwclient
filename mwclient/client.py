@@ -1136,6 +1136,8 @@ class Site(object):
                prop='id|user|by|timestamp|expiry|reason|flags'):
         """Retrieve blocks as a generator.
 
+        API doc: https://www.mediawiki.org/wiki/API:Blocks
+
         Returns:
             mwclient.listings.List: Generator yielding dicts, each dict containing:
                 - user: The username or IP address of the user
@@ -1149,6 +1151,11 @@ class Site(object):
                 - nocreate: key is present (empty string) if the user's ability to create
                     accounts has been disabled.
 
+        See Also:
+            When using the ``users`` filter to search for blocked users, only one block
+            per given user will be returned. If you want to retrieve the entire block log
+            for a specific user, you can use the :meth:`Site.logevents` method with
+            ``type=block`` and ``title='User:JohnDoe'``.
         """
 
         # TODO: Fix. Fix what?
