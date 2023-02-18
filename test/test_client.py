@@ -820,5 +820,43 @@ class TestClientGetTokens(TestCase):
 
         assert self.site.tokens['edit'] == 'sometoken'
 
+
+class TestClientPatrol(TestCase):
+
+    def setUp(self):
+        self.raw_call = mock.patch('mwclient.client.Site.raw_call').start()
+
+    def configure(self, version='1.24'):
+        self.raw_call.return_value = self.metaResponseAsJson(version=version)
+        self.site = mwclient.Site('test.wikipedia.org')
+
+    def tearDown(self):
+        mock.patch.stopall()
+
+    @mock.patch('mwclient.client.Site.get_token')
+    def test_patrol(self, get_token):
+        self.configure('1.24')
+        get_token.return_value = 'sometoken'
+        patrol_response = {"patrol": {"rcid": 12345, "ns": 0, "title": "Foo"}}
+        self.raw_call.return_value = json.dumps(patrol_response)
+
+        resp = self.site.patrol(12345)
+
+        assert resp == patrol_response["patrol"]
+        get_token.assert_called_once_with('patrol')
+
+    @mock.patch('mwclient.client.Site.get_token')
+    def test_patrol_on_mediawiki_below_1_17(self, get_token):
+        self.configure('1.16')
+        get_token.return_value = 'sometoken'
+        patrol_response = {"patrol": {"rcid": 12345, "ns": 0, "title": "Foo"}}
+        self.raw_call.return_value = json.dumps(patrol_response)
+
+        resp = self.site.patrol(12345)
+
+        assert resp == patrol_response["patrol"]
+        get_token.assert_called_once_with('edit')
+
+
 if __name__ == '__main__':
     unittest.main()
