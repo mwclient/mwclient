@@ -1062,8 +1062,46 @@ class Site(object):
 
     # def block(self): TODO?
     # def unblock: TODO?
-    # def patrol: TODO?
     # def import: TODO?
+
+    def patrol(self, rcid=None, revid=None, tags=None):
+        """Patrol a page or a revision. Either ``rcid`` or ``revid`` (but not both) must
+        be given.
+        The ``rcid`` and ``revid`` arguments may be obtained using the
+        :meth:`Site.recentchanges` function.
+
+        API doc: https://www.mediawiki.org/wiki/API:Patrol
+
+        Args:
+            rcid (int): The recentchanges ID to patrol.
+            revid (int): The revision ID to patrol.
+            tags (str): Change tags to apply to the entry in the patrol log. Multiple
+                tags can be given, by separating them with the pipe (|) character.
+
+        Returns:
+            Dict[str, Any]: The API response as a dictionary containing:
+
+            - **rcid** (int): The recentchanges id.
+            - **nsid** (int): The namespace id.
+            - **title** (str): The page title.
+
+        Raises:
+            errors.APIError: The MediaWiki API returned an error.
+
+        Notes:
+            - ``autopatrol`` rights are required in order to use this function.
+            - ``revid`` requires at least MediaWiki 1.22.
+            - ``tags`` requires at least MediaWiki 1.27.
+        """
+        if self.require(1, 17, raise_error=False):
+            token = self.get_token('patrol')
+        else:
+            # For MediaWiki versions earlier than 1.17, the patrol token is the same the
+            # edit token.
+            token = self.get_token('edit')
+
+        result = self.post('patrol', rcid=rcid, revid=revid, tags=tags, token=token)
+        return result['patrol']
 
     # Lists
     def allpages(self, start=None, prefix=None, namespace='0', filterredir='all',
