@@ -53,7 +53,7 @@ class Page(object):
         self.exists = 'missing' not in info
         self.length = info.get('length')
         self.protection = {
-            i['type']: (i['level'], i['expiry'])
+            i['type']: (i['level'], i.get('expiry'))
             for i in info.get('protection', ())
             if i
         }

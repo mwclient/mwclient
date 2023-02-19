@@ -165,6 +165,12 @@ class TestPage(unittest.TestCase):
         assert page.can('edit') is True  # User has 'autoconfirmed'  right
         assert page.can('move') is True  # User has 'sysop' right
 
+        # check an unusual case: no 'expiry' key, see
+        # https://github.com/mwclient/mwclient/issues/290
+        del mock_site.get.return_value['query']['pages']['728']['protection'][0]['expiry']
+        page = Page(mock_site, title)
+        assert page.protection == {'edit': ('autoconfirmed', None), 'move': ('sysop', 'infinity')}
+
     @mock.patch('mwclient.client.Site')
     def test_redirect(self, mock_site):
         # Check that page.redirect is set correctly
