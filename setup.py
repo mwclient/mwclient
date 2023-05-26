@@ -34,6 +34,6 @@ setup(name='mwclient',
       setup_requires=pytest_runner,
       tests_require=['pytest', 'pytest-cov',
                      'mock;python_version<"3.3"',
-                     'responses>=0.3.0', 'responses!=0.6.0'],
+                     'responses>=0.3.0', 'responses!=0.6.0', 'setuptools'],
       zip_safe=True
       )
