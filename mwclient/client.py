@@ -1,16 +1,14 @@
 # encoding=utf-8
-import warnings
+import json
 import logging
-from six import text_type
-from six import string_types
-import six
-
+import warnings
 from collections import OrderedDict
 
-import json
 import requests
-from requests.auth import HTTPBasicAuth, AuthBase
+import six
+from requests.auth import AuthBase, HTTPBasicAuth
 from requests_oauthlib import OAuth1
+from six import string_types, text_type
 
 import mwclient.errors as errors
 import mwclient.listing as listing
@@ -941,7 +939,7 @@ class Site(object):
         """
         if (
             (username is None and userid is None)
-            or (username is not None and userid is not None
+            or (username is not None and userid is not None)
         ):
             raise ValueError('username OR userid are required')
 
