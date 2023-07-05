@@ -1,4 +1,4 @@
-.. _`files`:
+.. _files:
 
 Working with files
 ==================

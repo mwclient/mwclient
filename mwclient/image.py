@@ -9,7 +9,7 @@ class Image(mwclient.page.Page):
             site, name, info, extra_properties={
                 'imageinfo': (
                     ('iiprop',
-                     'timestamp|user|comment|url|size|sha1|metadata|archivename'),
+                     'timestamp|user|comment|url|size|sha1|metadata|mime|archivename'),
                 )
             }
         )
@@ -24,7 +24,7 @@ class Image(mwclient.page.Page):
         """
         return mwclient.listing.PageProperty(
             self, 'imageinfo', 'ii',
-            iiprop='timestamp|user|comment|url|size|sha1|metadata|archivename'
+            iiprop='timestamp|user|comment|url|size|sha1|metadata|mime|archivename'
         )
 
     def imageusage(self, namespace=None, filterredir='all', redirect=False,

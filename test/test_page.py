@@ -6,7 +6,7 @@ import pytest
 import logging
 import requests
 import responses
-import mock
+import json
 import mwclient
 from mwclient.page import Page
 from mwclient.client import Site
@@ -14,9 +14,11 @@ from mwclient.listing import Category
 from mwclient.errors import APIError, AssertUserFailedError, ProtectedPageError, InvalidPageTitle
 
 try:
-    import json
+    import unittest.mock as mock
 except ImportError:
-    import simplejson as json
+    # Python < 3.3
+    import mock
+
 
 if __name__ == "__main__":
     print()
@@ -162,6 +164,12 @@ class TestPage(unittest.TestCase):
 
         assert page.can('edit') is True  # User has 'autoconfirmed'  right
         assert page.can('move') is True  # User has 'sysop' right
+
+        # check an unusual case: no 'expiry' key, see
+        # https://github.com/mwclient/mwclient/issues/290
+        del mock_site.get.return_value['query']['pages']['728']['protection'][0]['expiry']
+        page = Page(mock_site, title)
+        assert page.protection == {'edit': ('autoconfirmed', None), 'move': ('sysop', 'infinity')}
 
     @mock.patch('mwclient.client.Site')
     def test_redirect(self, mock_site):

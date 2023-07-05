@@ -11,14 +11,16 @@ import logging
 import requests
 import responses
 import pkg_resources  # part of setuptools
-import mock
 import time
+import json
 from requests_oauthlib import OAuth1
 
 try:
-    import json
+    import unittest.mock as mock
 except ImportError:
-    import simplejson as json
+    # Python < 3.3
+    import mock
+
 
 if __name__ == "__main__":
     print()
@@ -403,6 +405,67 @@ class TestClient(TestCase):
 
         assert repr(site) == '<Site object \'test.wikipedia.org/w/\'>'
 
+    @mock.patch("time.sleep")
+    @responses.activate
+    def test_api_http_error(self, timesleep):
+        # Test error paths in raw_call, via raw_api as it's more
+        # convenient to call. This would be way nicer with pytest
+        # parametrization but you can't use parametrization inside
+        # unittest.TestCase :(
+        site = self.stdSetup()
+        # All HTTP errors should raise HTTPError with or without retries
+        self.httpShouldReturn(body="foo", status=401)
+        with pytest.raises(requests.exceptions.HTTPError):
+            site.raw_api("query", "GET")
+        # for a 4xx response we should *not* retry
+        assert timesleep.call_count == 0
+        with pytest.raises(requests.exceptions.HTTPError):
+            site.raw_api("query", "GET", retry_on_error=False)
+        self.httpShouldReturn(body="foo", status=503)
+        with pytest.raises(requests.exceptions.HTTPError):
+            site.raw_api("query", "GET")
+        # for a 5xx response we *should* retry
+        assert timesleep.call_count == 25
+        timesleep.reset_mock()
+        with pytest.raises(requests.exceptions.HTTPError):
+            site.raw_api("query", "GET", retry_on_error=False)
+        # check we did not retry
+        assert timesleep.call_count == 0
+        # stop sending bad statuses
+        self.httpShouldReturn(body="foo", status=200)
+        # ConnectionError should retry then pass through, takes
+        # advantage of responses raising ConnectionError if you
+        # hit a URL that hasn't been configured. Timeout follows
+        # the same path so we don't bother testing it separately
+        realhost = site.host
+        site.host = "notthere"
+        with pytest.raises(requests.exceptions.ConnectionError):
+            site.raw_api("query", "GET")
+        assert timesleep.call_count == 25
+        timesleep.reset_mock()
+        with pytest.raises(requests.exceptions.ConnectionError):
+            site.raw_api("query", "GET", retry_on_error=False)
+        # check we did not retry
+        assert timesleep.call_count == 0
+
+    @mock.patch("time.sleep")
+    @responses.activate
+    def test_api_dblag(self, timesleep):
+        site = self.stdSetup()
+        # db lag should retry then raise MaximumRetriesExceeded,
+        # even with retry_on_error set
+        self.httpShouldReturn(
+            body="foo",
+            status=200,
+            headers={"x-database-lag": "true", "retry-after": "5"}
+        )
+        with pytest.raises(mwclient.errors.MaximumRetriesExceeded):
+            site.raw_api("query", "GET")
+        assert timesleep.call_count == 25
+        timesleep.reset_mock()
+        with pytest.raises(mwclient.errors.MaximumRetriesExceeded):
+            site.raw_api("query", "GET", retry_on_error=False)
+        assert timesleep.call_count == 25
 
 class TestLogin(TestCase):
 
@@ -464,6 +527,120 @@ class TestLogin(TestCase):
         assert len(call_args) == 2
         assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='login')
         assert call_args[1] == mock.call('login', 'POST', lgname='myusername', lgpassword='mypassword', lgtoken=login_token)
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_clientlogin_success(self, raw_api, site_init):
+        login_token = 'abc+\\'
+
+        def api_side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'logintoken': login_token}}
+                }
+            elif 'username' in kwargs:
+                assert kwargs['logintoken'] == login_token
+                assert kwargs.get('loginreturnurl')
+                return {
+                    'clientlogin': {'status': 'PASS'}
+                }
+
+        raw_api.side_effect = api_side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        # this would be done by site_init usually, but we're mocking it
+        site.version = (1, 28, 0)
+        success = site.clientlogin(username='myusername', password='mypassword')
+        url = '%s://%s' % (site.scheme, site.host)
+
+        call_args = raw_api.call_args_list
+
+        assert success is True
+        assert len(call_args) == 2
+        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='login')
+        assert call_args[1] == mock.call(
+            'clientlogin', 'POST',
+            username='myusername',
+            password='mypassword',
+            loginreturnurl=url,
+            logintoken=login_token
+        )
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_clientlogin_fail(self, raw_api, site_init):
+        login_token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'logintoken': login_token}}
+                }
+            elif 'username' in kwargs:
+                assert kwargs['logintoken'] == login_token
+                assert kwargs.get('loginreturnurl')
+                return {
+                    'clientlogin': {'status': 'FAIL'}
+                }
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        # this would be done by site_init usually, but we're mocking it
+        site.version = (1, 28, 0)
+
+        with pytest.raises(mwclient.errors.LoginError):
+            success = site.clientlogin(username='myusername', password='mypassword')
+
+        call_args = raw_api.call_args_list
+
+        assert len(call_args) == 2
+        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='login')
+        assert call_args[1] == mock.call(
+            'clientlogin', 'POST',
+            username='myusername',
+            password='mypassword',
+            loginreturnurl='%s://%s' % (site.scheme, site.host),
+            logintoken=login_token
+        )
+
+    @mock.patch('mwclient.client.Site.site_init')
+    @mock.patch('mwclient.client.Site.raw_api')
+    def test_clientlogin_continue(self, raw_api, site_init):
+        login_token = 'abc+\\'
+
+        def side_effect(*args, **kwargs):
+            if kwargs.get('meta') == 'tokens':
+                return {
+                    'query': {'tokens': {'logintoken': login_token}}
+                }
+            elif 'username' in kwargs:
+                assert kwargs['logintoken'] == login_token
+                assert kwargs.get('loginreturnurl')
+                return {
+                    'clientlogin': {'status': 'UI'}
+                }
+
+        raw_api.side_effect = side_effect
+
+        site = mwclient.Site('test.wikipedia.org')
+        # this would be done by site_init usually, but we're mocking it
+        site.version = (1, 28, 0)
+        success = site.clientlogin(username='myusername', password='mypassword')
+        url = '%s://%s' % (site.scheme, site.host)
+
+        call_args = raw_api.call_args_list
+
+        assert success == {'status': 'UI'}
+        assert len(call_args) == 2
+        assert call_args[0] == mock.call('query', 'GET', meta='tokens', type='login')
+        assert call_args[1] == mock.call(
+            'clientlogin', 'POST',
+            username='myusername',
+            password='mypassword',
+            loginreturnurl=url,
+            logintoken=login_token
+        )
 
 
 class TestClientApiMethods(TestCase):
@@ -1200,6 +1377,43 @@ class TestUser(TestCase):
 
         assert real_call_kwargs == mock_call_kwargs
         assert mock_call.args == call_args[2].args
+
+        
+class TestClientPatrol(TestCase):
+
+    def setUp(self):
+        self.raw_call = mock.patch('mwclient.client.Site.raw_call').start()
+
+    def configure(self, version='1.24'):
+        self.raw_call.return_value = self.metaResponseAsJson(version=version)
+        self.site = mwclient.Site('test.wikipedia.org')
+
+    def tearDown(self):
+        mock.patch.stopall()
+
+    @mock.patch('mwclient.client.Site.get_token')
+    def test_patrol(self, get_token):
+        self.configure('1.24')
+        get_token.return_value = 'sometoken'
+        patrol_response = {"patrol": {"rcid": 12345, "ns": 0, "title": "Foo"}}
+        self.raw_call.return_value = json.dumps(patrol_response)
+
+        resp = self.site.patrol(12345)
+
+        assert resp == patrol_response["patrol"]
+        get_token.assert_called_once_with('patrol')
+
+    @mock.patch('mwclient.client.Site.get_token')
+    def test_patrol_on_mediawiki_below_1_17(self, get_token):
+        self.configure('1.16')
+        get_token.return_value = 'sometoken'
+        patrol_response = {"patrol": {"rcid": 12345, "ns": 0, "title": "Foo"}}
+        self.raw_call.return_value = json.dumps(patrol_response)
+
+        resp = self.site.patrol(12345)
+
+        assert resp == patrol_response["patrol"]
+        get_token.assert_called_once_with('edit')
 
 
 if __name__ == '__main__':

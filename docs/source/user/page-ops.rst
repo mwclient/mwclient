@@ -1,4 +1,4 @@
-.. _`page-ops`:
+.. _page-ops:
 
 Page operations
 ===============

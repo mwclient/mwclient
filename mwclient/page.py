@@ -45,12 +45,15 @@ class Page(object):
         else:
             self.page_title = self.name
 
+        self.base_title = self.page_title.split('/')[0]
+        self.base_name = self.name.split('/')[0]
+
         self.touched = parse_timestamp(info.get('touched'))
         self.revision = info.get('lastrevid', 0)
         self.exists = 'missing' not in info
         self.length = info.get('length')
         self.protection = {
-            i['type']: (i['level'], i['expiry'])
+            i['type']: (i['level'], i.get('expiry'))
             for i in info.get('protection', ())
             if i
         }
@@ -214,7 +217,7 @@ class Page(object):
             data['starttimestamp'] = time.strftime('%Y%m%d%H%M%S', self.edit_time)
         if bot:
             data['bot'] = '1'
-        if section:
+        if section is not None:
             data['section'] = section
 
         data.update(kwargs)
@@ -281,7 +284,8 @@ class Page(object):
             return
         self.append('')
 
-    def move(self, new_title, reason='', move_talk=True, no_redirect=False):
+    def move(self, new_title, reason='', move_talk=True, no_redirect=False,
+             move_subpages=False, ignore_warnings=False):
         """Move (rename) page to new_title.
 
         If user account is an administrator, specify no_redirect as True to not
@@ -302,6 +306,10 @@ class Page(object):
             data['movetalk'] = '1'
         if no_redirect:
             data['noredirect'] = '1'
+        if move_subpages:
+            data['movesubpages'] = '1'
+        if ignore_warnings:
+            data['ignorewarnings'] = '1'
         result = self.site.post('move', ('from', self.name), to=new_title,
                                 token=self.get_token('move'), reason=reason, **data)
         return result['move']
