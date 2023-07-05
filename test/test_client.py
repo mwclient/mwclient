@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 import time
 import unittest
 import unittest.mock as mock
@@ -1214,8 +1215,9 @@ class TestUser(TestCase):
         assert 'remove' not in real_call_kwargs
         assert 'remove' not in mock_call_kwargs
 
-        assert real_call_kwargs == mock_call_kwargs
-        assert mock_call.args == call_args[1].args
+        if sys.version_info >= (3,8,0):
+            assert real_call_kwargs == mock_call_kwargs
+            assert mock_call.args == call_args[1].args
 
         assert added == ['*', 'user', 'bureaucrat', 'sysop']
 
@@ -1343,8 +1345,9 @@ class TestUser(TestCase):
         assert 'add' not in real_call_kwargs
         assert 'add' not in mock_call_kwargs
 
-        assert real_call_kwargs == mock_call_kwargs
-        assert mock_call.args == call_args[1].args
+        if sys.version_info >= (3,8,0):
+            assert real_call_kwargs == mock_call_kwargs
+            assert mock_call.args == call_args[1].args
 
         assert removed == ['bureaucrat', 'sysop']
 
@@ -1413,8 +1416,9 @@ class TestUser(TestCase):
         remove_kwargs = set(real_call_kwargs.pop('remove').split('|'))
         assert remove_kwargs == set(mock_call_kwargs.pop('remove').split('|'))
 
-        assert real_call_kwargs == mock_call_kwargs
-        assert mock_call.args == call_args[2].args
+        if sys.version_info >= (3,8,0):
+            assert real_call_kwargs == mock_call_kwargs
+            assert mock_call.args == call_args[2].args
 
 
 if __name__ == '__main__':
