@@ -22,6 +22,14 @@ class APIError(MwClientError):
         super(APIError, self).__init__(code, info, kwargs)
 
 
+class UserNotFound(APIError):
+    pass
+
+
+class UserCreateError(APIError):
+    pass
+
+
 class InsufficientPermission(MwClientError):
     pass
 
