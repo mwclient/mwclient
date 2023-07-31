@@ -140,7 +140,7 @@ class Site(object):
 
             # Set User-Agent header field
             if clients_useragent:
-                ua = clients_useragent + ' ' + USER_AGENT
+                ua = clients_useragent
             else:
                 ua = USER_AGENT
             self.connection.headers['User-Agent'] = ua
