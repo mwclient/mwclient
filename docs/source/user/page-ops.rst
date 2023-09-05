@@ -3,10 +3,15 @@
 Page operations
 ===============
 
-Start by :ref:`connecting <connecting>` to your site:
+Start by :ref:`connecting <connecting>` to your site as described in the
+:ref:`Connecting to your site <connecting>` section.
 
-    >>> from mwclient import Site
-    >>> site = Site('en.wikipedia.org')
+.. code-block:: python
+
+    from mwclient import Site
+
+    user_agent = 'MyCoolTool/0.2 (xyz@example.org)'
+    site = Site('en.wikipedia.org', clients_useragent=user_agent)
 
 For information about authenticating, please see
 :ref:`the section on authenticating <auth>`.
