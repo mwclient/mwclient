@@ -3,13 +3,24 @@
 Connecting to your site
 =======================
 
-Begin by importing the Site class:
+To connect to a MediaWiki site, you need to create a :class:`~mwclient.client.Site`
+object and pass it the hostname of the site you want to connect to. The hostname
+should not include the protocol (http or https) or the path to the API endpoint
+(see :ref:`endpoint`).
 
-    >>> from mwclient import Site
+.. code-block:: python
 
-Then try to connect to a site:
+    from mwclient import Site
 
-    >>> site = Site('test.wikipedia.org')
+    user_agent = 'MyCoolTool/0.2 (xyz@example.org)'
+    site = Site('en.wikipedia.org', clients_useragent=user_agent)
+
+.. warning::
+
+    The ``clients_useragent`` parameter, while optional, is highly recommended
+    and may be required by some sites, such as the Wikimedia wikis (e.g.
+    Wikipedia). Requests without a user agent may be rejected or rate-limited
+    by the site. See :ref:`user-agent` for more information.
 
 By default, mwclient will connect using https. If your site doesn't support
 https, you need to explicitly request http like so:
@@ -27,7 +38,7 @@ Wikimedia wikis. If you get a 404 Not Found or a
 :class:`mwclient.errors.InvalidResponse` error upon connecting, your site might
 use a different script path. You can specify it using the ``path`` argument:
 
-    >>> site = Site('my-awesome-wiki.org', path='/wiki/', )
+    >>> site = Site('my-awesome-wiki.org', path='/wiki/')
 
 .. _$wgScriptPath: https://www.mediawiki.org/wiki/Manual:$wgScriptPath
 
@@ -41,8 +52,8 @@ If you are connecting to a Wikimedia site, you should follow the
 The user agent should contain the tool name, the tool version
 and a way to contact you:
 
-    >>> ua = 'MyCoolTool/0.2 (xyz@example.org)'
-    >>> site = Site('test.wikipedia.org', clients_useragent=ua)
+    >>> user_agent = 'MyCoolTool/0.2 (xyz@example.org)'
+    >>> site = Site('test.wikipedia.org', clients_useragent=user_agent)
 
 It should follow the pattern
 ``{tool_name}/{tool_version} ({contact})``. The contact info can also
@@ -50,6 +61,10 @@ be your user name and the tool version may be omitted:
 ``RudolphBot (User:Santa Claus)``.
 
 Note that MwClient appends its own user agent to the end of your string.
+The final user agent will look like this:
+
+    >>> site.clients_useragent
+    'MyCoolTool/0.2 (xyz@example.org) mwclient/0.8.0'
 
 .. _Wikimedia User-Agent policy: https://meta.wikimedia.org/wiki/User-Agent_policy
 
