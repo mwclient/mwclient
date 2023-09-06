@@ -269,7 +269,7 @@ class Site(object):
     }
 
     def __repr__(self):
-        return "<Site object '%s%s'>" % (self.host, self.path)
+        return "<%s object '%s%s'>" % (self.__class__.__name__, self.host, self.path)
 
     def get(self, action, *args, **kwargs):
         """Perform a generic API call using GET.

@@ -126,7 +126,11 @@ class List(object):
             self._iter = six.itervalues(data['query'][self.result_member])
 
     def __repr__(self):
-        return "<List object '%s' for %s>" % (self.list_name, self.site)
+        return "<%s object '%s' for %s>" % (
+            self.__class__.__name__,
+            self.list_name,
+            self.site
+        )
 
     @staticmethod
     def generate_kwargs(_prefix, *args, **kwargs):
@@ -202,7 +206,11 @@ class Category(mwclient.page.Page, GeneratorList):
         GeneratorList.__init__(self, site, 'categorymembers', 'cm', **kwargs)
 
     def __repr__(self):
-        return "<Category object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
+        return "<%s object '%s' for %s>" % (
+            self.__class__.__name__,
+            self.name.encode('utf-8'),
+            self.site
+        )
 
     def members(self, prop='ids|title', namespace=None, sort='sortkey',
                 dir='asc', start=None, end=None, generator=True):
