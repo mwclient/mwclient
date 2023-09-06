@@ -75,4 +75,8 @@ class Image(mwclient.page.Page):
             return self.site.connection.get(url).content
 
     def __repr__(self):
-        return "<Image object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
+        return "<%s object '%s' for %s>" % (
+            self.__class__.__name__,
+            self.name.encode('utf-8'),
+            self.site
+        )

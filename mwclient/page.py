@@ -86,7 +86,11 @@ class Page(object):
             return target_page
 
     def __repr__(self):
-        return "<Page object '%s' for %s>" % (self.name.encode('utf-8'), self.site)
+        return "<%s object '%s' for %s>" % (
+            self.__class__.__name__,
+            self.name.encode('utf-8'),
+            self.site
+        )
 
     def __unicode__(self):
         return self.name
