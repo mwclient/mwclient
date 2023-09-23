@@ -22,7 +22,7 @@ USER_AGENT = 'mwclient/{} ({})'.format(__version__,
                                        'https://github.com/mwclient/mwclient')
 
 
-class Site(object):
+class Site:
     """A MediaWiki site identified by its hostname.
 
     Examples:

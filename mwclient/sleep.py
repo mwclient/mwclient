@@ -5,7 +5,7 @@ from mwclient.errors import MaximumRetriesExceeded
 log = logging.getLogger(__name__)
 
 
-class Sleepers(object):
+class Sleepers:
     """
     A class that allows for the creation of multiple `Sleeper` objects with shared
     arguments.
@@ -41,7 +41,7 @@ class Sleepers(object):
         return Sleeper(args, self.max_retries, self.retry_timeout, self.callback)
 
 
-class Sleeper(object):
+class Sleeper:
     """
     For any given operation, a `Sleeper` object keeps count of the number of retries.
     For each retry, the sleep time increases until the max number of retries is reached

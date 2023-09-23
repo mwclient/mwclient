@@ -4,7 +4,7 @@ import mwclient.listing
 import mwclient.errors
 
 
-class Page(object):
+class Page:
 
     def __init__(self, site, name, info=None, extra_properties=None):
         if type(name) is type(self):

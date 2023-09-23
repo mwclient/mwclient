@@ -3,7 +3,7 @@ import mwclient.page
 import mwclient.image
 
 
-class List(object):
+class List:
     """Base class for lazy iteration over api response content
 
     This is a class providing lazy iteration.  This means that the
@@ -120,7 +120,7 @@ class List(object):
         elif type(data['query'][self.result_member]) is list:
             self._iter = iter(data['query'][self.result_member])
         else:
-            self._iter = data['query'][self.result_member].values()
+            self._iter = iter(data['query'][self.result_member].values())
 
     def __repr__(self):
         return "<List object '%s' for %s>" % (self.list_name, self.site)
