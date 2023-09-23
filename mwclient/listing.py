@@ -176,10 +176,10 @@ class GeneratorList(List):
     def __next__(self):
         info = super(GeneratorList, self).__next__()
         if info['ns'] == 14:
-            return Category(self.site, u'', info)
+            return Category(self.site, '', info)
         if info['ns'] == 6:
-            return mwclient.image.Image(self.site, u'', info)
-        return mwclient.page.Page(self.site, u'', info)
+            return mwclient.image.Image(self.site, '', info)
+        return mwclient.page.Page(self.site, '', info)
 
     def load_chunk(self):
         # Put this here so that the constructor does not fail
@@ -278,11 +278,11 @@ class PageList(GeneratorList):
         for ns in self.site.namespaces:
             if ns == 0:
                 continue
-            namespace = u'%s:' % self.site.namespaces[ns].replace(' ', '_')
+            namespace = '%s:' % self.site.namespaces[ns].replace(' ', '_')
             if name.startswith(namespace):
                 return ns
             elif ns in self.site.default_namespaces:
-                namespace = u'%s:' % self.site.default_namespaces[ns].replace(' ', '_')
+                namespace = '%s:' % self.site.default_namespaces[ns].replace(' ', '_')
                 if name.startswith(namespace):
                     return ns
         return 0

@@ -37,7 +37,7 @@ class Page:
             raise mwclient.errors.InvalidPageTitle(info.get('invalidreason'))
 
         self.namespace = info.get('ns', 0)
-        self.name = info.get('title', u'')
+        self.name = info.get('title', '')
         if self.namespace:
             self.page_title = self.strip_namespace(self.name)
         else:
@@ -159,7 +159,7 @@ class Page:
                 text = rev['*']
             self.last_rev_time = rev['timestamp']
         except StopIteration:
-            text = u''
+            text = ''
             self.last_rev_time = None
         if not expandtemplates:
             self.edit_time = time.gmtime()
@@ -176,18 +176,18 @@ class Page:
         """Alias for edit, for maintaining backwards compatibility."""
         return self.edit(*args, **kwargs)
 
-    def edit(self, text, summary=u'', minor=False, bot=True, section=None, **kwargs):
+    def edit(self, text, summary='', minor=False, bot=True, section=None, **kwargs):
         """Update the text of a section or the whole page by performing an edit operation.
         """
         return self._edit(summary, minor, bot, section, text=text, **kwargs)
 
-    def append(self, text, summary=u'', minor=False, bot=True, section=None,
+    def append(self, text, summary='', minor=False, bot=True, section=None,
                **kwargs):
         """Append text to a section or the whole page by performing an edit operation.
         """
         return self._edit(summary, minor, bot, section, appendtext=text, **kwargs)
 
-    def prepend(self, text, summary=u'', minor=False, bot=True, section=None,
+    def prepend(self, text, summary='', minor=False, bot=True, section=None,
                 **kwargs):
         """Prepend text to a section or the whole page by performing an edit operation.
         """

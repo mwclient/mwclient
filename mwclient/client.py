@@ -172,7 +172,7 @@ class Site:
                     raise errors.OAuthAuthorizationError(self, e.code, e.info)
 
                 # Private wiki, do init after login
-                if e.args[0] not in {u'unknown_action', u'readapidenied'}:
+                if e.args[0] not in {'unknown_action', 'readapidenied'}:
                     raise
 
     def site_init(self):
@@ -259,11 +259,11 @@ class Site:
         return version_tuple
 
     default_namespaces = {
-        0: u'', 1: u'Talk', 2: u'User', 3: u'User talk', 4: u'Project',
-        5: u'Project talk', 6: u'Image', 7: u'Image talk', 8: u'MediaWiki',
-        9: u'MediaWiki talk', 10: u'Template', 11: u'Template talk', 12: u'Help',
-        13: u'Help talk', 14: u'Category', 15: u'Category talk',
-        -1: u'Special', -2: u'Media'
+        0: '', 1: 'Talk', 2: 'User', 3: 'User talk', 4: 'Project',
+        5: 'Project talk', 6: 'Image', 7: 'Image talk', 8: 'MediaWiki',
+        9: 'MediaWiki talk', 10: 'Template', 11: 'Template talk', 12: 'Help',
+        13: 'Help talk', 14: 'Category', 15: 'Category talk',
+        -1: 'Special', -2: 'Media'
     }
 
     def __repr__(self):
@@ -368,7 +368,7 @@ class Site:
         except KeyError:
             userinfo = ()
         if 'blockedby' in userinfo:
-            self.blocked = (userinfo['blockedby'], userinfo.get('blockreason', u''))
+            self.blocked = (userinfo['blockedby'], userinfo.get('blockreason', ''))
         else:
             self.blocked = False
         self.hasmsg = 'messages' in userinfo
@@ -379,14 +379,14 @@ class Site:
                     log.warning(warning['*'])
 
         if 'error' in info:
-            if info['error'].get('code') in {u'internal_api_error_DBConnectionError',
-                                             u'internal_api_error_DBQueryError'}:
+            if info['error'].get('code') in {'internal_api_error_DBConnectionError',
+                                             'internal_api_error_DBQueryError'}:
                 sleeper.sleep()
                 return False
 
             # cope with https://phabricator.wikimedia.org/T106066
             if (
-                info['error'].get('code') == u'mwoauth-invalid-authorization'
+                info['error'].get('code') == 'mwoauth-invalid-authorization'
                 and 'Nonce already used' in info['error'].get('info')
             ):
                 log.warning('Retrying due to nonce error, see'
@@ -664,7 +664,7 @@ class Site:
             info = self.post('emailuser', target=user, subject=subject,
                              text=text, ccme=cc, token=token)
         except errors.APIError as e:
-            if e.args[0] == u'noemail':
+            if e.args[0] == 'noemail':
                 raise errors.NoSpecifiedEmail(user, e.args[1])
             raise errors.EmailError(*e)
 
@@ -1449,7 +1449,7 @@ class Site:
 
         offset = 0
         while offset is not None:
-            results = self.raw_api('ask', query=u'{query}|offset={offset}'.format(
+            results = self.raw_api('ask', query='{query}|offset={offset}'.format(
                 query=query, offset=offset), http_method='GET', **kwargs)
             self.handle_api_result(results)  # raises APIError on error
             offset = results.get('query-continue-offset')
