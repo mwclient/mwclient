@@ -1,5 +1,4 @@
 # encoding=utf-8
-from __future__ import print_function
 import unittest
 import time
 from mwclient.util import parse_timestamp

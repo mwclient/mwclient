@@ -1,7 +1,5 @@
 # encoding=utf-8
-from __future__ import print_function
-
-from six import StringIO
+from io import StringIO
 import unittest
 import pytest
 import mwclient
@@ -13,11 +11,7 @@ import time
 import json
 from requests_oauthlib import OAuth1
 
-try:
-    import unittest.mock as mock
-except ImportError:
-    # Python < 3.3
-    import mock
+import unittest.mock as mock
 
 
 if __name__ == "__main__":

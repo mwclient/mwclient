@@ -1,5 +1,4 @@
 # encoding=utf-8
-from __future__ import print_function
 import unittest
 import time
 import pytest
@@ -7,10 +6,7 @@ from mwclient.sleep import Sleepers
 from mwclient.sleep import Sleeper
 from mwclient.errors import MaximumRetriesExceeded
 
-try:
-    import mock
-except ImportError:
-    import unittest.mock as mock
+import unittest.mock as mock
 
 if __name__ == "__main__":
     print()

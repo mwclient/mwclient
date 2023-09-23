@@ -1,8 +1,6 @@
 # encoding=utf-8
 import warnings
 import logging
-from six import text_type
-import six
 
 from collections import OrderedDict
 
@@ -101,7 +99,7 @@ class Site(object):
         self.ext = ext
         self.credentials = None
         self.compress = compress
-        self.max_lag = text_type(max_lag)
+        self.max_lag = str(max_lag)
         self.force_login = force_login
         self.requests = reqs or {}
         self.scheme = scheme
@@ -199,7 +197,7 @@ class Site(object):
         self.site = meta['query']['general']
         self.namespaces = {
             namespace['id']: namespace.get('*', '')
-            for namespace in six.itervalues(meta['query']['namespaces'])
+            for namespace in meta['query']['namespaces'].values()
         }
         self.writeapi = 'writeapi' in self.site
 
@@ -411,10 +409,10 @@ class Site(object):
     def _query_string(*args, **kwargs):
         kwargs.update(args)
         qs1 = [
-            (k, v) for k, v in six.iteritems(kwargs) if k not in {'wpEditToken', 'token'}
+            (k, v) for k, v in kwargs.items() if k not in {'wpEditToken', 'token'}
         ]
         qs2 = [
-            (k, v) for k, v in six.iteritems(kwargs) if k in {'wpEditToken', 'token'}
+            (k, v) for k, v in kwargs.items() if k in {'wpEditToken', 'token'}
         ]
         return OrderedDict(qs1 + qs2)
 
@@ -861,7 +859,7 @@ class Site(object):
                     title = 'Test'
                 info = self.post('query', titles=title,
                                  prop='info', intoken=type)
-                for i in six.itervalues(info['query']['pages']):
+                for i in info['query']['pages'].values():
                     if i['title'] == title:
                         self.tokens[type] = i['%stoken' % type]
 
@@ -1316,7 +1314,7 @@ class Site(object):
         kwargs = {
             'prop': 'revisions',
             'rvprop': prop,
-            'revids': '|'.join(map(text_type, revids))
+            'revids': '|'.join(map(str, revids))
         }
 
         revisions = []

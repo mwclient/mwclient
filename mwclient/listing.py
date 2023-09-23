@@ -1,6 +1,3 @@
-import six
-import six.moves
-from six import text_type
 from mwclient.util import parse_timestamp
 import mwclient.page
 import mwclient.image
@@ -28,12 +25,12 @@ class List(object):
 
         if limit is None:
             limit = site.api_limit
-        self.args[self.prefix + 'limit'] = text_type(limit)
+        self.args[self.prefix + 'limit'] = str(limit)
 
         self.count = 0
         self.max_items = max_items
 
-        self._iter = iter(six.moves.range(0))
+        self._iter = iter(range(0))
 
         self.last = False
         self.result_member = list_name
@@ -52,7 +49,7 @@ class List(object):
         # See: https://github.com/mwclient/mwclient/issues/194
         while True:
             try:
-                item = six.next(self._iter)
+                item = next(self._iter)
                 if item is not None:
                     break
             except StopIteration:
@@ -94,7 +91,7 @@ class List(object):
         """
         data = self.site.get(
             'query', (self.generator, self.list_name),
-            *[(text_type(k), v) for k, v in six.iteritems(self.args)]
+            *[(str(k), v) for k, v in self.args.items()]
         )
         if not data:
             # Non existent page
@@ -119,11 +116,11 @@ class List(object):
     def set_iter(self, data):
         """Set `self._iter` to the API response `data`."""
         if self.result_member not in data['query']:
-            self._iter = iter(six.moves.range(0))
+            self._iter = iter(range(0))
         elif type(data['query'][self.result_member]) is list:
             self._iter = iter(data['query'][self.result_member])
         else:
-            self._iter = six.itervalues(data['query'][self.result_member])
+            self._iter = data['query'][self.result_member].values()
 
     def __repr__(self):
         return "<List object '%s' for %s>" % (self.list_name, self.site)
@@ -131,7 +128,7 @@ class List(object):
     @staticmethod
     def generate_kwargs(_prefix, *args, **kwargs):
         kwargs.update(args)
-        for key, value in six.iteritems(kwargs):
+        for key, value in kwargs.items():
             if value is not None and value is not False:
                 yield _prefix + key, value
 
@@ -228,7 +225,7 @@ class PageList(GeneratorList):
             kwargs['gapto'] = end
 
         super(PageList, self).__init__(site, 'allpages', 'ap',
-                                       gapnamespace=text_type(namespace),
+                                       gapnamespace=str(namespace),
                                        gapfilterredir=redirects,
                                        **kwargs)
 
@@ -301,7 +298,7 @@ class PageProperty(List):
         self.generator = 'prop'
 
     def set_iter(self, data):
-        for page in six.itervalues(data['query']['pages']):
+        for page in data['query']['pages'].values():
             if page['title'] == self.page.name:
                 self._iter = iter(page.get(self.list_name, ()))
                 return

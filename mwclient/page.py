@@ -1,5 +1,3 @@
-import six
-from six import text_type
 import time
 from mwclient.util import parse_timestamp
 import mwclient.listing
@@ -18,9 +16,9 @@ class Page(object):
 
         if not info:
             if extra_properties:
-                prop = 'info|' + '|'.join(six.iterkeys(extra_properties))
+                prop = 'info|' + '|'.join(extra_properties.keys())
                 extra_props = []
-                for extra_prop in six.itervalues(extra_properties):
+                for extra_prop in extra_properties.values():
                     extra_props.extend(extra_prop)
             else:
                 prop = 'info'
@@ -32,7 +30,7 @@ class Page(object):
             else:
                 info = self.site.get('query', prop=prop, titles=name,
                                      inprop='protection', *extra_props)
-            info = six.next(six.itervalues(info['query']['pages']))
+            info = next(info['query']['pages'].values())
         self._info = info
 
         if 'invalid' in info:
@@ -143,9 +141,9 @@ class Page(object):
         if not self.can('read'):
             raise mwclient.errors.InsufficientPermission(self)
         if not self.exists:
-            return u''
+            return ''
         if section is not None:
-            section = text_type(section)
+            section = str(section)
 
         key = hash((section, expandtemplates))
         if cache and key in self._textcache:

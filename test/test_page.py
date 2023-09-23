@@ -1,6 +1,4 @@
 # encoding=utf-8
-from __future__ import print_function
-
 import unittest
 import pytest
 import logging
@@ -13,11 +11,7 @@ from mwclient.client import Site
 from mwclient.listing import Category
 from mwclient.errors import APIError, AssertUserFailedError, ProtectedPageError, InvalidPageTitle
 
-try:
-    import unittest.mock as mock
-except ImportError:
-    # Python < 3.3
-    import mock
+import unittest.mock as mock
 
 
 if __name__ == "__main__":
