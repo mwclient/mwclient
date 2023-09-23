@@ -30,7 +30,7 @@ class Page(object):
             else:
                 info = self.site.get('query', prop=prop, titles=name,
                                      inprop='protection', *extra_props)
-            info = next(info['query']['pages'].values())
+            info = next(iter(info['query']['pages'].values()))
         self._info = info
 
         if 'invalid' in info:
