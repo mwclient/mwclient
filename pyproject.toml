@@ -45,6 +45,12 @@ test = [
 "Homepage" = "https://github.com/mwclient/mwclient"
 "Bug Reports" = "https://github.com/mwclient/mwclient/issues"
 
+[tool.pytest.ini_options]
+addopts = "--cov=mwtp --cov-report=html --color=yes"
+testpaths = [
+	"test"
+]
+
 [build-system]
 requires = ["setuptools>=40.6.0", "wheel"]
 build-backend = "setuptools.build_meta"
