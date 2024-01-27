@@ -181,6 +181,15 @@ class TestClient(TestCase):
         assert isinstance(site.connection.auth, requests.auth.HTTPBasicAuth)
 
     @responses.activate
+    def test_basic_auth_non_latin(self):
+
+        self.httpShouldReturn(self.metaResponseAsJson())
+
+        site = mwclient.Site('test.wikipedia.org', httpauth=('我', '非常秘密'))
+
+        assert isinstance(site.connection.auth, requests.auth.HTTPBasicAuth)
+
+    @responses.activate
     def test_httpauth_raise_error_on_invalid_type(self):
 
         self.httpShouldReturn(self.metaResponseAsJson())

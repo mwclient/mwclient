@@ -59,10 +59,13 @@ class Site:
         do_init (bool): Whether to automatically initialize the :py:class:`Site` on
             initialization. When set to `False`, the :py:class:`Site` must be initialized
             manually using the :py:meth:`.site_init` method. Defaults to `True`.
-        httpauth (Union[tuple[str, str], requests.auth.AuthBase]): An
+        httpauth (Union[tuple[basestring, basestring], requests.auth.AuthBase]): An
             authentication method to be used when making API requests. This can be either
             an authentication object as provided by the :py:mod:`requests` library, or a
-            tuple in the form `{username, password}`.
+            tuple in the form `{username, password}`. Usernames and passwords provided as
+            text strings are encoded as UTF-8. If dealing with a server that cannot
+            handle UTF-8, please provide the username and password already encoded with
+            the appropriate encoding.
         reqs (Dict[str, Any]): Additional arguments to be passed to the
             :py:meth:`requests.Session.request` method when performing API calls. If the
             `timeout` key is empty, a default timeout of 30 seconds is added.
@@ -109,6 +112,12 @@ class Site:
         if consumer_token is not None:
             auth = OAuth1(consumer_token, consumer_secret, access_token, access_secret)
         elif isinstance(httpauth, (list, tuple)):
+            # workaround weird requests default to encode as latin-1
+            # https://github.com/mwclient/mwclient/issues/315
+            # https://github.com/psf/requests/issues/4564
+            httpauth = [
+                it.encode("utf-8") if isinstance(it, str) else it for it in httpauth
+            ]
             auth = HTTPBasicAuth(*httpauth)
         elif httpauth is None or isinstance(httpauth, (AuthBase,)):
             auth = httpauth
