@@ -8,7 +8,7 @@
 [![Latest version][latest-version-img]](https://pypi.python.org/pypi/mwclient)
 [![MIT license][mit-license-img]](http://opensource.org/licenses/MIT)
 [![Documentation status][documentation-status-img]](http://mwclient.readthedocs.io/en/latest/)
-[![Issue statistics][issue-statistics-img]](http://isitmaintained.com/project/tldr-pages/tldr)
+[![Issue statistics][issue-statistics-img]](http://isitmaintained.com/project/mwclient/mwclient)
 [![Gitter chat][gitter-chat-img]](https://gitter.im/mwclient/mwclient)
 
 
@@ -17,7 +17,7 @@
 [latest-version-img]: https://img.shields.io/pypi/v/mwclient.svg
 [mit-license-img]: https://img.shields.io/github/license/mwclient/mwclient.svg
 [documentation-status-img]: https://readthedocs.org/projects/mwclient/badge/
-[issue-statistics-img]: http://isitmaintained.com/badge/resolution/tldr-pages/tldr.svg
+[issue-statistics-img]: http://isitmaintained.com/badge/resolution/mwclient/mwclient.svg
 [gitter-chat-img]: https://img.shields.io/gitter/room/mwclient/mwclient.svg
 
 mwclient is a lightweight Python client library to the
