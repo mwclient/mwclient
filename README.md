@@ -47,6 +47,12 @@ Please see the [changelog
 document](https://github.com/mwclient/mwclient/blob/master/CHANGELOG.md)
 for a list of changes.
 
+mwclient was originally written by Bryan Tong Minh. It was maintained
+for many years by Dan Michael O. Heggø, with assistance from Waldir
+Pimenta. It is currently maintained by Marc Trölitzsch, Adam Williamson
+and Megan Cutrofello. The best way to get in touch with the maintainers
+is by filing an issue or a pull request.
+
 ## Documentation
 
 Up-to-date documentation is hosted [at Read the Docs](http://mwclient.readthedocs.io/en/latest/).
