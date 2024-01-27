@@ -1,12 +1,10 @@
-import six
-from six import text_type
 import time
 from mwclient.util import parse_timestamp
 import mwclient.listing
 import mwclient.errors
 
 
-class Page(object):
+class Page:
 
     def __init__(self, site, name, info=None, extra_properties=None):
         if type(name) is type(self):
@@ -18,9 +16,9 @@ class Page(object):
 
         if not info:
             if extra_properties:
-                prop = 'info|' + '|'.join(six.iterkeys(extra_properties))
+                prop = 'info|' + '|'.join(extra_properties.keys())
                 extra_props = []
-                for extra_prop in six.itervalues(extra_properties):
+                for extra_prop in extra_properties.values():
                     extra_props.extend(extra_prop)
             else:
                 prop = 'info'
@@ -32,14 +30,14 @@ class Page(object):
             else:
                 info = self.site.get('query', prop=prop, titles=name,
                                      inprop='protection', *extra_props)
-            info = six.next(six.itervalues(info['query']['pages']))
+            info = next(iter(info['query']['pages'].values()))
         self._info = info
 
         if 'invalid' in info:
             raise mwclient.errors.InvalidPageTitle(info.get('invalidreason'))
 
         self.namespace = info.get('ns', 0)
-        self.name = info.get('title', u'')
+        self.name = info.get('title', '')
         if self.namespace:
             self.page_title = self.strip_namespace(self.name)
         else:
@@ -147,9 +145,9 @@ class Page(object):
         if not self.can('read'):
             raise mwclient.errors.InsufficientPermission(self)
         if not self.exists:
-            return u''
+            return ''
         if section is not None:
-            section = text_type(section)
+            section = str(section)
 
         key = hash((section, expandtemplates))
         if cache and key in self._textcache:
@@ -165,7 +163,7 @@ class Page(object):
                 text = rev['*']
             self.last_rev_time = rev['timestamp']
         except StopIteration:
-            text = u''
+            text = ''
             self.last_rev_time = None
         if not expandtemplates:
             self.edit_time = time.gmtime()
@@ -182,18 +180,18 @@ class Page(object):
         """Alias for edit, for maintaining backwards compatibility."""
         return self.edit(*args, **kwargs)
 
-    def edit(self, text, summary=u'', minor=False, bot=True, section=None, **kwargs):
+    def edit(self, text, summary='', minor=False, bot=True, section=None, **kwargs):
         """Update the text of a section or the whole page by performing an edit operation.
         """
         return self._edit(summary, minor, bot, section, text=text, **kwargs)
 
-    def append(self, text, summary=u'', minor=False, bot=True, section=None,
+    def append(self, text, summary='', minor=False, bot=True, section=None,
                **kwargs):
         """Append text to a section or the whole page by performing an edit operation.
         """
         return self._edit(summary, minor, bot, section, appendtext=text, **kwargs)
 
-    def prepend(self, text, summary=u'', minor=False, bot=True, section=None,
+    def prepend(self, text, summary='', minor=False, bot=True, section=None,
                 **kwargs):
         """Prepend text to a section or the whole page by performing an edit operation.
         """

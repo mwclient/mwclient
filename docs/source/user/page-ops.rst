@@ -50,11 +50,11 @@ is handled under the hood so you don't have to worry about it.
     >>> unique_users = set(users)
     >>> user_revisions = [{'user': user, 'count': users.count(user)} for user in unique_users]
     >>> sorted(user_revisions, key=lambda x: x['count'], reverse=True)[:5]
-    [{'count': 6, 'user': u'Wolf12345'},
-     {'count': 4, 'user': u'Test-bot'},
-     {'count': 4, 'user': u'Mirxaeth'},
-     {'count': 3, 'user': u'192.251.192.201'},
-     {'count': 3, 'user': u'78.50.51.180'}]
+    [{'count': 6, 'user': 'Wolf12345'},
+     {'count': 4, 'user': 'Test-bot'},
+     {'count': 4, 'user': 'Mirxaeth'},
+     {'count': 3, 'user': '192.251.192.201'},
+     {'count': 3, 'user': '78.50.51.180'}]
 
 *Tip:* If you want to retrieve a specific number of revisions, the
 :code:`itertools.islice` method can come in handy:

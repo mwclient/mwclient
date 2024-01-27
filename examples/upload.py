@@ -1,6 +1,4 @@
-from __future__ import print_function
-from past.builtins import xrange
-from StringIO import StringIO
+from io import StringIO
 import sys
 import os
 import pprint
@@ -24,7 +22,7 @@ else:
 site = mwclient.Site(host, path)
 site.login(sys.argv[1], sys.argv[2])
 
-name = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(8)) + '.png'
+name = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)) + '.png'
 
 print('Using http://%s%sindex.php?title=File:' % (host, path) + name)
 print('Regular upload test')

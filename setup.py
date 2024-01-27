@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # encoding=utf-8
-from __future__ import print_function
 import os
 import sys
 from setuptools import setup
@@ -18,7 +17,6 @@ setup(name='mwclient',
       long_description_content_type='text/markdown',
       classifiers=[
           'Programming Language :: Python',
-          'Programming Language :: Python :: 2.7',
           'Programming Language :: Python :: 3.5',
           'Programming Language :: Python :: 3.6',
           'Programming Language :: Python :: 3.7',
@@ -30,10 +28,9 @@ setup(name='mwclient',
       url='https://github.com/mwclient/mwclient',
       license='MIT',
       packages=['mwclient'],
-      install_requires=['requests-oauthlib', 'six'],
+      install_requires=['requests-oauthlib'],
       setup_requires=pytest_runner,
       tests_require=['pytest', 'pytest-cov',
-                     'mock;python_version<"3.3"',
                      'responses>=0.3.0', 'responses!=0.6.0', 'setuptools'],
       zip_safe=True
       )

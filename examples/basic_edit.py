@@ -1,4 +1,3 @@
-from __future__ import print_function
 import sys
 import os
 
@@ -61,7 +60,7 @@ if site.writeapi:
     print('History:', list(image.imagehistory()))
 
 text = page.text()
-text += u'\n[[Image:%s-test-image.png]]' % prefix
+text += '\n[[Image:%s-test-image.png]]' % prefix
 page.edit(text, 'Adding image')
 print('Images:', list(page.images(generator=False)))
 print('Cleaning up')
