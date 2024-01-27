@@ -3,7 +3,7 @@
     <h1>mwclient</h1>
 </div>
 
-[![Build status][build-status-img]](https://travis-ci.org/mwclient/mwclient)
+[![Build status][build-status-img]](https://github.com/mwclient/mwclient)
 [![Test coverage][test-coverage-img]](https://coveralls.io/r/mwclient/mwclient)
 [![Latest version][latest-version-img]](https://pypi.python.org/pypi/mwclient)
 [![MIT license][mit-license-img]](http://opensource.org/licenses/MIT)
@@ -12,7 +12,7 @@
 [![Gitter chat][gitter-chat-img]](https://gitter.im/mwclient/mwclient)
 
 
-[build-status-img]: https://img.shields.io/travis/mwclient/mwclient.svg
+[build-status-img]: https://github.com/mwclient/mwclient/actions/workflows/tox.yml/badge.svg
 [test-coverage-img]: https://img.shields.io/coveralls/mwclient/mwclient.svg
 [latest-version-img]: https://img.shields.io/pypi/v/mwclient.svg
 [mit-license-img]: https://img.shields.io/github/license/mwclient/mwclient.svg
