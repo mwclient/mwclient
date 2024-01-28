@@ -1,4 +1,3 @@
-# encoding=utf-8
 import unittest
 import time
 from mwclient.util import parse_timestamp

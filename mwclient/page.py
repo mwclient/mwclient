@@ -90,9 +90,6 @@ class Page:
             self.site
         )
 
-    def __unicode__(self):
-        return self.name
-
     @staticmethod
     def strip_namespace(title):
         if title[0] == ':':
