@@ -69,10 +69,6 @@ class List:
             return item[self.return_values]
         return item
 
-    def next(self, *args, **kwargs):
-        """ For Python 2.x support """
-        return self.__next__(*args, **kwargs)
-
     def load_chunk(self):
         """Query a new chunk of data
 

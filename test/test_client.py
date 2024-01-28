@@ -1,4 +1,3 @@
-# encoding=utf-8
 from io import StringIO
 import unittest
 import pytest
