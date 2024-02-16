@@ -115,8 +115,8 @@ unauthenticated, just set
 
 .. _oauth:
 
-OAuth
-^^^^^
+OAuth Authentication
+^^^^^^^^^^^^^^^^^^^^
 
 On Wikimedia wikis, the recommended authentication method is to authenticate as
 a `owner-only consumer`_. Once you have obtained the *consumer token* (also
@@ -132,33 +132,39 @@ called *consumer key*), the *consumer secret*, the *access token* and the
 
 .. _owner-only consumer: https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
 
-.. _old-login:
+.. _username-password:
 
-Old-school login
-^^^^^^^^^^^^^^^^
+Username-Password Authentication
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To use old-school login, call the login method:
+.. warning::
+    Username-Password authentication is not recommended for Wikimedia wikis.
+    See :ref:`oauth` for the recommended authentication method.
+
+The easiest way to authenticate is to call :meth:`~mwclient.client.Site.login`
+with your username and password. If login fails, a
+:class:`mwclient.errors.LoginError` will be raised.
 
     >>> site.login('my_username', 'my_password')
-
-If login fails, a :class:`mwclient.errors.LoginError` will be thrown.
-See :meth:`mwclient.client.Site.login` for all options.
 
 .. _http-auth:
 
 HTTP authentication
 ^^^^^^^^^^^^^^^^^^^
 
-If your server is configured to use HTTP authentication, you can
-authenticate using the ``httpauth`` parameter. For Basic HTTP authentication:
+.. warning::
+    HTTP authentication does not replace MediaWiki's built-in authentication
+    system. It is used to protect access to the API, not to authenticate users.
 
-    >>> site = Site('awesome.site', httpauth=('my_username', 'my_password'))
+If your server is configured to use HTTP authentication, you can authenticate
+using the ``httpauth`` parameter. This parameter is a proxy to the
+``auth`` parameter of :class:`requests.Session` and can be set to any class
+that extends :class:`requests.auth.AuthBase`. For example, to use basic
+authentication:
 
-You can also pass in any other :ref:`authentication mechanism <requests:authentication>`
-based on the :class:`requests.auth.AuthBase`, such as Digest authentication:
+    >>> from requests.auth import HTTPBasicAuth
+    >>> site = Site('awesome.site', httpauth=HTTPBasicAuth('my_username', 'my_password'))
 
-    >>> from requests.auth import HTTPDigestAuth
-    >>> site = Site('awesome.site', httpauth=HTTPDigestAuth('my_username', 'my_password'))
 
 .. _ssl-auth:
 
