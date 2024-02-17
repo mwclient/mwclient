@@ -12,7 +12,6 @@ from requests_oauthlib import OAuth1
 
 import unittest.mock as mock
 
-
 if __name__ == "__main__":
     print()
     print("Note: Running in stand-alone mode. Consult the README")
@@ -773,6 +772,33 @@ class TestClientUploadArgs(TestCase):
 
         with pytest.raises(mwclient.errors.InsufficientPermission):
             self.site.upload(filename='Test', file=StringIO('test'))
+
+    def test_upload_file_exists(self):
+        self.configure()
+        self.raw_call.side_effect = [
+            self.makePageResponse(title='File:Test.jpg', imagerepository='local',
+                                  imageinfo=[{
+                                      "comment": "",
+                                      "height": 1440,
+                                      "metadata": [],
+                                      "sha1": "69a764a9cf8307ea4130831a0aa0b9b7f9585726",
+                                      "size": 123,
+                                      "timestamp": "2013-12-22T07:11:07Z",
+                                      "user": "TestUser",
+                                      "width": 2160
+                                  }]),
+            json.dumps({'query': {'tokens': {'csrftoken': self.vars['token']}}}),
+            json.dumps({
+                'upload': {'result': 'Warning',
+                           'warnings': {'duplicate': ['Test.jpg'],
+                                        'exists': 'Test.jpg'},
+                           'filekey': '1apyzwruya84.da2cdk.1.jpg',
+                           'sessionkey': '1apyzwruya84.da2cdk.1.jpg'}
+            })
+        ]
+
+        with pytest.raises(mwclient.errors.FileExists):
+            self.site.upload(file=StringIO('test'), filename='Test.jpg', ignore=False)
 
 
 class TestClientGetTokens(TestCase):
