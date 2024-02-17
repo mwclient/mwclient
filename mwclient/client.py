@@ -904,6 +904,7 @@ class Site:
         Raises:
             errors.InsufficientPermission
             requests.exceptions.HTTPError
+            errors.FileExists: The file already exists and `ignore` is `False`.
         """
 
         if file_size is not None:
@@ -982,7 +983,16 @@ class Site:
                 info = {}
             if self.handle_api_result(info, kwargs=predata, sleeper=sleeper):
                 response = info.get('upload', {})
+                # Workaround for https://github.com/mwclient/mwclient/issues/211
+                # ----------------------------------------------------------------
+                # Raise an error if the file already exists. This is necessary because
+                # MediaWiki returns a warning, not an error, leading to silent failure.
+                # The user must explicitly set ignore=True (ignorewarnings=True) to
+                # overwrite an existing file.
+                if ignore is False and 'exists' in response.get('warnings', {}):
+                    raise errors.FileExists(filename)
                 break
+
         if file is not None:
             file.close()
         return response
