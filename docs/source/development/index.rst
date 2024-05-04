@@ -109,3 +109,18 @@ When it is ready, push your branch to your remote:
 
 Then you can open a pull request on GitHub. You should see a URL to do this
 when you push your branch.
+
+Making a release
+----------------
+
+These instructions are for maintainers of the project.
+To cut a release, ensure ``CHANGELOG.md`` is updated, then use
+`bump-my-version <https://callowayproject.github.io/bump-my-version/>`_:
+
+.. code:: bash
+
+    $ pip install bump-my-version
+    $ bump-my-version bump major|minor|patch
+
+Then check the commit looks correct and is tagged vX.Y.Z, and push. The
+``.github/workflows/release.yml`` action will publish to PyPI.
