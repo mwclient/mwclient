@@ -12,12 +12,14 @@ Development environment
 
 If you plan to submit a pull request, you should first
 `fork <https://github.com/mwclient/mwclient#fork-destination-box>`_
-the mwclient repo on GitHub, then clone your own fork:
+the mwclient repo on GitHub, then check out the original repository
+and configure your fork as a remote:
 
 .. code:: bash
 
-    $ git clone git@github.com:MYUSERNAME/mwclient.git
+    $ git clone https://github.com/mwclient/mwclient.git
     $ cd mwclient
+    $ git remote add fork git@github.com:MYUSERNAME/mwclient.git
 
 You can then use pip to do an "editable" install so that your
 edits will be immediately available for (both interactive
@@ -26,6 +28,12 @@ and automated) testing:
 .. code:: bash
 
     $ pip install -e .
+
+Create a new branch for your changes:
+
+.. code:: bash
+
+    $ git checkout -b my-branch
 
 Test suite
 ----------
@@ -91,7 +99,13 @@ on the main master branch to ease merging:
 
 .. code:: bash
 
-    $ git remote add upstream https://github.com/mwclient/mwclient.git
-    $ git rebase upstream master
+    $ git rebase master
 
-Then push your code and open a pull request on GitHub.
+When it is ready, push your branch to your remote:
+
+.. code:: bash
+
+    $ git push -u fork my-branch
+
+Then you can open a pull request on GitHub. You should see a URL to do this
+when you push your branch.
