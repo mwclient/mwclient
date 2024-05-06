@@ -132,20 +132,54 @@ called *consumer key*), the *consumer secret*, the *access token* and the
 
 .. _owner-only consumer: https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
 
+.. _clientlogin:
+
+Clientlogin authentication
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The :meth:`~mwclient.client.Site.clientlogin` method supports authentication
+using the ``clientlogin`` API, currently recommended by upstream for non-oauth
+authentication.
+
+For simple username-password authentication, you can do:
+
+    >>> site.clientlogin(username='myusername', password='secret')
+
+However, ``clientlogin`` can be called with arbitrary kwargs which are passed
+through, potentially enabling many different authentication processes,
+depending on server configuration.
+
+``clientlogin`` will retrieve and add the ``logintoken`` kwarg automatically,
+and add a ``loginreturnurl`` kwarg if neither it nor ``logincontinue`` is set.
+
+It returns ``True`` if login immediately succeeds, and raises an error if it
+fails. Otherwise it returns the response from the server for your application
+to parse. You will need to do something appropriate with the response and then
+call ``clientlogin`` again with updated arguments. Please see the
+`upstream documentation`_ for more details.
+
+.. _upstream documentation: https://www.mediawiki.org/wiki/API:Login#Method_2._action=clientlogin
+
 .. _username-password:
 
-Username-Password Authentication
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Legacy Username-Password Authentication
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. warning::
     Username-Password authentication is not recommended for Wikimedia wikis.
     See :ref:`oauth` for the recommended authentication method.
 
-The easiest way to authenticate is to call :meth:`~mwclient.client.Site.login`
+To use the legacy ``login`` interface, call :meth:`~mwclient.client.Site.login`
 with your username and password. If login fails, a
 :class:`mwclient.errors.LoginError` will be raised.
 
     >>> site.login('my_username', 'my_password')
+
+For sites that use "bot passwords", you can use this method to login with a
+bot password. From mediawiki 1.27 onwards, logging in this way with an
+account's main password is deprecated, and may stop working at some point.
+It is recommended to use :ref:`oauth`, :ref:`clientlogin`, or a bot password
+instead.
 
 .. _http-auth:
 
