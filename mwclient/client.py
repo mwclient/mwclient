@@ -65,7 +65,7 @@ class Site:
             text strings are encoded as UTF-8. If dealing with a server that cannot
             handle UTF-8, please provide the username and password already encoded with
             the appropriate encoding.
-        reqs (Dict[str, Any]): Additional arguments to be passed to the
+        connection_options (Dict[str, Any]): Additional arguments to be passed to the
             :py:meth:`requests.Session.request` method when performing API calls. If the
             `timeout` key is empty, a default timeout of 30 seconds is added.
         consumer_token (str): OAuth1 consumer key for owner-only consumers.
@@ -92,9 +92,9 @@ class Site:
     def __init__(self, host, path='/w/', ext='.php', pool=None, retry_timeout=30,
                  max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
                  max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
-                 reqs=None, consumer_token=None, consumer_secret=None, access_token=None,
-                 access_secret=None, client_certificate=None, custom_headers=None,
-                 scheme='https'):
+                 connection_options=None, consumer_token=None, consumer_secret=None,
+                 access_token=None, access_secret=None, client_certificate=None,
+                 custom_headers=None, scheme='https', reqs=None):
         # Setup member variables
         self.host = host
         self.path = path
@@ -103,7 +103,17 @@ class Site:
         self.compress = compress
         self.max_lag = str(max_lag)
         self.force_login = force_login
-        self.requests = reqs or {}
+        if reqs and connection_options:
+            raise ValueError(
+                "reqs is a deprecated alias of connection_options. Do not specify both."
+            )
+        if reqs:
+            warnings.warn(
+                "reqs is deprecated in mwclient 1.0.0. Use connection_options instead",
+                DeprecationWarning
+            )
+            connection_options = reqs
+        self.requests = connection_options or {}
         self.scheme = scheme
         if 'timeout' not in self.requests:
             self.requests['timeout'] = 30  # seconds
