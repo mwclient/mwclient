@@ -74,7 +74,7 @@ Using a proxy
 -------------
 
 If you need to use a proxy, you can configure the :class:`requests.Session`
-using the `reqs` parameter of the :class:`~mwclient.client.Site`.
+using the `connection_options` parameter of the :class:`~mwclient.client.Site`.
 
 .. code-block:: python
 
@@ -84,7 +84,7 @@ using the `reqs` parameter of the :class:`~mwclient.client.Site`.
       'http': 'http://10.10.1.10:3128',
       'https': 'http://10.10.1.10:1080',
     }
-    site = mwclient.Site('en.wikipedia.org', reqs={"proxy": proxies})
+    site = mwclient.Site('en.wikipedia.org', connection_options={"proxy": proxies})
 
 Errors and warnings
 -------------------
