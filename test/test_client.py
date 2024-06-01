@@ -467,6 +467,18 @@ class TestClient(TestCase):
             site.raw_api("query", "GET", retry_on_error=False)
         assert timesleep.call_count == 25
 
+    @responses.activate
+    def test_connection_options(self):
+        self.httpShouldReturn(self.metaResponseAsJson())
+        args = {"timeout": 60, "stream": False}
+        site = mwclient.Site('test.wikipedia.org', connection_options=args)
+        assert site.requests == args
+        with pytest.warns(DeprecationWarning):
+            site = mwclient.Site('test.wikipedia.org', reqs=args)
+        assert site.requests == args
+        with pytest.raises(ValueError):
+            site = mwclient.Site('test.wikipedia.org', reqs=args, connection_options=args)
+
 class TestLogin(TestCase):
 
     @mock.patch('mwclient.client.Site.site_init')
