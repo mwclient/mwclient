@@ -48,7 +48,18 @@ class ProtectedPageError(EditError, InsufficientPermission):
 
 
 class FileExists(EditError):
-    pass
+    """
+    Raised when trying to upload a file that already exists.
+
+    See also: https://www.mediawiki.org/wiki/API:Upload#Upload_warnings
+    """
+
+    def __init__(self, file_name):
+        self.file_name = file_name
+
+    def __str__(self):
+        return ('The file "{0}" already exists. Set ignore=True to overwrite it.'
+                .format(self.file_name))
 
 
 class LoginError(MwClientError):
