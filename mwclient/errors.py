@@ -1,3 +1,9 @@
+from typing import Any, TYPE_CHECKING, Optional, cast
+
+if TYPE_CHECKING:
+    import mwclient.page
+
+
 class MwClientError(RuntimeError):
     pass
 
@@ -16,7 +22,7 @@ class MaximumRetriesExceeded(MwClientError):
 
 class APIError(MwClientError):
 
-    def __init__(self, code, info, kwargs):
+    def __init__(self, code: Optional[str], info: str, kwargs: Optional[Any]) -> None:
         self.code = code
         self.info = info
         super(APIError, self).__init__(code, info, kwargs)
@@ -36,12 +42,17 @@ class EditError(MwClientError):
 
 class ProtectedPageError(EditError, InsufficientPermission):
 
-    def __init__(self, page, code=None, info=None):
+    def __init__(
+        self,
+        page: 'mwclient.page.Page',
+        code: Optional[str] = None,
+        info: Optional[str] = None
+    ) -> None:
         self.page = page
         self.code = code
         self.info = info
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self.info is not None:
             return self.info
         return 'You do not have the "edit" right.'
@@ -53,7 +64,9 @@ class FileExists(EditError):
 
 class LoginError(MwClientError):
 
-    def __init__(self, site, code, info):
+    def __init__(
+        self, site: 'mwclient.client.Site', code: Optional[str], info: str
+    ) -> None:
         super(LoginError, self).__init__(
             site,
             {'result': code, 'reason': info}  # For backwards-compability
@@ -62,7 +75,7 @@ class LoginError(MwClientError):
         self.code = code
         self.info = info
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.info
 
 
@@ -72,15 +85,15 @@ class OAuthAuthorizationError(LoginError):
 
 class AssertUserFailedError(MwClientError):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super(AssertUserFailedError, self).__init__((
             'By default, mwclient protects you from accidentally editing '
             'without being logged in. If you actually want to edit without '
             'logging in, you can set force_login on the Site object to False.'
         ))
 
-    def __str__(self):
-        return self.args[0]
+    def __str__(self) -> str:
+        return cast(str, self.args[0])
 
 
 class EmailError(MwClientError):
@@ -97,7 +110,7 @@ class NoWriteApi(MwClientError):
 
 class InvalidResponse(MwClientError):
 
-    def __init__(self, response_text=None):
+    def __init__(self, response_text: Optional[str] = None) -> None:
         super(InvalidResponse, self).__init__((
             'Did not get a valid JSON response from the server. Check that '
             'you used the correct hostname. If you did, the server might '
@@ -106,8 +119,8 @@ class InvalidResponse(MwClientError):
         )
         self.response_text = response_text
 
-    def __str__(self):
-        return self.args[0]
+    def __str__(self) -> str:
+        return cast(str, self.args[0])
 
 
 class InvalidPageTitle(MwClientError):
