@@ -8,5 +8,6 @@ dist
 .eggs
 .tox
 .idea/*
+.venv/
 .coverage
 coverage.lcov

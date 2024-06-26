@@ -1,16 +1,19 @@
-import warnings
-import logging
-
-from collections import OrderedDict
-
+import io
 import json
+import logging
+import warnings
+from collections import OrderedDict
+from typing import Optional, Callable, Union, Mapping, Any, MutableMapping, List, Dict, \
+    Tuple, cast, Iterable, BinaryIO, TextIO
+
 import requests
 from requests.auth import HTTPBasicAuth, AuthBase
 from requests_oauthlib import OAuth1
 
 import mwclient.errors as errors
 import mwclient.listing as listing
-from mwclient.sleep import Sleepers
+from mwclient.sleep import Sleeper, Sleepers
+from mwclient.types import Namespace
 from mwclient.util import parse_timestamp, read_in_chunks
 
 __version__ = '0.10.1'
@@ -30,54 +33,49 @@ class Site:
         >>> wikia_site = mwclient.Site('vim.wikia.com', path='/')
 
     Args:
-        host (str): The hostname of a MediaWiki instance. Must not include a
-            scheme (e.g. `https://`) - use the `scheme` argument instead.
-        path (str): The instances script path (where the `index.php` and `api.php` scripts
-            are located). Must contain a trailing slash (`/`). Defaults to `/w/`.
-        ext (str): The file extension used by the MediaWiki API scripts. Defaults to
-            `.php`.
-        pool (requests.Session): A preexisting :class:`~requests.Session` to be used when
-            executing API requests.
-        retry_timeout (int): The number of seconds to sleep for each past retry of a
-            failing API request. Defaults to `30`.
-        max_retries (int): The maximum number of retries to perform for failing API
-            requests. Defaults to `25`.
-        wait_callback (Callable): A callback function to be executed for each failing
-            API request.
-        clients_useragent (str): A prefix to be added to the default mwclient user-agent.
-            Should follow the pattern `'{tool_name}/{tool_version} ({contact})'`. Check
-            the `User-Agent policy <https://meta.wikimedia.org/wiki/User-Agent_policy>`_
+        host: The hostname of a MediaWiki instance. Must not include a scheme
+            (e.g. `https://`) - use the `scheme` argument instead.
+        path: The instances script path (where the `index.php` and `api.php` scripts are
+            located). Must contain a trailing slash (`/`). Defaults to `/w/`.
+        ext: The file extension used by the MediaWiki API scripts. Defaults to `.php`.
+        pool: A preexisting :class:`~requests.Session` to be used when executing API
+            requests.
+        retry_timeout: The number of seconds to sleep for each past retry of a failing API
+            request. Defaults to `30`.
+        max_retries: The maximum number of retries to perform for failing API requests.
+            Defaults to `25`.
+        wait_callback: A callback function to be executed for each failing API request.
+        clients_useragent: A prefix to be added to the default mwclient user-agent. Should
+            follow the pattern `'{tool_name}/{tool_version} ({contact})'`. Check the
+            `User-Agent policy <https://meta.wikimedia.org/wiki/User-Agent_policy>`_
             for more information.
-        max_lag (int): A `maxlag` parameter to be used in `index.php` calls. Consult the
+        max_lag: A `maxlag` parameter to be used in `index.php` calls. Consult the
             `documentation <https://www.mediawiki.org/wiki/Manual:Maxlag_parameter>`_ for
             more information. Defaults to `3`.
-        compress (bool): Whether to request and accept gzip compressed API responses.
-            Defaults to `True`.
-        force_login (bool): Whether to require authentication when editing pages. Set to
-            `False` to allow unauthenticated edits. Defaults to `True`.
-        do_init (bool): Whether to automatically initialize the :py:class:`Site` on
+        compress: Whether to request and accept gzip compressed API responses. Defaults to
+             `True`.
+        force_login: Whether to require authentication when editing pages. Set to `False`
+            to allow unauthenticated edits. Defaults to `True`.
+        do_init: Whether to automatically initialize the :py:class:`Site` on
             initialization. When set to `False`, the :py:class:`Site` must be initialized
             manually using the :py:meth:`.site_init` method. Defaults to `True`.
-        httpauth (Union[tuple[basestring, basestring], requests.auth.AuthBase]): An
-            authentication method to be used when making API requests. This can be either
-            an authentication object as provided by the :py:mod:`requests` library, or a
-            tuple in the form `{username, password}`. Usernames and passwords provided as
-            text strings are encoded as UTF-8. If dealing with a server that cannot
-            handle UTF-8, please provide the username and password already encoded with
-            the appropriate encoding.
-        reqs (Dict[str, Any]): Additional arguments to be passed to the
-            :py:meth:`requests.Session.request` method when performing API calls. If the
-            `timeout` key is empty, a default timeout of 30 seconds is added.
-        consumer_token (str): OAuth1 consumer key for owner-only consumers.
-        consumer_secret (str): OAuth1 consumer secret for owner-only consumers.
-        access_token (str): OAuth1 access key for owner-only consumers.
-        access_secret (str): OAuth1 access secret for owner-only consumers.
-        client_certificate (Union[str, tuple[str, str]]): A client certificate to be added
-            to the session.
-        custom_headers (Dict[str, str]): A dictionary of custom headers to be added to all
-            API requests.
-        scheme (str): The URI scheme to use. This should be either `http` or `https` in
-            most cases. Defaults to `https`.
+        httpauth: An authentication method to be used when making API requests. This can
+            be either an authentication object as provided by the :py:mod:`requests`
+            library, or a tuple in the form `{username, password}`. Usernames and
+            passwords provided as text strings are encoded as UTF-8. If dealing with a
+            server that cannot handle UTF-8, please provide the username and password
+            already encoded with the appropriate encoding.
+        reqs: Additional arguments to be passed to the :py:meth:`requests.Session.request`
+            method when performing API calls. If the `timeout` key is empty, a default
+            timeout of 30 seconds is added.
+        consumer_token: OAuth1 consumer key for owner-only consumers.
+        consumer_secret: OAuth1 consumer secret for owner-only consumers.
+        access_token: OAuth1 access key for owner-only consumers.
+        access_secret: OAuth1 access secret for owner-only consumers.
+        client_certificate: A client certificate to be added to the session.
+        custom_headers: A dictionary of custom headers to be added to all API requests.
+        scheme: The URI scheme to use. This should be either `http` or `https` in most
+            cases. Defaults to `https`.
 
     Raises:
         RuntimeError: The authentication passed to the `httpauth` parameter is invalid.
@@ -89,17 +87,40 @@ class Site:
     """
     api_limit = 500
 
-    def __init__(self, host, path='/w/', ext='.php', pool=None, retry_timeout=30,
-                 max_retries=25, wait_callback=lambda *x: None, clients_useragent=None,
-                 max_lag=3, compress=True, force_login=True, do_init=True, httpauth=None,
-                 reqs=None, consumer_token=None, consumer_secret=None, access_token=None,
-                 access_secret=None, client_certificate=None, custom_headers=None,
-                 scheme='https'):
+    def __init__(
+        self,
+        host: str,
+        path: str = '/w/',
+        ext: str = '.php',
+        pool: Optional[requests.Session] = None,
+        retry_timeout: int = 30,
+        max_retries: int = 25,
+        wait_callback: Callable[['Sleeper', int, Optional[Any]], Any] = lambda *x: None,
+        clients_useragent: Optional[str] = None,
+        max_lag: int = 3,
+        compress: bool = True,
+        force_login: bool = True,
+        do_init: bool = True,
+        httpauth: Union[
+            Tuple[Union[str, bytes], Union[str, bytes]],
+            requests.auth.AuthBase,
+            List[Union[str, bytes]],
+            None,
+        ] = None,
+        reqs: Optional[MutableMapping[str, Any]] = None,
+        consumer_token: Optional[str] = None,
+        consumer_secret: Optional[str] = None,
+        access_token: Optional[str] = None,
+        access_secret: Optional[str] = None,
+        client_certificate: Optional[Union[str, Tuple[str, str]]] = None,
+        custom_headers: Optional[Mapping[str, str]] = None,
+        scheme: str = 'https'
+    ) -> None:
         # Setup member variables
         self.host = host
         self.path = path
         self.ext = ext
-        self.credentials = None
+        self.credentials = None  # type: Optional[Tuple[str, str, Optional[str]]]
         self.compress = compress
         self.max_lag = str(max_lag)
         self.force_login = force_login
@@ -127,19 +148,19 @@ class Site:
         self.sleepers = Sleepers(max_retries, retry_timeout, wait_callback)
 
         # Site properties
-        self.blocked = False    # Whether current user is blocked
+        self.blocked = False  # type: Union[Tuple[str, str], bool]  # Is user blocked?
         self.hasmsg = False  # Whether current user has new messages
-        self.groups = []    # Groups current user belongs to
-        self.rights = []    # Rights current user has
-        self.tokens = {}    # Edit tokens of the current user
-        self.version = None
+        self.groups = []  # type: List[str]  # Groups current user is in
+        self.rights = []  # type: List[str]  # Rights current user has
+        self.tokens = {}  # type: Dict[str, str]  # Edit tokens of the current user
+        self.version = None  # type: Union[Tuple[int, ...], Tuple[int, str], None]
 
-        self.namespaces = self.default_namespaces
-        self.writeapi = False
+        self.namespaces = self.default_namespaces  # type: Dict[int, str]
+        self.writeapi = False  # type: bool
 
         # Setup connection
         if pool is None:
-            self.connection = requests.Session()
+            self.connection = requests.Session()  # type: requests.Session
             self.connection.auth = auth
             if client_certificate:
                 self.connection.cert = client_certificate
@@ -183,7 +204,7 @@ class Site:
                 if e.args[0] not in {'unknown_action', 'readapidenied'}:
                     raise
 
-    def site_init(self):
+    def site_init(self) -> None:
         """Populates the object with information about the current user and site. This is
         done automatically when creating the object, unless explicitly disabled using the
         `do_init=False` constructor argument."""
@@ -222,7 +243,9 @@ class Site:
         self.initialized = True
 
     @staticmethod
-    def version_tuple_from_generator(string, prefix='MediaWiki '):
+    def version_tuple_from_generator(
+        string: str, prefix: str = 'MediaWiki '
+    ) -> Union[Tuple[int, ...], Tuple[int, str]]:
         """Return a version tuple from a MediaWiki Generator string.
 
         Example:
@@ -230,8 +253,8 @@ class Site:
             (1, 5, 1)
 
         Args:
-            string (str): The MediaWiki Generator string.
-            prefix (str): The expected prefix of the string.
+            string: The MediaWiki Generator string.
+            prefix: The expected prefix of the string.
 
         Returns:
             A tuple containing the individual elements of the given version number.
@@ -241,7 +264,7 @@ class Site:
 
         version = string[len(prefix):].split('.')
 
-        def split_num(s):
+        def split_num(s: str) -> Union[Tuple[int], Tuple[int, str]]:
             """Split the string on the first non-digit character.
 
             Returns:
@@ -254,9 +277,9 @@ class Site:
                     break
                 i += 1
             if s[i:]:
-                return (int(s[:i]), s[i:], )
+                return (int(s[:i]), s[i:],)
             else:
-                return (int(s[:i]), )
+                return (int(s[:i]),)
 
         version_tuple = sum((split_num(s) for s in version), ())
 
@@ -274,45 +297,51 @@ class Site:
         -1: 'Special', -2: 'Media'
     }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<%s object '%s%s'>" % (self.__class__.__name__, self.host, self.path)
 
-    def get(self, action, *args, **kwargs):
+    def get(self, action: str, *args: Tuple[str, Any], **kwargs: Any) -> Dict[str, Any]:
         """Perform a generic API call using GET.
 
         This is just a shorthand for calling api() with http_method='GET'.
         All arguments will be passed on.
 
         Args:
-            action (str): The MediaWiki API action to be performed.
+            action: The MediaWiki API action to be performed.
 
         Returns:
             The raw response from the API call, as a dictionary.
         """
         return self.api(action, 'GET', *args, **kwargs)
 
-    def post(self, action, *args, **kwargs):
+    def post(self, action: str, *args: Tuple[str, Any], **kwargs: Any) -> Dict[str, Any]:
         """Perform a generic API call using POST.
 
         This is just a shorthand for calling api() with http_method='POST'.
         All arguments will be passed on.
 
         Args:
-            action (str): The MediaWiki API action to be performed.
+            action: The MediaWiki API action to be performed.
 
         Returns:
             The raw response from the API call, as a dictionary.
         """
         return self.api(action, 'POST', *args, **kwargs)
 
-    def api(self, action, http_method='POST', *args, **kwargs):
+    def api(
+        self,
+        action: str,
+        http_method: str = 'POST',
+        *args: Tuple[str, Any],
+        **kwargs: Any
+    ) -> Dict[str, Any]:
         """Perform a generic API call and handle errors.
 
         All arguments will be passed on.
 
         Args:
-            action (str): The MediaWiki API action to be performed.
-            http_method (str): The HTTP method to use.
+            action: The MediaWiki API action to be performed.
+            http_method: The HTTP method to use.
 
         Example:
             To get coordinates from the GeoData MediaWiki extension at English Wikipedia:
@@ -353,16 +382,20 @@ class Site:
             if self.handle_api_result(info, sleeper=sleeper):
                 return info
 
-    def handle_api_result(self, info, kwargs=None, sleeper=None):
+    def handle_api_result(
+        self,
+        info: Mapping[str, Any],
+        kwargs: Optional[Mapping[str, Any]] = None,
+        sleeper: Optional['Sleeper'] = None
+    ) -> bool:
         """Checks the given API response, raising an appropriate exception or sleeping if
         necessary.
 
         Args:
-            info (dict): The API result.
-            kwargs (dict): Additional arguments to be passed when raising an
+            info: The API result.
+            kwargs: Additional arguments to be passed when raising an
                 :class:`errors.APIError`.
-            sleeper (sleep.Sleeper): A :class:`~sleep.Sleeper` instance to use when
-                sleeping.
+            sleeper: A :class:`~sleep.Sleeper` instance to use when sleeping.
 
         Returns:
             `False` if the given API response contains an exception, else `True`.
@@ -414,7 +447,7 @@ class Site:
         return True
 
     @staticmethod
-    def _query_string(*args, **kwargs):
+    def _query_string(*args: Tuple[str, Any], **kwargs: Any) -> Dict[str, Any]:
         kwargs.update(args)
         qs1 = [
             (k, v) for k, v in kwargs.items() if k not in {'wpEditToken', 'token'}
@@ -424,7 +457,16 @@ class Site:
         ]
         return OrderedDict(qs1 + qs2)
 
-    def raw_call(self, script, data, files=None, retry_on_error=True, http_method='POST'):
+    def raw_call(
+        self,
+        script: str,
+        data: Mapping[str, Any],
+        files: Optional[
+            Mapping[str, Union[io.BytesIO, Tuple[str, io.BufferedReader]]]
+        ] = None,
+        retry_on_error: bool = True,
+        http_method: str = 'POST'
+    ) -> str:
         """
         Perform a generic request and return the raw text.
 
@@ -437,11 +479,11 @@ class Site:
         HTTP responses.
 
         Args:
-            script (str): Script name, usually 'api'.
-            data (dict): Post data
-            files (dict): Files to upload
-            retry_on_error (bool): Retry on connection error
-            http_method (str): The HTTP method, defaults to 'POST'
+            script: Script name, usually 'api'.
+            data: Post data
+            files: Files to upload
+            retry_on_error: Retry on connection error
+            http_method: The HTTP method, defaults to 'POST'
 
         Returns:
             The raw text response.
@@ -462,8 +504,8 @@ class Site:
 
         scheme = self.scheme
         host = self.host
-        if isinstance(host, (list, tuple)):
-            warnings.warn(
+        if isinstance(host, (list, tuple)):  # type: ignore[unreachable]
+            warnings.warn(  # type: ignore[unreachable]
                 'Specifying host as a tuple is deprecated as of mwclient 0.10.1. '
                 + 'Please use the new scheme argument instead.',
                 DeprecationWarning
@@ -477,7 +519,7 @@ class Site:
         while True:
             toraise = None
             wait_time = 0
-            args = {'files': files, 'headers': headers}
+            args = {'files': files, 'headers': headers}  # type: Dict[str, Any]
             for k, v in self.requests.items():
                 args[k] = v
             if http_method == 'GET':
@@ -488,7 +530,9 @@ class Site:
             try:
                 stream = self.connection.request(http_method, url, **args)
                 if stream.headers.get('x-database-lag'):
-                    wait_time = int(stream.headers.get('retry-after'))
+                    wait_time = int(
+                        stream.headers.get('retry-after')  # type: ignore[arg-type]
+                    )
                     log.warning('Database lag exceeds max lag. '
                                 'Waiting for {} seconds'.format(wait_time))
                     # fall through to the sleep
@@ -516,7 +560,7 @@ class Site:
                 if not retry_on_error:
                     raise
                 log.warning('Connection error. Retrying in a moment.')
-                toraise = err
+                toraise = err  # type: ignore[assignment]
                 # proceed to the sleep
 
             # all retry paths come here
@@ -526,20 +570,26 @@ class Site:
                 if toraise == "stream":
                     stream.raise_for_status()
                 elif toraise:
-                    raise toraise
+                    raise toraise  # type: ignore[misc]
                 else:
                     raise
 
-    def raw_api(self, action, http_method='POST', retry_on_error=True, *args, **kwargs):
+    def raw_api(
+        self,
+        action: str,
+        http_method: str = 'POST',
+        retry_on_error: bool = True,
+        *args: Tuple[str, Any],
+        **kwargs: Any
+    ) -> Dict[str, Any]:
         """Send a call to the API.
 
         Args:
-            action (str): The MediaWiki API action to perform.
-            http_method (str): The HTTP method to use in the request.
-            retry_on_error (bool): Whether to retry API call on connection errors.
-            *args (Tuple[str, Any]): Arguments to be passed to the `api.php` script as
-                data.
-            **kwargs (Any): Arguments to be passed to the `api.php` script as data.
+            action: The MediaWiki API action to perform.
+            http_method: The HTTP method to use in the request.
+            retry_on_error: Whether to retry API call on connection errors.
+            *args: Arguments to be passed to the `api.php` script as data.
+            **kwargs: Arguments to be passed to the `api.php` script as data.
 
         Returns:
             The API response.
@@ -562,21 +612,26 @@ class Site:
                             http_method=http_method)
 
         try:
-            return json.loads(res, object_pairs_hook=OrderedDict)
+            return cast(Dict[str, Any], json.loads(res, object_pairs_hook=OrderedDict))
         except ValueError:
             if res.startswith('MediaWiki API is not enabled for this site.'):
                 raise errors.APIDisabledError
             raise errors.InvalidResponse(res)
 
-    def raw_index(self, action, http_method='POST', *args, **kwargs):
+    def raw_index(
+        self,
+        action: str,
+        http_method: str = 'POST',
+        *args: Tuple[str, Any],
+        **kwargs: Any
+    ) -> str:
         """Sends a call to index.php rather than the API.
 
         Args:
-            action (str): The MediaWiki API action to perform.
-            http_method (str): The HTTP method to use in the request.
-            *args (Tuple[str, Any]): Arguments to be passed to the `index.php` script as
-                data.
-            **kwargs (Any): Arguments to be passed to the `index.php` script as data.
+            action: The MediaWiki API action to perform.
+            http_method: The HTTP method to use in the request.
+            *args: Arguments to be passed to the `index.php` script as data.
+            **kwargs: Arguments to be passed to the `index.php` script as data.
 
         Returns:
             The API response.
@@ -595,15 +650,21 @@ class Site:
         data = self._query_string(*args, **kwargs)
         return self.raw_call('index', data, http_method=http_method)
 
-    def require(self, major, minor, revision=None, raise_error=True):
+    def require(
+        self,
+        major: int,
+        minor: int,
+        revision: Optional[int] = None,
+        raise_error: bool = True
+    ) -> bool:
         """Check whether the current wiki matches the required version.
 
         Args:
-            major (int): The required major version.
-            minor (int): The required minor version.
-            revision (int): The required revision.
-            raise_error (bool): Whether to throw an error if the version of the current
-                wiki is below the required version. Defaults to `True`.
+            major: The required major version.
+            minor: The required minor version.
+            revision: The required revision.
+            raise_error: Whether to throw an error if the version of the current wiki is
+                below the required version. Defaults to `True`.
 
         Returns:
             `False` if the version of the current wiki is below the required version, else
@@ -623,7 +684,7 @@ class Site:
         """
         if self.version is None:
             if raise_error is None:
-                return
+                return  # type: ignore[unreachable]
             # FIXME: Replace this with a specific error
             raise RuntimeError('Site %s has not yet been initialized' % repr(self))
 
@@ -643,7 +704,9 @@ class Site:
             raise NotImplementedError
 
     # Actions
-    def email(self, user, text, subject, cc=False):
+    def email(
+        self, user: str, text: str, subject: str, cc: bool = False
+    ) -> Dict[str, Any]:
         """
         Send email to a specified user on the wiki.
 
@@ -652,11 +715,13 @@ class Site:
             ... except mwclient.errors.NoSpecifiedEmail:
             ...     print('User does not accept email, or has no email address.')
 
+        API doc: https://www.mediawiki.org/wiki/API:Email
+
         Args:
-            user (str): User name of the recipient
-            text (str): Body of the email
-            subject (str): Subject of the email
-            cc (bool): True to send a copy of the email to yourself (default is False)
+            user: Username of the recipient
+            text: Body of the email
+            subject: Subject of the email
+            cc: True to send a copy of the email to yourself (default is False)
 
         Returns:
             Dictionary of the JSON response
@@ -674,11 +739,17 @@ class Site:
         except errors.APIError as e:
             if e.args[0] == 'noemail':
                 raise errors.NoSpecifiedEmail(user, e.args[1])
-            raise errors.EmailError(*e)
+            raise errors.EmailError(*e)  # type: ignore[misc]
 
         return info
 
-    def login(self, username=None, password=None, cookies=None, domain=None):
+    def login(
+        self,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        cookies: Optional[Mapping[str, str]] = None,
+        domain: Optional[str] = None
+    ) -> None:
         """
         Login to the wiki using a username and bot password. The method returns
         nothing if the login was successful, but raises and error if it was not.
@@ -695,11 +766,11 @@ class Site:
               with a user who has userrights permission (a bureaucrat for eg.).
 
         Args:
-            username (str): MediaWiki username
-            password (str): MediaWiki password
-            cookies (dict): Custom cookies to include with the log-in request.
-            domain (str): Sends domain name for authentication; used by some
-                MediaWiki plug-ins like the 'LDAP Authentication' extension.
+            username: MediaWiki username
+            password: MediaWiki password
+            cookies: Custom cookies to include with the log-in request.
+            domain: Sends domain name for authentication; used by some MediaWiki plug-ins
+                like the 'LDAP Authentication' extension.
 
         Raises:
             LoginError (mwclient.errors.LoginError): Login failed, the reason can be
@@ -752,7 +823,9 @@ class Site:
 
         self.site_init()
 
-    def clientlogin(self, cookies=None, **kwargs):
+    def clientlogin(
+        self, cookies: Optional[Mapping[str, str]] = None, **kwargs: Any
+    ) -> Any:
         """
         Login to the wiki using a username and password. The method returns
         True if it's a success or the returned response if it's a multi-steps
@@ -765,8 +838,8 @@ class Site:
             ...     print('Could not login to MediaWiki: %s' % e)
 
         Args:
-            cookies (dict): Custom cookies to include with the log-in request.
-            **kwargs (dict): Custom vars used for clientlogin as:
+            cookies: Custom cookies to include with the log-in request.
+            **kwargs: Custom vars used for clientlogin as:
                 - loginmergerequestfields
                 - loginpreservestate
                 - loginreturnurl,
@@ -821,15 +894,17 @@ class Site:
                     raise errors.LoginError(self, status,
                                             login['clientlogin'].get('message'))
 
-    def get_token(self, type, force=False, title=None):
+    def get_token(
+        self, type: str, force: bool = False, title: Optional[str] = None
+    ) -> str:
         """Request a MediaWiki access token of the given `type`.
 
         Args:
-            type (str): The type of token to request.
-            force (bool): Force the request of a new token, even if a token of that type
-                has already been cached.
-            title (str): The page title for which to request a token. Only used for
-                MediaWiki versions below 1.24.
+            type: The type of token to request.
+            force: Force the request of a new token, even if a token of that type has
+                already been cached.
+            title: The page title for which to request a token. Only used for MediaWiki
+                versions below 1.24.
 
         Returns:
             A MediaWiki token of the requested `type`.
@@ -873,25 +948,34 @@ class Site:
 
         return self.tokens[type]
 
-    def upload(self, file=None, filename=None, description='', ignore=False,
-               file_size=None, url=None, filekey=None, comment=None):
+    def upload(
+        self,
+        file: Union[str, BinaryIO, TextIO, None] = None,
+        filename: Optional[str] = None,
+        description: str = '',
+        ignore: bool = False,
+        file_size: Optional[int] = None,
+        url: Optional[str] = None,
+        filekey: Optional[str] = None,
+        comment: Optional[str] = None
+    ) -> Any:
         """Upload a file to the site.
 
         Note that one of `file`, `filekey` and `url` must be specified, but not
         more than one. For normal uploads, you specify `file`.
 
+        API doc: https://www.mediawiki.org/wiki/API:Upload
+
         Args:
-            file (str): File object or stream to upload.
-            filename (str): Destination filename, don't include namespace
-                            prefix like 'File:'
-            description (str): Wikitext for the file description page.
-            ignore (bool): True to upload despite any warnings.
-            file_size (int): Deprecated in mwclient 0.7
-            url (str): URL to fetch the file from.
-            filekey (str): Key that identifies a previous upload that was
-                           stashed temporarily.
-            comment (str): Upload comment. Also used as the initial page text
-                           for new files if `description` is not specified.
+            file: File object or stream to upload.
+            filename: Destination filename, don't include namespace prefix like 'File:'
+            description: Wikitext for the file description page.
+            ignore: True to upload despite any warnings.
+            file_size: Deprecated in mwclient 0.7
+            url: URL to fetch the file from.
+            filekey: Key that identifies a previous upload that was stashed temporarily.
+            comment: Upload comment. Also used as the initial page text for new files if
+                     `description` is not specified.
 
         Example:
 
@@ -936,10 +1020,15 @@ class Site:
             if not hasattr(file, 'read'):
                 file = open(file, 'rb')
 
+            # Narrowing the type of file from Union[str, io.BufferedReader] to just
+            # io.BufferedReader, since we know it's not a string at this point.
+            file = cast(io.BufferedReader, file)
+
             content_size = file.seek(0, 2)
             file.seek(0)
 
-            if self.version[:2] >= (1, 20) and content_size > self.chunk_size:
+            if (self.version[:2] >= (1, 20)  # type: ignore[index]
+                    and content_size > self.chunk_size):
                 return self.chunk_upload(file, filename, ignore, comment, text)
 
         predata = {
@@ -958,7 +1047,7 @@ class Site:
 
         # sessionkey was renamed to filekey in MediaWiki 1.18
         # https://phabricator.wikimedia.org/rMW5f13517e36b45342f228f3de4298bb0fe186995d
-        if self.version[:2] < (1, 18):
+        if self.version[:2] < (1, 18):  # type: ignore[index]
             predata['sessionkey'] = filekey
         else:
             predata['filekey'] = filekey
@@ -966,7 +1055,6 @@ class Site:
         postdata = predata
         files = None
         if file is not None:
-
             # Workaround for https://github.com/mwclient/mwclient/issues/65
             # ----------------------------------------------------------------
             # Since the filename in Content-Disposition is not interpreted,
@@ -987,7 +1075,14 @@ class Site:
             file.close()
         return response
 
-    def chunk_upload(self, file, filename, ignorewarnings, comment, text):
+    def chunk_upload(
+        self,
+        file: io.BufferedReader,
+        filename: str,
+        ignorewarnings: bool,
+        comment: str,
+        text: Optional[str]
+    ) -> Any:
         """Upload a file to the site in chunks.
 
         This method is called by `Site.upload` if you are connecting to a newer
@@ -995,8 +1090,11 @@ class Site:
         method directly.
 
         Args:
-            file (file-like object): File object or stream to upload.
-            params (dict): Dict containing upload parameters.
+            file: File object or stream to upload.
+            filename: Destination filename.
+            ignorewarnings: True to upload despite any warnings.
+            comment: Upload comment.
+            text: Initial page text for new files.
         """
         image = self.Images[filename]
 
@@ -1048,20 +1146,29 @@ class Site:
         params['text'] = text
         return self.post('upload', **params)
 
-    def parse(self, text=None, title=None, page=None, prop=None,
-              redirects=False, mobileformat=False):
+    def parse(
+        self,
+        text: Optional[str] = None,
+        title: Optional[str] = None,
+        page: Optional[str] = None,
+        prop: Optional[str] = None,
+        redirects: bool = False,
+        mobileformat: bool = False
+    ) -> Any:
         """Parses the given content and returns parser output.
 
+        API doc: https://www.mediawiki.org/wiki/API:Parse
+
         Args:
-            text (str): Text to parse.
-            title (str): Title of page the text belongs to.
-            page (str): The name of a page to parse. Cannot be used together with text
+            text: Text to parse.
+            title: Title of page the text belongs to.
+            page: The name of a page to parse. Cannot be used together with text
                 and title.
-            prop (str): Which pieces of information to get. Multiple alues should be
+            prop: Which pieces of information to get. Multiple alues should be
                 separated using the pipe (`|`) character.
-            redirects (bool): Resolve the redirect, if the given `page` is a redirect.
+            redirects: Resolve the redirect, if the given `page` is a redirect.
                 Defaults to `False`.
-            mobileformat (bool): Return parse output in a format suitable for mobile
+            mobileformat: Return parse output in a format suitable for mobile
                 devices. Defaults to `False`.
 
         Returns:
@@ -1087,7 +1194,12 @@ class Site:
     # def unblock: TODO?
     # def import: TODO?
 
-    def patrol(self, rcid=None, revid=None, tags=None):
+    def patrol(
+        self,
+        rcid: Optional[int] = None,
+        revid: Optional[int] = None,
+        tags: Optional[str] = None
+    ) -> Any:
         """Patrol a page or a revision. Either ``rcid`` or ``revid`` (but not both) must
         be given.
         The ``rcid`` and ``revid`` arguments may be obtained using the
@@ -1096,9 +1208,9 @@ class Site:
         API doc: https://www.mediawiki.org/wiki/API:Patrol
 
         Args:
-            rcid (int): The recentchanges ID to patrol.
-            revid (int): The revision ID to patrol.
-            tags (str): Change tags to apply to the entry in the patrol log. Multiple
+            rcid: The recentchanges ID to patrol.
+            revid: The revision ID to patrol.
+            tags: Change tags to apply to the entry in the patrol log. Multiple
                 tags can be given, by separating them with the pipe (|) character.
 
         Returns:
@@ -1127,11 +1239,27 @@ class Site:
         return result['patrol']
 
     # Lists
-    def allpages(self, start=None, prefix=None, namespace='0', filterredir='all',
-                 minsize=None, maxsize=None, prtype=None, prlevel=None,
-                 limit=None, dir='ascending', filterlanglinks='all', generator=True,
-                 end=None):
-        """Retrieve all pages on the wiki as a generator."""
+    def allpages(
+        self,
+        start: Optional[str] = None,
+        prefix: Optional[str] = None,
+        namespace: Namespace = '0',
+        filterredir: str = 'all',
+        minsize: Optional[int] = None,
+        maxsize: Optional[int] = None,
+        prtype: Optional[str] = None,
+        prlevel: Optional[str] = None,
+        limit: Optional[int] = None,
+        dir: str = 'ascending',
+        filterlanglinks: str = 'all',
+        generator: bool = True,
+        end: Optional[str] = None
+    ) -> listing.List:
+        """
+        Retrieve all pages on the wiki as a generator.
+
+        API doc: https://www.mediawiki.org/wiki/API:Allpages
+        """
 
         pfx = listing.List.get_prefix('ap', generator)
         kwargs = dict(listing.List.generate_kwargs(
@@ -1144,23 +1272,51 @@ class Site:
                                                 limit=limit, return_values='title',
                                                 **kwargs)
 
-    def allimages(self, start=None, prefix=None, minsize=None, maxsize=None, limit=None,
-                  dir='ascending', sha1=None, sha1base36=None, generator=True, end=None):
-        """Retrieve all images on the wiki as a generator."""
+    def allimages(
+        self,
+        start: Optional[str] = None,
+        prefix: Optional[str] = None,
+        minsize: Optional[int] = None,
+        maxsize: Optional[int] = None,
+        limit: Optional[int] = None,
+        dir: str = 'ascending',
+        sha1: Optional[str] = None,
+        sha1base36: Optional[str] = None,
+        generator: bool = True,
+        end: Optional[str] = None
+    ) -> listing.List:
+        """
+        Retrieve all images on the wiki as a generator.
+
+        API doc: https://www.mediawiki.org/wiki/API:Allimages
+        """
 
         pfx = listing.List.get_prefix('ai', generator)
         kwargs = dict(listing.List.generate_kwargs(
             pfx, ('from', start), ('to', end), prefix=prefix,
             minsize=minsize, maxsize=maxsize,
-            dir=dir, sha1=sha1, sha1base36=sha1base36,
+            dir=dir, sha1=sha1, sha1base36=sha1base36
         ))
         return listing.List.get_list(generator)(self, 'allimages', 'ai', limit=limit,
                                                 return_values='timestamp|url',
                                                 **kwargs)
 
-    def alllinks(self, start=None, prefix=None, unique=False, prop='title',
-                 namespace='0', limit=None, generator=True, end=None):
-        """Retrieve a list of all links on the wiki as a generator."""
+    def alllinks(
+        self,
+        start: Optional[str] = None,
+        prefix: Optional[str] = None,
+        unique: bool = False,
+        prop: str = 'title',
+        namespace: Namespace = '0',
+        limit: Optional[int] = None,
+        generator: bool = True,
+        end: Optional[str] = None
+    ) -> listing.List:
+        """
+        Retrieve a list of all links on the wiki as a generator.
+
+        API doc: https://www.mediawiki.org/wiki/API:Alllinks
+        """
 
         pfx = listing.List.get_prefix('al', generator)
         kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end),
@@ -1171,9 +1327,20 @@ class Site:
         return listing.List.get_list(generator)(self, 'alllinks', 'al', limit=limit,
                                                 return_values='title', **kwargs)
 
-    def allcategories(self, start=None, prefix=None, dir='ascending', limit=None,
-                      generator=True, end=None):
-        """Retrieve all categories on the wiki as a generator."""
+    def allcategories(
+        self,
+        start: Optional[str] = None,
+        prefix: Optional[str] = None,
+        dir: str = 'ascending',
+        limit: Optional[int] = None,
+        generator: bool = True,
+        end: Optional[str] = None
+    ) -> listing.List:
+        """
+        Retrieve all categories on the wiki as a generator.
+
+        API doc: https://www.mediawiki.org/wiki/API:Allcategories
+        """
 
         pfx = listing.List.get_prefix('ac', generator)
         kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end),
@@ -1181,9 +1348,23 @@ class Site:
         return listing.List.get_list(generator)(self, 'allcategories', 'ac', limit=limit,
                                                 **kwargs)
 
-    def allusers(self, start=None, prefix=None, group=None, prop=None, limit=None,
-                 witheditsonly=False, activeusers=False, rights=None, end=None):
-        """Retrieve all users on the wiki as a generator."""
+    def allusers(
+        self,
+        start: Optional[str] = None,
+        prefix: Optional[str] = None,
+        group: Optional[str] = None,
+        prop: Optional[str] = None,
+        limit: Optional[int] = None,
+        witheditsonly: bool = False,
+        activeusers: bool = False,
+        rights: Optional[str] = None,
+        end: Optional[str] = None
+    ) -> listing.List:
+        """
+        Retrieve all users on the wiki as a generator.
+
+        API doc: https://www.mediawiki.org/wiki/API:Allusers
+        """
 
         kwargs = dict(listing.List.generate_kwargs('au', ('from', start), ('to', end),
                                                    prefix=prefix,
@@ -1193,8 +1374,16 @@ class Site:
                                                    activeusers=activeusers))
         return listing.List(self, 'allusers', 'au', limit=limit, **kwargs)
 
-    def blocks(self, start=None, end=None, dir='older', ids=None, users=None, limit=None,
-               prop='id|user|by|timestamp|expiry|reason|flags'):
+    def blocks(
+        self,
+        start: Optional[str] = None,
+        end: Optional[str] = None,
+        dir: str = 'older',
+        ids: Optional[str] = None,
+        users: Optional[str] = None,
+        limit: Optional[int] = None,
+        prop: str = 'id|user|by|timestamp|expiry|reason|flags'
+    ) -> listing.List:
         """Retrieve blocks as a generator.
 
         API doc: https://www.mediawiki.org/wiki/API:Blocks
@@ -1224,17 +1413,38 @@ class Site:
                                                    ids=ids, users=users, prop=prop))
         return listing.List(self, 'blocks', 'bk', limit=limit, **kwargs)
 
-    def deletedrevisions(self, start=None, end=None, dir='older', namespace=None,
-                         limit=None, prop='user|comment'):
+    def deletedrevisions(
+        self,
+        start: Optional[str] = None,
+        end: Optional[str] = None,
+        dir: str = 'older',
+        namespace: Optional[int] = None,
+        limit: Optional[int] = None,
+        prop: str = 'user|comment'
+    ) -> listing.List:
+        """
+        Retrieve deleted revisions as a generator.
+
+        API doc: https://www.mediawiki.org/wiki/API:Deletedrevs
+        """
         # TODO: Fix
 
         kwargs = dict(listing.List.generate_kwargs('dr', start=start, end=end, dir=dir,
                                                    namespace=namespace, prop=prop))
         return listing.List(self, 'deletedrevs', 'dr', limit=limit, **kwargs)
 
-    def exturlusage(self, query, prop=None, protocol='http', namespace=None, limit=None):
+    def exturlusage(
+        self,
+        query: str,
+        prop: Optional[str] = None,
+        protocol: str = 'http',
+        namespace: Optional[Namespace] = None,
+        limit: Optional[int] = None
+    ) -> listing.List:
         r"""Retrieve the list of pages that link to a particular domain or URL,
          as a generator.
+
+         API doc: https://www.mediawiki.org/wiki/API:Exturlusage
 
         This API call mirrors the Special:LinkSearch function on-wiki.
 
@@ -1259,26 +1469,55 @@ class Site:
                                                    namespace=namespace))
         return listing.List(self, 'exturlusage', 'eu', limit=limit, **kwargs)
 
-    def logevents(self, type=None, prop=None, start=None, end=None,
-                  dir='older', user=None, title=None, limit=None, action=None):
-        """Retrieve logevents as a generator."""
+    def logevents(
+        self,
+        type: Optional[str] = None,
+        prop: Optional[str] = None,
+        start: Optional[str] = None,
+        end: Optional[str] = None,
+        dir: str = 'older',
+        user: Optional[str] = None,
+        title: Optional[str] = None,
+        limit: Optional[int] = None,
+        action: Optional[str] = None
+    ) -> listing.List:
+        """
+        Retrieve logevents as a generator.
+
+        API doc: https://www.mediawiki.org/wiki/API:Logevents
+        """
         kwargs = dict(listing.List.generate_kwargs('le', prop=prop, type=type,
                                                    start=start, end=end, dir=dir,
                                                    user=user, title=title, action=action))
         return listing.List(self, 'logevents', 'le', limit=limit, **kwargs)
 
-    def checkuserlog(self, user=None, target=None, limit=10, dir='older',
-                     start=None, end=None):
+    def checkuserlog(
+        self,
+        user: Optional[str] = None,
+        target: Optional[str] = None,
+        limit: int = 10,
+        dir: str = 'older',
+        start: Optional[str] = None,
+        end: Optional[str] = None
+    ) -> listing.NestedList:
         """Retrieve checkuserlog items as a generator."""
 
         kwargs = dict(listing.List.generate_kwargs('cul', target=target, start=start,
                                                    end=end, dir=dir, user=user))
-        return listing.NestedList('entries', self, 'checkuserlog', 'cul',
-                                  limit=limit, **kwargs)
+        return listing.NestedList(
+            'entries',
+            self,  # type: ignore[arg-type]
+            'checkuserlog',  # type: ignore[arg-type]
+            'cul',  # type: ignore[arg-type]
+            limit=limit,
+            **kwargs,
+        )
 
     # def protectedtitles requires 1.15
-    def random(self, namespace, limit=20):
+    def random(self, namespace: Namespace, limit: int = 20) -> listing.List:
         """Retrieve a generator of random pages from a particular namespace.
+
+        API doc: https://www.mediawiki.org/wiki/API:Random
 
         limit specifies the number of random articles retrieved.
         namespace is a namespace identifier integer.
@@ -1290,9 +1529,22 @@ class Site:
         kwargs = dict(listing.List.generate_kwargs('rn', namespace=namespace))
         return listing.List(self, 'random', 'rn', limit=limit, **kwargs)
 
-    def recentchanges(self, start=None, end=None, dir='older', namespace=None,
-                      prop=None, show=None, limit=None, type=None, toponly=None):
-        """List recent changes to the wiki, à la Special:Recentchanges.
+    def recentchanges(
+        self,
+        start: Optional[str] = None,
+        end: Optional[str] = None,
+        dir: str = 'older',
+        namespace: Optional[Namespace] = None,
+        prop: Optional[str] = None,
+        show: Optional[str] = None,
+        limit: Optional[int] = None,
+        type: Optional[str] = None,
+        toponly: Optional[bool] = None
+    ) -> listing.List:
+        """
+        List recent changes to the wiki, à la Special:Recentchanges.
+
+        API doc: https://www.mediawiki.org/wiki/API:Recentchanges
         """
         kwargs = dict(listing.List.generate_kwargs('rc', start=start, end=end, dir=dir,
                                                    namespace=namespace, prop=prop,
@@ -1300,7 +1552,9 @@ class Site:
                                                    toponly='1' if toponly else None))
         return listing.List(self, 'recentchanges', 'rc', limit=limit, **kwargs)
 
-    def revisions(self, revids, prop='ids|timestamp|flags|comment|user'):
+    def revisions(
+        self, revids: List[int], prop: str = 'ids|timestamp|flags|comment|user'
+    ) -> List[Dict[str, Any]]:
         """Get data about a list of revisions.
 
         See also the `Page.revisions()` method.
@@ -1313,8 +1567,8 @@ class Site:
             ...     print(revision['*'])
 
         Args:
-            revids (list): A list of (max 50) revisions.
-            prop (str): Which properties to get for each revision.
+            revids: A list of (max 50) revisions.
+            prop: Which properties to get for each revision.
 
         Returns:
             A list of revisions
@@ -1335,7 +1589,14 @@ class Site:
                 revisions.append(revision)
         return revisions
 
-    def search(self, search, namespace='0', what=None, redirects=False, limit=None):
+    def search(
+        self,
+        search: str,
+        namespace: Namespace = '0',
+        what: Optional[str] = None,
+        redirects: bool = False,
+        limit: Optional[int] = None
+    ) -> listing.List:
         """Perform a full text search.
 
         API doc: https://www.mediawiki.org/wiki/API:Search
@@ -1345,17 +1606,17 @@ class Site:
             ...     print(result.get('title'))
 
         Args:
-            search (str): The query string
-            namespace (int): The namespace to search (default: 0)
-            what (str): Search scope: 'text' for fulltext, or 'title' for titles only.
-                        Depending on the search backend,
-                        both options may not be available.
-                        For instance
-                        `CirrusSearch <https://www.mediawiki.org/wiki/Help:CirrusSearch>`_
-                        doesn't support 'title', but instead provides an "intitle:"
-                        query string filter.
-            redirects (bool): Include redirect pages in the search
-                              (option removed in MediaWiki 1.23).
+            search: The query string
+            namespace: The namespace to search (default: 0)
+            what: Search scope: 'text' for fulltext, or 'title' for titles only.
+                  Depending on the search backend,
+                  both options may not be available.
+                  For instance
+                  `CirrusSearch <https://www.mediawiki.org/wiki/Help:CirrusSearch>`_
+                  doesn't support 'title', but instead provides an "intitle:"
+                  query string filter.
+            redirects: Include redirect pages in the search
+                       (option removed in MediaWiki 1.23).
 
         Returns:
             mwclient.listings.List: Search results iterator
@@ -1366,8 +1627,18 @@ class Site:
             kwargs['srredirects'] = '1'
         return listing.List(self, 'search', 'sr', limit=limit, **kwargs)
 
-    def usercontributions(self, user, start=None, end=None, dir='older', namespace=None,
-                          prop=None, show=None, limit=None, uselang=None):
+    def usercontributions(
+        self,
+        user: str,
+        start: Optional[str] = None,
+        end: Optional[str] = None,
+        dir: str = 'older',
+        namespace: Optional[Namespace] = None,
+        prop: Optional[str] = None,
+        show: Optional[str] = None,
+        limit: Optional[int] = None,
+        uselang: Optional[str] = None
+    ) -> listing.List:
         """
         List the contributions made by a given user to the wiki.
 
@@ -1379,7 +1650,11 @@ class Site:
         return listing.List(self, 'usercontribs', 'uc', limit=limit, uselang=uselang,
                             **kwargs)
 
-    def users(self, users, prop='blockinfo|groups|editcount'):
+    def users(
+        self,
+        users: Iterable[str],
+        prop: str = 'blockinfo|groups|editcount'
+    ) -> listing.List:
         """
         Get information about a list of users.
 
@@ -1388,8 +1663,17 @@ class Site:
 
         return listing.List(self, 'users', 'us', ususers='|'.join(users), usprop=prop)
 
-    def watchlist(self, allrev=False, start=None, end=None, namespace=None, dir='older',
-                  prop=None, show=None, limit=None):
+    def watchlist(
+        self,
+        allrev: bool = False,
+        start: Optional[str] = None,
+        end: Optional[str] = None,
+        namespace: Optional[Namespace] = None,
+        dir: str = 'older',
+        prop: Optional[str] = None,
+        show: Optional[str] = None,
+        limit: Optional[int] = None
+    ) -> listing.List:
         """
         List the pages on the current user's watchlist.
 
@@ -1403,16 +1687,18 @@ class Site:
             kwargs['wlallrev'] = '1'
         return listing.List(self, 'watchlist', 'wl', limit=limit, **kwargs)
 
-    def expandtemplates(self, text, title=None, generatexml=False):
+    def expandtemplates(
+        self, text: str, title: Optional[str] = None, generatexml: bool = False
+    ) -> Any:
         """
         Takes wikitext (text) and expands templates.
 
         API doc: https://www.mediawiki.org/wiki/API:Expandtemplates
 
         Args:
-            text (str): Wikitext to convert.
-            title (str): Title of the page.
-            generatexml (bool): Generate the XML parse tree. Defaults to `False`.
+            text: Wikitext to convert.
+            title: Title of the page.
+            generatexml: Generate the XML parse tree. Defaults to `False`.
         """
 
         kwargs = {}
@@ -1429,14 +1715,14 @@ class Site:
         else:
             return result['expandtemplates']['*']
 
-    def ask(self, query, title=None):
+    def ask(self, query: str, title: Optional[str] = None) -> Iterable[Dict[str, Any]]:
         """
         Ask a query against Semantic MediaWiki.
 
         API doc: https://semantic-mediawiki.org/wiki/Ask_API
 
         Args:
-            query (str): The SMW query to be executed.
+            query: The SMW query to be executed.
 
         Returns:
             Generator for retrieving all search results, with each answer as a dictionary.
@@ -1451,16 +1737,16 @@ class Site:
             >>>         print(title)
             >>>         print(data)
         """
-        kwargs = {}
+        kwargs = {}  # type: Dict[str, Any]
         if title is None:
             kwargs['title'] = title
 
-        offset = 0
+        offset = 0  # type: Optional[int]
         while offset is not None:
             results = self.raw_api('ask', query='{query}|offset={offset}'.format(
                 query=query, offset=offset), http_method='GET', **kwargs)
             self.handle_api_result(results)  # raises APIError on error
-            offset = results.get('query-continue-offset')
+            offset = cast(Optional[int], results.get('query-continue-offset'))
             answers = results['query'].get('results', [])
 
             if isinstance(answers, dict):
