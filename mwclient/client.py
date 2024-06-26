@@ -1,12 +1,11 @@
 import io
-import warnings
+import json
 import logging
-
+import warnings
 from collections import OrderedDict
 from typing import Optional, Callable, Union, Mapping, Any, MutableMapping, List, Dict, \
     Tuple, cast, Iterable, BinaryIO, TextIO
 
-import json
 import requests
 from requests.auth import HTTPBasicAuth, AuthBase
 from requests_oauthlib import OAuth1
@@ -96,7 +95,7 @@ class Site:
         pool: Optional[requests.Session] = None,
         retry_timeout: int = 30,
         max_retries: int = 25,
-        wait_callback: Callable[..., None] = lambda *x: None,
+        wait_callback: Callable[['Sleeper', int, Optional[Any]], Any] = lambda *x: None,
         clients_useragent: Optional[str] = None,
         max_lag: int = 3,
         compress: bool = True,

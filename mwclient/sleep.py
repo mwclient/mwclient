@@ -1,5 +1,5 @@
-import time
 import logging
+import time
 from typing import Callable, Optional, Any
 
 from mwclient.errors import MaximumRetriesExceeded
@@ -32,7 +32,7 @@ class Sleepers:
         self,
         max_retries: int,
         retry_timeout: int,
-        callback: Callable[..., None] = lambda *x: None
+        callback: Callable[['Sleeper', int, Optional[Any]], Any] = lambda *x: None
     ) -> None:
         self.max_retries = max_retries
         self.retry_timeout = retry_timeout
@@ -73,7 +73,7 @@ class Sleeper:
         args: Any,
         max_retries: int,
         retry_timeout: int,
-        callback: Callable[..., None]
+        callback: Callable[['Sleeper', int, Optional[Any]], Any]
     ) -> None:
         self.args = args
         self.retries = 0
