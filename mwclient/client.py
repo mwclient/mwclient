@@ -494,7 +494,7 @@ class Site:
                     # fall through to the sleep
                 elif stream.status_code == 200:
                     return stream.text
-                elif stream.status_code < 500 or stream.status_code > 599:
+                elif (stream.status_code < 500 or stream.status_code > 599) and not stream.status_code == 429:  # 429 is Too Many Request - this is retryable:
                     stream.raise_for_status()
                 else:
                     if not retry_on_error:
