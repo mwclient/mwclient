@@ -1020,12 +1020,17 @@ class Site:
         file_size: Optional[int] = None,
         url: Optional[str] = None,
         filekey: Optional[str] = None,
-        comment: Optional[str] = None
+        comment: Optional[str] = None,
+        asynchronous: bool = False,
+        stash: bool = False
     ) -> Dict[str, Any]:
         """Upload a file to the site.
 
         Note that one of `file`, `filekey` and `url` must be specified, but not
-        more than one. For normal uploads, you specify `file`.
+        more than one. For normal uploads, you specify `file`. For asynchronous
+        uploads, upload specifying `stash=True`, then take the parameter `filekey`
+        from the response JSON and call `upload` again, specifying the `filekey`
+        and `asynchronous=True`.
 
         API doc: https://www.mediawiki.org/wiki/API:Upload
 
@@ -1039,11 +1044,23 @@ class Site:
             filekey: Key that identifies a previous upload that was stashed temporarily.
             comment: Upload comment. Also used as the initial page text for new files if
                      `description` is not specified.
+            asynchronous: Whether the server should upload the file asynchronously.
+                            Must be used with the filekey of a previously stashed file
+            stash: If set, the file will be stashed instead of uploaded right away.
 
         Example:
 
             >>> client.upload(open('somefile', 'rb'), filename='somefile.jpg',
                               description='Some description')
+
+        Async Example:
+            >>> response = client.upload(open('somefile','rb'),
+                                        filename='somefile.jpg',
+                                        description='Some description',
+                                        stash=True)
+
+            >>> client.upload(filekey=response["filekey"],
+                              asynchronous=True)
 
         Returns:
             JSON result from the API.
@@ -1103,11 +1120,20 @@ class Site:
             'text': text,
             'token': image.get_token('edit'),
         }
-
+        if stash:
+            predata['stash'] = 'true'
         if ignore:
             predata['ignorewarnings'] = 'true'
         if url:
             predata['url'] = url
+        if asynchronous:
+            if filekey is None:
+                raise TypeError(
+                    """'asynchronous' must be used with the filekey
+                    from a previously stashed upload."""
+                )
+
+            predata['async'] = 'true'
 
         # sessionkey was renamed to filekey in MediaWiki 1.18
         # https://phabricator.wikimedia.org/rMW5f13517e36b45342f228f3de4298bb0fe186995d
