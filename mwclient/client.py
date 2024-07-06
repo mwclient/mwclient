@@ -874,7 +874,7 @@ class Site:
         return self.tokens[type]
 
     def upload(self, file=None, filename=None, description='', ignore=False,
-               file_size=None, url=None, filekey=None, comment=None):
+               file_size=None, url=None, filekey=None, comment=None, asynchronous=False):
         """Upload a file to the site.
 
         Note that one of `file`, `filekey` and `url` must be specified, but not
@@ -955,6 +955,8 @@ class Site:
             predata['ignorewarnings'] = 'true'
         if url:
             predata['url'] = url
+        if asynchronous:
+            predata['async'] = 'true'
 
         # sessionkey was renamed to filekey in MediaWiki 1.18
         # https://phabricator.wikimedia.org/rMW5f13517e36b45342f228f3de4298bb0fe186995d
