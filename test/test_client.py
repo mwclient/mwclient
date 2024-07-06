@@ -862,6 +862,24 @@ class TestClientUploadArgs(TestCase):
         with pytest.raises(mwclient.errors.InsufficientPermission):
             self.site.upload(filename='Test', file=BytesIO(b'test'))
 
+    def test_async_without_filekey(self):
+        self.configure()
+
+        with pytest.raises(TypeError):
+            self.site.upload(filename='Test', file=BytesIO(b'test'), asynchronous=True)
+
+    def test_async_args(self):
+        self.configure()
+
+        self.site.upload(filename='Test', filekey='abc', asynchronous=True)
+
+        args, kwargs = self.raw_call.call_args
+        data = args[1]
+
+        assert data.get('filekey') == 'abc'
+        assert data.get('filename') == 'Test'
+        assert data.get('async') == 'true'
+
     def test_upload_file_exists(self):
         self.configure()
         self.raw_call.side_effect = [
