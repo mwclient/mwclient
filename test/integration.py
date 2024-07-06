@@ -71,6 +71,11 @@ def site(request):
             "sed", "-i", r"$ a\$wgGroupPermissions['user']['edit'] = true;",
             "/var/www/html/LocalSettings.php"]
     subprocess.run(args)
+    # allow file uploads
+    args = [_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
+        "sed", "-i", r"s/\$wgEnableUploads = false;/\$wgEnableUploads = true;/",
+        "/var/www/html/LocalSettings.php"]
+    subprocess.run(args)
     # block until the server is actually running, up to 30 seconds
     start = int(time.time())
     resp: Optional[http.client.HTTPResponse] = None
@@ -175,3 +180,32 @@ class TestClientLogin:
         pg.edit("Hi I'm a new page", "create new page")
         pg = site.pages["Anonymous New Page"]
         assert pg.text() == "Hi I'm a new page"
+
+
+class TestUploadAsync:
+    def test_upload_async(self, site):
+        filename = "test.jpg"
+
+        site.login(username="testuser", password="weakpassword")
+        assert site.logged_in
+
+        with open("test/resources/cat.jpg", "rb") as f:
+            stash_response = site.upload(
+                file=f,
+                filename=filename,
+                description="Test image upload",
+                stash=True,
+            )
+
+        filekey = stash_response["filekey"]
+        assert filekey
+
+        assert not site.Images[filename].exists
+
+        site.upload(
+            filekey=filekey,
+            filename=filename,
+            asynchronous=True,
+        )
+
+        assert site.Images[filename].exists
