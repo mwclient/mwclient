@@ -1,5 +1,5 @@
 import time
-from mwclient.util import parse_timestamp
+from mwclient.util import parse_timestamp, handle_limit
 import mwclient.listing
 import mwclient.errors
 
@@ -150,7 +150,10 @@ class Page:
         if cache and key in self._textcache:
             return self._textcache[key]
 
-        revs = self.revisions(prop='content|timestamp', limit=1, section=section,
+        # we set api_chunk_size not max_items because otherwise revisions'
+        # default api_chunk_size of 50 gets used and we get 50 revisions;
+        # no need to set max_items as well as we only iterate one time
+        revs = self.revisions(prop='content|timestamp', api_chunk_size=1, section=section,
                               slots=slot)
         try:
             rev = next(revs)
@@ -349,12 +352,13 @@ class Page:
 
     # Properties
     def backlinks(self, namespace=None, filterredir='all', redirect=False,
-                  limit=None, generator=True):
+                  limit=None, generator=True, max_items=None, api_chunk_size=None):
         """List pages that link to the current page, similar to Special:Whatlinkshere.
 
         API doc: https://www.mediawiki.org/wiki/API:Backlinks
 
         """
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         prefix = mwclient.listing.List.get_prefix('bl', generator)
         kwargs = dict(mwclient.listing.List.generate_kwargs(
             prefix, namespace=namespace, filterredir=filterredir,
@@ -364,8 +368,8 @@ class Page:
         kwargs[prefix + 'title'] = self.name
 
         return mwclient.listing.List.get_list(generator)(
-            self.site, 'backlinks', 'bl', limit=limit, return_values='title',
-            **kwargs
+            self.site, 'backlinks', 'bl', max_items=max_items,
+            api_chunk_size=api_chunk_size, return_values='title', **kwargs
         )
 
     def categories(self, generator=True, show=None):
@@ -396,7 +400,8 @@ class Page:
                 self, 'categories', 'cl', return_values='title', **kwargs
             )
 
-    def embeddedin(self, namespace=None, filterredir='all', limit=None, generator=True):
+    def embeddedin(self, namespace=None, filterredir='all', limit=None, generator=True,
+                   max_items=None, api_chunk_size=None):
         """List pages that transclude the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Embeddedin
@@ -405,20 +410,23 @@ class Page:
             namespace (int): Restricts search to a given namespace (Default: None)
             filterredir (str): How to filter redirects, either 'all' (default),
                 'redirects' or 'nonredirects'.
-            limit (int): Maximum amount of pages to return per request
+            limit (int): The API request chunk size (deprecated)
             generator (bool): Return generator (Default: True)
+            max_items(int): The maximum number of pages to yield
+            api_chunk_size(int): The API request chunk size
 
         Returns:
             mwclient.listings.List: Page iterator
         """
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         prefix = mwclient.listing.List.get_prefix('ei', generator)
         kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace,
                                                             filterredir=filterredir))
         kwargs[prefix + 'title'] = self.name
 
         return mwclient.listing.List.get_list(generator)(
-            self.site, 'embeddedin', 'ei', limit=limit, return_values='title',
-            **kwargs
+            self.site, 'embeddedin', 'ei', max_items=max_items,
+            api_chunk_size=api_chunk_size, return_values='title', **kwargs
         )
 
     def extlinks(self):
@@ -478,10 +486,11 @@ class Page:
                                                  return_values='title', **kwargs)
 
     def revisions(self, startid=None, endid=None, start=None, end=None,
-                  dir='older', user=None, excludeuser=None, limit=50,
+                  dir='older', user=None, excludeuser=None, limit=None,
                   prop='ids|timestamp|flags|comment|user',
                   expandtemplates=False, section=None,
-                  diffto=None, slots=None, uselang=None):
+                  diffto=None, slots=None, uselang=None, max_items=None,
+                  api_chunk_size=50):
         """List revisions of the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Revisions
@@ -494,7 +503,7 @@ class Page:
             dir (str): Direction to list in: 'older' (default) or 'newer'.
             user (str): Only list revisions made by this user.
             excludeuser (str): Exclude revisions made by this user.
-            limit (int): The maximum number of revisions to return per request.
+            limit (int): The API request chunk size (deprecated).
             prop (str): Which properties to get for each revision,
                 default: 'ids|timestamp|flags|comment|user'
             expandtemplates (bool): Expand templates in rvprop=content output
@@ -505,10 +514,13 @@ class Page:
             slots (str): The content slot (Mediawiki >= 1.32) to retrieve content from.
             uselang (str): Language to use for parsed edit comments and other localized
                 messages.
+            max_items(int): The maximum number of revisions to yield.
+            api_chunk_size(int): The API request chunk size (as a number of revisions).
 
         Returns:
             mwclient.listings.List: Revision iterator
         """
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(mwclient.listing.List.generate_kwargs(
             'rv', startid=startid, endid=endid, start=start, end=end, user=user,
             excludeuser=excludeuser, diffto=diffto, slots=slots
@@ -526,7 +538,9 @@ class Page:
         if section is not None:
             kwargs['rvsection'] = section
 
-        return mwclient.listing.RevisionsIterator(self, 'revisions', 'rv', limit=limit,
+        return mwclient.listing.RevisionsIterator(self, 'revisions', 'rv',
+                                                  max_items=max_items,
+                                                  api_chunk_size=api_chunk_size,
                                                   **kwargs)
 
     def templates(self, namespace=None, generator=True):
