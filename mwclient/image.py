@@ -1,10 +1,19 @@
+import io
+from typing import Optional, Mapping, Any, overload
+
 import mwclient.listing
 import mwclient.page
+from mwclient.types import Namespace
 
 
 class Image(mwclient.page.Page):
 
-    def __init__(self, site, name, info=None):
+    def __init__(
+        self,
+        site: 'mwclient.client.Site',
+        name: str,
+        info: Optional[Mapping[str, Any]] = None
+    ) -> None:
         super(Image, self).__init__(
             site, name, info, extra_properties={
                 'imageinfo': (
@@ -16,7 +25,7 @@ class Image(mwclient.page.Page):
         self.imagerepository = self._info.get('imagerepository', '')
         self.imageinfo = self._info.get('imageinfo', ({}, ))[0]
 
-    def imagehistory(self):
+    def imagehistory(self) -> 'mwclient.listing.PageProperty':
         """
         Get file revision info for the given file.
 
@@ -27,8 +36,14 @@ class Image(mwclient.page.Page):
             iiprop='timestamp|user|comment|url|size|sha1|metadata|mime|archivename'
         )
 
-    def imageusage(self, namespace=None, filterredir='all', redirect=False,
-                   limit=None, generator=True):
+    def imageusage(
+        self,
+        namespace: Optional[Namespace] = None,
+        filterredir: str = 'all',
+        redirect: bool = False,
+        limit: Optional[int] = None,
+        generator: bool = True
+    ) -> 'mwclient.listing.List':
         """
         List pages that use the given file.
 
@@ -44,7 +59,9 @@ class Image(mwclient.page.Page):
             self.site, 'imageusage', 'iu', limit=limit, return_values='title', **kwargs
         )
 
-    def duplicatefiles(self, limit=None):
+    def duplicatefiles(
+        self, limit: Optional[int] = None
+    ) -> 'mwclient.listing.PageProperty':
         """
         List duplicates of the current file.
 
@@ -52,7 +69,17 @@ class Image(mwclient.page.Page):
         """
         return mwclient.listing.PageProperty(self, 'duplicatefiles', 'df', dflimit=limit)
 
-    def download(self, destination=None):
+    @overload
+    def download(self) -> bytes:
+        ...
+
+    @overload
+    def download(self, destination: io.BufferedWriter) -> None:
+        ...
+
+    def download(
+        self, destination: Optional[io.BufferedWriter] = None
+    ) -> Optional[bytes]:
         """
         Download the file. If `destination` is given, the file will be written
         directly to the stream. Otherwise the file content will be stored in memory
@@ -64,17 +91,18 @@ class Image(mwclient.page.Page):
             ...     image.download(fd)
 
         Args:
-            destination (file object): Destination file
+            destination: Destination file
         """
         url = self.imageinfo['url']
         if destination is not None:
             res = self.site.connection.get(url, stream=True)
             for chunk in res.iter_content(1024):
                 destination.write(chunk)
+            return None
         else:
             return self.site.connection.get(url).content
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<%s object '%s' for %s>" % (
             self.__class__.__name__,
             self.name,

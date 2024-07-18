@@ -1,17 +1,10 @@
 import unittest
-import pytest
-import logging
-import requests
-import responses
-import json
-import mwclient
-from mwclient.page import Page
-from mwclient.client import Site
-from mwclient.listing import Category
-from mwclient.errors import APIError, AssertUserFailedError, ProtectedPageError, InvalidPageTitle
-
 import unittest.mock as mock
-
+import pytest
+import mwclient
+from mwclient.errors import APIError, AssertUserFailedError, ProtectedPageError, \
+    InvalidPageTitle
+from mwclient.page import Page
 
 if __name__ == "__main__":
     print()
@@ -270,7 +263,7 @@ class TestPageApiArgs(unittest.TestCase):
 
     def test_get_page_text_cached(self):
         # Check page.text() caching
-        self.page.revisions = mock.Mock(return_value=iter([]))
+        self.page.revisions = mock.Mock(return_value=iter([]))  # type: ignore
         self.page.text()
         self.page.text()
         # When cache is hit, revisions is not, so call_count should be 1

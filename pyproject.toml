@@ -20,3 +20,17 @@ filename = "mwclient/client.py"
 
 [[tool.bumpversion.files]]
 filename = "README.md"
+
+[tool.mypy]
+packages = ["mwclient", "test"]
+strict = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = "test.*"
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = "requests_oauthlib"
+ignore_missing_imports = true

@@ -1,12 +1,13 @@
 import time
 import io
+from typing import Optional, Iterable
 
 
-def parse_timestamp(t):
+def parse_timestamp(t: Optional[str]) -> time.struct_time:
     """Parses a string containing a timestamp.
 
     Args:
-        t (str): A string containing a timestamp.
+        t: A string containing a timestamp.
 
     Returns:
         time.struct_time: A timestamp.
@@ -16,7 +17,7 @@ def parse_timestamp(t):
     return time.strptime(t, '%Y-%m-%dT%H:%M:%SZ')
 
 
-def read_in_chunks(stream, chunk_size):
+def read_in_chunks(stream: io.BufferedReader, chunk_size: int) -> Iterable[io.BytesIO]:
     while True:
         data = stream.read(chunk_size)
         if not data:

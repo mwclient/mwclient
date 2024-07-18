@@ -1,5 +1,7 @@
-import time
 import logging
+import time
+from typing import Callable, Optional, Any
+
 from mwclient.errors import MaximumRetriesExceeded
 
 log = logging.getLogger(__name__)
@@ -17,24 +19,30 @@ class Sleepers:
         using the `make` method.
         >>> sleeper = sleepers.make()
     Args:
-        max_retries (int): The maximum number of retries to perform.
-        retry_timeout (int): The time to sleep for each past retry.
-        callback (Callable[[int, Any], None]): A callable to be called on each retry.
+        max_retries: The maximum number of retries to perform.
+        retry_timeout: The time to sleep for each past retry.
+        callback: A callable to be called on each retry.
     Attributes:
-        max_retries (int): The maximum number of retries to perform.
-        retry_timeout (int): The time to sleep for each past retry.
-        callback (callable): A callable to be called on each retry.
+        max_retries: The maximum number of retries to perform.
+        retry_timeout: The time to sleep for each past retry.
+        callback: A callable to be called on each retry.
     """
-    def __init__(self, max_retries, retry_timeout, callback=lambda *x: None):
+
+    def __init__(
+        self,
+        max_retries: int,
+        retry_timeout: int,
+        callback: Callable[['Sleeper', int, Optional[Any]], Any] = lambda *x: None
+    ) -> None:
         self.max_retries = max_retries
         self.retry_timeout = retry_timeout
         self.callback = callback
 
-    def make(self, args=None):
+    def make(self, args: Optional[Any] = None) -> 'Sleeper':
         """
         Creates a new `Sleeper` object.
         Args:
-            args (Any): Arguments to be passed to the `callback` callable.
+            args: Arguments to be passed to the `callback` callable.
         Returns:
             Sleeper: A `Sleeper` object.
         """
@@ -48,25 +56,32 @@ class Sleeper:
     and a `MaximumRetriesExceeded` is raised. The sleeper object should be discarded
     once the operation is successful.
     Args:
-        args (Any): Arguments to be passed to the `callback` callable.
-        max_retries (int): The maximum number of retries to perform.
-        retry_timeout (int): The time to sleep for each past retry.
-        callback (callable, None]): A callable to be called on each retry.
+        args: Arguments to be passed to the `callback` callable.
+        max_retries: The maximum number of retries to perform.
+        retry_timeout: The time to sleep for each past retry.
+        callback: A callable to be called on each retry.
     Attributes:
-        args (Any): Arguments to be passed to the `callback` callable.
-        retries (int): The number of retries that have been performed.
-        max_retries (int): The maximum number of retries to perform.
-        retry_timeout (int): The time to sleep for each past retry.
-        callback (callable): A callable to be called on each retry.
+        args: Arguments to be passed to the `callback` callable.
+        retries: The number of retries that have been performed.
+        max_retries: The maximum number of retries to perform.
+        retry_timeout: The time to sleep for each past retry.
+        callback: A callable to be called on each retry.
     """
-    def __init__(self, args, max_retries, retry_timeout, callback):
+
+    def __init__(
+        self,
+        args: Any,
+        max_retries: int,
+        retry_timeout: int,
+        callback: Callable[['Sleeper', int, Optional[Any]], Any]
+    ) -> None:
         self.args = args
         self.retries = 0
         self.max_retries = max_retries
         self.retry_timeout = retry_timeout
         self.callback = callback
 
-    def sleep(self, min_time=0):
+    def sleep(self, min_time: int = 0) -> None:
         """
         Sleeps for a minimum of `min_time` seconds. The actual sleeping time will increase
         with the number of retries.

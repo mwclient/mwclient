@@ -1,18 +1,26 @@
 import time
-from mwclient.util import parse_timestamp
-import mwclient.listing
+from typing import Optional, Mapping, Any, cast, Dict, Union, Tuple  # noqa: F401
+
 import mwclient.errors
+import mwclient.listing
+from mwclient.types import Namespace
+from mwclient.util import parse_timestamp
 
 
 class Page:
 
-    def __init__(self, site, name, info=None, extra_properties=None):
+    def __init__(
+        self,
+        site: 'mwclient.client.Site',
+        name: Union[int, str, 'Page'],
+        info: Optional[Mapping[str, Any]] = None,
+        extra_properties: Optional[Mapping[str, Any]] = None
+    ) -> None:
         if type(name) is type(self):
             self.__dict__.update(name.__dict__)
             return
         self.site = site
-        self.name = name
-        self._textcache = {}
+        self._textcache = {}  # type: Dict[int, str]
 
         if not info:
             if extra_properties:
@@ -22,7 +30,7 @@ class Page:
                     extra_props.extend(extra_prop)
             else:
                 prop = 'info'
-                extra_props = ()
+                extra_props = []
 
             if type(name) is int:
                 info = self.site.get('query', prop=prop, pageids=name,
@@ -31,6 +39,8 @@ class Page:
                 info = self.site.get('query', prop=prop, titles=name,
                                      inprop='protection', *extra_props)
             info = next(iter(info['query']['pages'].values()))
+
+        info = cast(Mapping[str, Any], info)
         self._info = info
 
         if 'invalid' in info:
@@ -61,10 +71,10 @@ class Page:
         self.pagelanguage = info.get('pagelanguage', None)
         self.restrictiontypes = info.get('restrictiontypes', None)
 
-        self.last_rev_time = None
-        self.edit_time = None
+        self.last_rev_time = None  # type: Optional[time.struct_time]
+        self.edit_time = None  # type: Optional[time.struct_time]
 
-    def redirects_to(self):
+    def redirects_to(self) -> Optional['Page']:
         """ Get the redirect target page, or None if the page is not a redirect."""
         info = self.site.get('query', prop='pageprops', titles=self.name, redirects='')
         if 'redirects' in info['query']:
@@ -75,7 +85,7 @@ class Page:
         else:
             return None
 
-    def resolve_redirect(self):
+    def resolve_redirect(self) -> 'Page':
         """ Get the redirect target page, or the current page if its not a redirect."""
         target_page = self.redirects_to()
         if target_page is None:
@@ -83,7 +93,7 @@ class Page:
         else:
             return target_page
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<%s object '%s' for %s>" % (
             self.__class__.__name__,
             self.name,
@@ -91,13 +101,13 @@ class Page:
         )
 
     @staticmethod
-    def strip_namespace(title):
+    def strip_namespace(title: str) -> str:
         if title[0] == ':':
             title = title[1:]
         return title[title.find(':') + 1:]
 
     @staticmethod
-    def normalize_title(title):
+    def normalize_title(title: str) -> str:
         # TODO: Make site dependent
         title = title.strip()
         if title[0] == ':':
@@ -106,7 +116,7 @@ class Page:
         title = title.replace(' ', '_')
         return title
 
-    def can(self, action):
+    def can(self, action: str) -> bool:
         """Check if the current user has the right to carry out some action
         with the current page.
 
@@ -121,10 +131,16 @@ class Page:
 
         return level in self.site.rights
 
-    def get_token(self, type, force=False):
+    def get_token(self, type: str, force: bool = False) -> str:
         return self.site.get_token(type, force, title=self.name)
 
-    def text(self, section=None, expandtemplates=False, cache=True, slot='main'):
+    def text(
+        self,
+        section: Union[int, str, None] = None,
+        expandtemplates: bool = False,
+        cache: bool = True,
+        slot: str = 'main'
+    ) -> Any:
         """Get the current wikitext of the page, or of a specific section.
 
         If the page does not exist, an empty string is returned. By
@@ -134,9 +150,9 @@ class Page:
         lives as long as the instance does.
 
         Args:
-            section (int): Section number, to only get text from a single section.
-            expandtemplates (bool): Expand templates (default: `False`)
-            cache (bool): Use in-memory caching (default: `True`)
+            section: Section number, to only get text from a single section.
+            expandtemplates: Expand templates (default: `False`)
+            cache: Use in-memory caching (default: `True`)
         """
 
         if not self.can('read'):
@@ -173,28 +189,52 @@ class Page:
             self._textcache[key] = text
         return text
 
-    def save(self, *args, **kwargs):
+    def save(self, *args: Tuple[str, Any], **kwargs: Any) -> Any:
         """Alias for edit, for maintaining backwards compatibility."""
-        return self.edit(*args, **kwargs)
+        return self.edit(*args, **kwargs)  # type: ignore[arg-type]
 
-    def edit(self, text, summary='', minor=False, bot=True, section=None, **kwargs):
+    def edit(
+        self,
+        text: str,
+        summary: str = '',
+        minor: bool = False,
+        bot: bool = True,
+        section: Optional[str] = None,
+        **kwargs: Any
+    ) -> Any:
         """Update the text of a section or the whole page by performing an edit operation.
         """
         return self._edit(summary, minor, bot, section, text=text, **kwargs)
 
-    def append(self, text, summary='', minor=False, bot=True, section=None,
-               **kwargs):
+    def append(
+        self,
+        text: str,
+        summary: str = '',
+        minor: bool = False,
+        bot: bool = True,
+        section: Optional[str] = None,
+        **kwargs: Any
+    ) -> Any:
         """Append text to a section or the whole page by performing an edit operation.
         """
         return self._edit(summary, minor, bot, section, appendtext=text, **kwargs)
 
-    def prepend(self, text, summary='', minor=False, bot=True, section=None,
-                **kwargs):
+    def prepend(
+        self,
+        text: str,
+        summary: str = '',
+        minor: bool = False,
+        bot: bool = True,
+        section: Optional[str] = None,
+        **kwargs: Any
+    ) -> Any:
         """Prepend text to a section or the whole page by performing an edit operation.
         """
         return self._edit(summary, minor, bot, section, prependtext=text, **kwargs)
 
-    def _edit(self, summary, minor, bot, section, **kwargs):
+    def _edit(
+        self, summary: str, minor: bool, bot: bool, section: Optional[str], **kwargs: Any
+    ) -> Any:
         if not self.site.logged_in and self.site.force_login:
             raise mwclient.errors.AssertUserFailedError()
         if self.site.blocked:
@@ -224,7 +264,7 @@ class Page:
         if self.site.force_login:
             data['assert'] = 'user'
 
-        def do_edit():
+        def do_edit() -> Any:
             result = self.site.post('edit', title=self.name, summary=summary,
                                     token=self.get_token('edit'),
                                     **data)
@@ -240,8 +280,8 @@ class Page:
                 self.get_token('edit', force=True)
                 try:
                     result = do_edit()
-                except mwclient.errors.APIError as e:
-                    self.handle_edit_error(e, summary)
+                except mwclient.errors.APIError as e2:
+                    self.handle_edit_error(e2, summary)
             else:
                 self.handle_edit_error(e, summary)
 
@@ -259,7 +299,7 @@ class Page:
         self._textcache = {}
         return result['edit']
 
-    def handle_edit_error(self, e, summary):
+    def handle_edit_error(self, e: 'mwclient.errors.APIError', summary: str) -> None:
         if e.code == 'editconflict':
             raise mwclient.errors.EditError(self, summary, e.info)
         elif e.code in {'protectedtitle', 'cantcreate', 'cantcreate-anon',
@@ -273,7 +313,7 @@ class Page:
         else:
             raise e
 
-    def touch(self):
+    def touch(self) -> None:
         """Perform a "null edit" on the page to update the wiki's cached data of it.
         This is useful in contrast to purge when needing to update stored data on a wiki,
         for example Semantic MediaWiki properties or Cargo table values, since purge
@@ -283,8 +323,15 @@ class Page:
             return
         self.append('')
 
-    def move(self, new_title, reason='', move_talk=True, no_redirect=False,
-             move_subpages=False, ignore_warnings=False):
+    def move(
+        self,
+        new_title: str,
+        reason: str = '',
+        move_talk: bool = True,
+        no_redirect: bool = False,
+        move_subpages: bool = False,
+        ignore_warnings: bool = False
+    ) -> Any:
         """Move (rename) page to new_title.
 
         If user account is an administrator, specify no_redirect as True to not
@@ -293,6 +340,7 @@ class Page:
         If user does not have permission to move page, an InsufficientPermission
         exception is raised.
 
+        API doc: https://www.mediawiki.org/wiki/API:Move
         """
         if not self.can('move'):
             raise mwclient.errors.InsufficientPermission(self)
@@ -313,12 +361,19 @@ class Page:
                                 token=self.get_token('move'), reason=reason, **data)
         return result['move']
 
-    def delete(self, reason='', watch=False, unwatch=False, oldimage=False):
+    def delete(
+        self,
+        reason: str = '',
+        watch: bool = False,
+        unwatch: bool = False,
+        oldimage: Optional[str] = None
+    ) -> Any:
         """Delete page.
 
         If user does not have permission to delete page, an InsufficientPermission
         exception is raised.
 
+        API doc: https://www.mediawiki.org/wiki/API:Delete
         """
         if not self.can('delete'):
             raise mwclient.errors.InsufficientPermission(self)
@@ -338,18 +393,25 @@ class Page:
                                 reason=reason, **data)
         return result['delete']
 
-    def purge(self):
+    def purge(self) -> None:
         """Purge server-side cache of page. This will re-render templates and other
         dynamic content.
 
+        API doc: https://www.mediawiki.org/wiki/API:Purge
         """
         self.site.post('purge', titles=self.name)
 
     # def watch: requires 1.14
 
     # Properties
-    def backlinks(self, namespace=None, filterredir='all', redirect=False,
-                  limit=None, generator=True):
+    def backlinks(
+        self,
+        namespace: Optional[Namespace] = None,
+        filterredir: str = 'all',
+        redirect: bool = False,
+        limit: Optional[int] = None,
+        generator: bool = True
+    ) -> 'mwclient.listing.List':
         """List pages that link to the current page, similar to Special:Whatlinkshere.
 
         API doc: https://www.mediawiki.org/wiki/API:Backlinks
@@ -368,14 +430,16 @@ class Page:
             **kwargs
         )
 
-    def categories(self, generator=True, show=None):
+    def categories(
+        self, generator: bool = True, show: Optional[str] = None
+    ) -> Union['mwclient.listing.PagePropertyGenerator', 'mwclient.listing.PageProperty']:
         """List categories used on the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Categories
 
         Args:
-            generator (bool): Return generator (Default: True)
-            show (str): Set to 'hidden' to only return hidden categories
+            generator: Return generator (Default: True)
+            show: Set to 'hidden' to only return hidden categories
                 or '!hidden' to only return non-hidden ones.
 
         Returns:
@@ -396,17 +460,23 @@ class Page:
                 self, 'categories', 'cl', return_values='title', **kwargs
             )
 
-    def embeddedin(self, namespace=None, filterredir='all', limit=None, generator=True):
+    def embeddedin(
+        self,
+        namespace: Optional[Namespace] = None,
+        filterredir: str = 'all',
+        limit: Optional[int] = None,
+        generator: bool = True
+    ) -> 'mwclient.listing.List':
         """List pages that transclude the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Embeddedin
 
         Args:
-            namespace (int): Restricts search to a given namespace (Default: None)
-            filterredir (str): How to filter redirects, either 'all' (default),
+            namespace Restricts search to a given namespace (Default: None)
+            filterredir: How to filter redirects, either 'all' (default),
                 'redirects' or 'nonredirects'.
-            limit (int): Maximum amount of pages to return per request
-            generator (bool): Return generator (Default: True)
+            limit: Maximum amount of pages to return per request
+            generator: Return generator (Default: True)
 
         Returns:
             mwclient.listings.List: Page iterator
@@ -421,7 +491,7 @@ class Page:
             **kwargs
         )
 
-    def extlinks(self):
+    def extlinks(self) -> 'mwclient.listing.PageProperty':
         """List external links from the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Extlinks
@@ -429,7 +499,9 @@ class Page:
         """
         return mwclient.listing.PageProperty(self, 'extlinks', 'el', return_values='*')
 
-    def images(self, generator=True):
+    def images(
+        self, generator: bool = True
+    ) -> Union['mwclient.listing.PagePropertyGenerator', 'mwclient.listing.PageProperty']:
         """List files/images embedded in the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Images
@@ -441,7 +513,7 @@ class Page:
             return mwclient.listing.PageProperty(self, 'images', '',
                                                  return_values='title')
 
-    def iwlinks(self):
+    def iwlinks(self) -> 'mwclient.listing.PageProperty':
         """List interwiki links from the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Iwlinks
@@ -450,7 +522,7 @@ class Page:
         return mwclient.listing.PageProperty(self, 'iwlinks', 'iw',
                                              return_values=('prefix', '*'))
 
-    def langlinks(self, **kwargs):
+    def langlinks(self, **kwargs: Any) -> 'mwclient.listing.PageProperty':
         """List interlanguage links from the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Langlinks
@@ -460,7 +532,12 @@ class Page:
                                              return_values=('lang', '*'),
                                              **kwargs)
 
-    def links(self, namespace=None, generator=True, redirects=False):
+    def links(
+        self,
+        namespace: Optional[Namespace] = None,
+        generator: bool = True,
+        redirects: bool = False
+    ) -> Union['mwclient.listing.PagePropertyGenerator', 'mwclient.listing.PageProperty']:
         """List links to other pages from the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Links
@@ -477,33 +554,45 @@ class Page:
             return mwclient.listing.PageProperty(self, 'links', 'pl',
                                                  return_values='title', **kwargs)
 
-    def revisions(self, startid=None, endid=None, start=None, end=None,
-                  dir='older', user=None, excludeuser=None, limit=50,
-                  prop='ids|timestamp|flags|comment|user',
-                  expandtemplates=False, section=None,
-                  diffto=None, slots=None, uselang=None):
+    def revisions(
+        self,
+        startid: Optional[int] = None,
+        endid: Optional[int] = None,
+        start: Optional[str] = None,
+        end: Optional[str] = None,
+        dir: str = 'older',
+        user: Optional[str] = None,
+        excludeuser: Optional[str] = None,
+        limit: int = 50,
+        prop: str = 'ids|timestamp|flags|comment|user',
+        expandtemplates: bool = False,
+        section: Optional[str] = None,
+        diffto: Optional[int] = None,
+        slots: Optional[str] = None,
+        uselang: Optional[str] = None
+    ) -> 'mwclient.listing.List':
         """List revisions of the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Revisions
 
         Args:
-            startid (int): Revision ID to start listing from.
-            endid (int): Revision ID to stop listing at.
-            start (str): Timestamp to start listing from.
-            end (str): Timestamp to end listing at.
-            dir (str): Direction to list in: 'older' (default) or 'newer'.
-            user (str): Only list revisions made by this user.
-            excludeuser (str): Exclude revisions made by this user.
-            limit (int): The maximum number of revisions to return per request.
-            prop (str): Which properties to get for each revision,
+            startid: Revision ID to start listing from.
+            endid: Revision ID to stop listing at.
+            start: Timestamp to start listing from.
+            end: Timestamp to end listing at.
+            dir: Direction to list in: 'older' (default) or 'newer'.
+            user: Only list revisions made by this user.
+            excludeuser: Exclude revisions made by this user.
+            limit: The maximum number of revisions to return per request.
+            prop: Which properties to get for each revision,
                 default: 'ids|timestamp|flags|comment|user'
-            expandtemplates (bool): Expand templates in rvprop=content output
-            section (int): Section number. If rvprop=content is set, only the contents
+            expandtemplates: Expand templates in rvprop=content output
+            section: Section number. If rvprop=content is set, only the contents
                 of this section will be retrieved.
-            diffto (str): Revision ID to diff each revision to. Use "prev", "next" and
+            diffto: Revision ID to diff each revision to. Use "prev", "next" and
                 "cur" for the previous, next and current revision respectively.
-            slots (str): The content slot (Mediawiki >= 1.32) to retrieve content from.
-            uselang (str): Language to use for parsed edit comments and other localized
+            slots: The content slot (Mediawiki >= 1.32) to retrieve content from.
+            uselang: Language to use for parsed edit comments and other localized
                 messages.
 
         Returns:
@@ -514,7 +603,7 @@ class Page:
             excludeuser=excludeuser, diffto=diffto, slots=slots
         ))
 
-        if self.site.version[:2] < (1, 32) and 'rvslots' in kwargs:
+        if self.site.version[:2] < (1, 32) and 'rvslots' in kwargs:  # type: ignore[index]
             # https://github.com/mwclient/mwclient/issues/199
             del kwargs['rvslots']
 
@@ -529,7 +618,9 @@ class Page:
         return mwclient.listing.RevisionsIterator(self, 'revisions', 'rv', limit=limit,
                                                   **kwargs)
 
-    def templates(self, namespace=None, generator=True):
+    def templates(
+        self, namespace: Optional[Namespace] = None, generator: bool = True
+    ) -> Union['mwclient.listing.PagePropertyGenerator', 'mwclient.listing.PageProperty']:
         """List templates used on the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Templates
