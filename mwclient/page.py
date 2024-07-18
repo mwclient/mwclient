@@ -96,7 +96,7 @@ class Page:
     def __repr__(self) -> str:
         return "<%s object '%s' for %s>" % (
             self.__class__.__name__,
-            self.name.encode('utf-8'),
+            self.name,
             self.site
         )
 

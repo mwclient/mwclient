@@ -65,9 +65,9 @@ class Site:
             passwords provided as text strings are encoded as UTF-8. If dealing with a
             server that cannot handle UTF-8, please provide the username and password
             already encoded with the appropriate encoding.
-        reqs: Additional arguments to be passed to the :py:meth:`requests.Session.request`
-            method when performing API calls. If the `timeout` key is empty, a default
-            timeout of 30 seconds is added.
+        connection_options: Additional arguments to be passed to the
+            :py:meth:`requests.Session.request` method when performing API calls. If the
+            `timeout` key is empty, a default timeout of 30 seconds is added.
         consumer_token: OAuth1 consumer key for owner-only consumers.
         consumer_secret: OAuth1 consumer secret for owner-only consumers.
         access_token: OAuth1 access key for owner-only consumers.
@@ -107,14 +107,15 @@ class Site:
             List[Union[str, bytes]],
             None,
         ] = None,
-        reqs: Optional[MutableMapping[str, Any]] = None,
+        connection_options: Optional[MutableMapping[str, Any]] = None,
         consumer_token: Optional[str] = None,
         consumer_secret: Optional[str] = None,
         access_token: Optional[str] = None,
         access_secret: Optional[str] = None,
         client_certificate: Optional[Union[str, Tuple[str, str]]] = None,
         custom_headers: Optional[Mapping[str, str]] = None,
-        scheme: str = 'https'
+        scheme: str = 'https',
+        reqs: Optional[MutableMapping[str, Any]] = None,
     ) -> None:
         # Setup member variables
         self.host = host
@@ -124,7 +125,17 @@ class Site:
         self.compress = compress
         self.max_lag = str(max_lag)
         self.force_login = force_login
-        self.requests = reqs or {}
+        if reqs and connection_options:
+            raise ValueError(
+                "reqs is a deprecated alias of connection_options. Do not specify both."
+            )
+        if reqs:
+            warnings.warn(
+                "reqs is deprecated in mwclient 1.0.0. Use connection_options instead",
+                DeprecationWarning
+            )
+            connection_options = reqs
+        self.requests = connection_options or {}
         self.scheme = scheme
         if 'timeout' not in self.requests:
             self.requests['timeout'] = 30  # seconds
@@ -988,6 +999,7 @@ class Site:
         Raises:
             errors.InsufficientPermission
             requests.exceptions.HTTPError
+            errors.FileExists: The file already exists and `ignore` is `False`.
         """
 
         if file_size is not None:
@@ -1028,7 +1040,7 @@ class Site:
             file.seek(0)
 
             if (self.version[:2] >= (1, 20)  # type: ignore[index]
-                    and content_size > self.chunk_size):
+                and content_size > self.chunk_size):
                 return self.chunk_upload(file, filename, ignore, comment, text)
 
         predata = {
@@ -1070,7 +1082,16 @@ class Site:
                 info = {}
             if self.handle_api_result(info, kwargs=predata, sleeper=sleeper):
                 response = info.get('upload', {})
+                # Workaround for https://github.com/mwclient/mwclient/issues/211
+                # ----------------------------------------------------------------
+                # Raise an error if the file already exists. This is necessary because
+                # MediaWiki returns a warning, not an error, leading to silent failure.
+                # The user must explicitly set ignore=True (ignorewarnings=True) to
+                # overwrite an existing file.
+                if ignore is False and 'exists' in response.get('warnings', {}):
+                    raise errors.FileExists(filename)
                 break
+
         if file is not None:
             file.close()
         return response
