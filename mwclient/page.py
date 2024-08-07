@@ -202,9 +202,6 @@ class Page:
         if not self.can('edit'):
             raise mwclient.errors.ProtectedPageError(self)
 
-        if not self.site.writeapi:
-            raise mwclient.errors.NoWriteApi(self)
-
         data = {}
         if minor:
             data['minor'] = '1'
@@ -297,9 +294,6 @@ class Page:
         if not self.can('move'):
             raise mwclient.errors.InsufficientPermission(self)
 
-        if not self.site.writeapi:
-            raise mwclient.errors.NoWriteApi(self)
-
         data = {}
         if move_talk:
             data['movetalk'] = '1'
@@ -322,9 +316,6 @@ class Page:
         """
         if not self.can('delete'):
             raise mwclient.errors.InsufficientPermission(self)
-
-        if not self.site.writeapi:
-            raise mwclient.errors.NoWriteApi(self)
 
         data = {}
         if watch:

@@ -25,7 +25,6 @@ site = mwclient.ex.ConfiguredSite(sys.argv[1])
 site.compress = False
 
 print('Running configured site', sys.argv[1])
-print('Site has writeapi:', getattr(site, 'writeapi', False))
 
 page = site.Pages[prefix + '/text1']
 
@@ -52,12 +51,6 @@ image = site.Images[prefix + '-test-image.png']
 print('Imageinfo:', image.imageinfo)
 history = list(image.imagehistory())
 print('History:', history)
-
-if site.writeapi:
-    print('Deleting old version')
-    archivename = history[1]['archivename']
-    image.delete('Testing history deletion', oldimage=archivename)
-    print('History:', list(image.imagehistory()))
 
 text = page.text()
 text += '\n[[Image:%s-test-image.png]]' % prefix
