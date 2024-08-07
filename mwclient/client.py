@@ -145,7 +145,6 @@ class Site:
         self.version = None
 
         self.namespaces = self.default_namespaces
-        self.writeapi = False
 
         # Setup connection
         if pool is None:
@@ -217,7 +216,6 @@ class Site:
             namespace['id']: namespace.get('*', '')
             for namespace in meta['query']['namespaces'].values()
         }
-        self.writeapi = 'writeapi' in self.site
 
         self.version = self.version_tuple_from_generator(self.site['generator'])
 
