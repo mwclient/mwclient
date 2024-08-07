@@ -52,6 +52,11 @@ print('Imageinfo:', image.imageinfo)
 history = list(image.imagehistory())
 print('History:', history)
 
+print('Deleting old version')
+archivename = history[1]['archivename']
+image.delete('Testing history deletion', oldimage=archivename)
+print('History:', list(image.imagehistory()))
+
 text = page.text()
 text += '\n[[Image:%s-test-image.png]]' % prefix
 page.edit(text, 'Adding image')
