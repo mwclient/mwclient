@@ -11,7 +11,7 @@ from requests_oauthlib import OAuth1
 import mwclient.errors as errors
 import mwclient.listing as listing
 from mwclient.sleep import Sleepers
-from mwclient.util import parse_timestamp, read_in_chunks
+from mwclient.util import parse_timestamp, read_in_chunks, handle_limit
 
 __version__ = '0.10.1'
 
@@ -1148,9 +1148,10 @@ class Site:
     def allpages(self, start=None, prefix=None, namespace='0', filterredir='all',
                  minsize=None, maxsize=None, prtype=None, prlevel=None,
                  limit=None, dir='ascending', filterlanglinks='all', generator=True,
-                 end=None):
+                 end=None, max_items=None, api_chunk_size=None):
         """Retrieve all pages on the wiki as a generator."""
 
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         pfx = listing.List.get_prefix('ap', generator)
         kwargs = dict(listing.List.generate_kwargs(
             pfx, ('from', start), ('to', end), prefix=prefix,
@@ -1159,60 +1160,76 @@ class Site:
             filterlanglinks=filterlanglinks,
         ))
         return listing.List.get_list(generator)(self, 'allpages', 'ap',
-                                                limit=limit, return_values='title',
+                                                max_items=max_items,
+                                                api_chunk_size=api_chunk_size,
+                                                return_values='title',
                                                 **kwargs)
 
     def allimages(self, start=None, prefix=None, minsize=None, maxsize=None, limit=None,
-                  dir='ascending', sha1=None, sha1base36=None, generator=True, end=None):
+                  dir='ascending', sha1=None, sha1base36=None, generator=True, end=None,
+                  max_items=None, api_chunk_size=None):
         """Retrieve all images on the wiki as a generator."""
 
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         pfx = listing.List.get_prefix('ai', generator)
         kwargs = dict(listing.List.generate_kwargs(
             pfx, ('from', start), ('to', end), prefix=prefix,
             minsize=minsize, maxsize=maxsize,
             dir=dir, sha1=sha1, sha1base36=sha1base36,
         ))
-        return listing.List.get_list(generator)(self, 'allimages', 'ai', limit=limit,
+        return listing.List.get_list(generator)(self, 'allimages', 'ai',
+                                                max_items=max_items,
+                                                api_chunk_size=api_chunk_size,
                                                 return_values='timestamp|url',
                                                 **kwargs)
 
     def alllinks(self, start=None, prefix=None, unique=False, prop='title',
-                 namespace='0', limit=None, generator=True, end=None):
+                 namespace='0', limit=None, generator=True, end=None, max_items=None,
+                 api_chunk_size=None):
         """Retrieve a list of all links on the wiki as a generator."""
 
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         pfx = listing.List.get_prefix('al', generator)
         kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end),
                                                    prefix=prefix,
                                                    prop=prop, namespace=namespace))
         if unique:
             kwargs[pfx + 'unique'] = '1'
-        return listing.List.get_list(generator)(self, 'alllinks', 'al', limit=limit,
+        return listing.List.get_list(generator)(self, 'alllinks', 'al',
+                                                max_items=max_items,
+                                                api_chunk_size=api_chunk_size,
                                                 return_values='title', **kwargs)
 
     def allcategories(self, start=None, prefix=None, dir='ascending', limit=None,
-                      generator=True, end=None):
+                      generator=True, end=None, max_items=None, api_chunk_size=None):
         """Retrieve all categories on the wiki as a generator."""
 
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         pfx = listing.List.get_prefix('ac', generator)
         kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end),
                                                    prefix=prefix, dir=dir))
-        return listing.List.get_list(generator)(self, 'allcategories', 'ac', limit=limit,
-                                                **kwargs)
+        return listing.List.get_list(generator)(self, 'allcategories', 'ac',
+                                                max_items=max_items,
+                                                api_chunk_size=api_chunk_size, **kwargs)
 
     def allusers(self, start=None, prefix=None, group=None, prop=None, limit=None,
-                 witheditsonly=False, activeusers=False, rights=None, end=None):
+                 witheditsonly=False, activeusers=False, rights=None, end=None,
+                 max_items=None, api_chunk_size=None):
         """Retrieve all users on the wiki as a generator."""
 
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(listing.List.generate_kwargs('au', ('from', start), ('to', end),
                                                    prefix=prefix,
                                                    group=group, prop=prop,
                                                    rights=rights,
                                                    witheditsonly=witheditsonly,
                                                    activeusers=activeusers))
-        return listing.List(self, 'allusers', 'au', limit=limit, **kwargs)
+        return listing.List(self, 'allusers', 'au', max_items=max_items,
+                            api_chunk_size=api_chunk_size, **kwargs)
 
     def blocks(self, start=None, end=None, dir='older', ids=None, users=None, limit=None,
-               prop='id|user|by|timestamp|expiry|reason|flags'):
+               prop='id|user|by|timestamp|expiry|reason|flags', max_items=None,
+               api_chunk_size=None):
         """Retrieve blocks as a generator.
 
         API doc: https://www.mediawiki.org/wiki/API:Blocks
@@ -1238,19 +1255,24 @@ class Site:
         """
 
         # TODO: Fix. Fix what?
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(listing.List.generate_kwargs('bk', start=start, end=end, dir=dir,
                                                    ids=ids, users=users, prop=prop))
-        return listing.List(self, 'blocks', 'bk', limit=limit, **kwargs)
+        return listing.List(self, 'blocks', 'bk', max_items=max_items,
+                            api_chunk_size=api_chunk_size, **kwargs)
 
     def deletedrevisions(self, start=None, end=None, dir='older', namespace=None,
-                         limit=None, prop='user|comment'):
+                         limit=None, prop='user|comment', max_items=None,
+                         api_chunk_size=None):
         # TODO: Fix
-
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(listing.List.generate_kwargs('dr', start=start, end=end, dir=dir,
                                                    namespace=namespace, prop=prop))
-        return listing.List(self, 'deletedrevs', 'dr', limit=limit, **kwargs)
+        return listing.List(self, 'deletedrevs', 'dr', max_items=max_items,
+                            api_chunk_size=api_chunk_size, **kwargs)
 
-    def exturlusage(self, query, prop=None, protocol='http', namespace=None, limit=None):
+    def exturlusage(self, query, prop=None, protocol='http', namespace=None, limit=None,
+                    max_items=None, api_chunk_size=None):
         r"""Retrieve the list of pages that link to a particular domain or URL,
          as a generator.
 
@@ -1272,51 +1294,64 @@ class Site:
 
         """
 
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(listing.List.generate_kwargs('eu', query=query, prop=prop,
                                                    protocol=protocol,
                                                    namespace=namespace))
-        return listing.List(self, 'exturlusage', 'eu', limit=limit, **kwargs)
+        return listing.List(self, 'exturlusage', 'eu', max_items=max_items,
+                            api_chunk_size=api_chunk_size, **kwargs)
 
     def logevents(self, type=None, prop=None, start=None, end=None,
-                  dir='older', user=None, title=None, limit=None, action=None):
+                  dir='older', user=None, title=None, limit=None, action=None,
+                  max_items=None, api_chunk_size=None):
         """Retrieve logevents as a generator."""
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(listing.List.generate_kwargs('le', prop=prop, type=type,
                                                    start=start, end=end, dir=dir,
                                                    user=user, title=title, action=action))
-        return listing.List(self, 'logevents', 'le', limit=limit, **kwargs)
+        return listing.List(self, 'logevents', 'le', max_items=max_items,
+                            api_chunk_size=api_chunk_size, **kwargs)
 
-    def checkuserlog(self, user=None, target=None, limit=10, dir='older',
-                     start=None, end=None):
+    def checkuserlog(self, user=None, target=None, limit=None, dir='older',
+                     start=None, end=None, max_items=None, api_chunk_size=10):
         """Retrieve checkuserlog items as a generator."""
 
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(listing.List.generate_kwargs('cul', target=target, start=start,
                                                    end=end, dir=dir, user=user))
         return listing.NestedList('entries', self, 'checkuserlog', 'cul',
-                                  limit=limit, **kwargs)
+                                  max_items=max_items, api_chunk_size=api_chunk_size,
+                                  **kwargs)
 
     # def protectedtitles requires 1.15
-    def random(self, namespace, limit=20):
+    def random(self, namespace, limit=None, max_items=None, api_chunk_size=20):
         """Retrieve a generator of random pages from a particular namespace.
 
-        limit specifies the number of random articles retrieved.
+        max_items specifies the number of random articles retrieved.
+        api_chunk_size and limit (deprecated) specify the API chunk size.
         namespace is a namespace identifier integer.
 
         Generator contains dictionary with namespace, page ID and title.
 
         """
 
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(listing.List.generate_kwargs('rn', namespace=namespace))
-        return listing.List(self, 'random', 'rn', limit=limit, **kwargs)
+        return listing.List(self, 'random', 'rn', max_items=max_items,
+                            api_chunk_size=api_chunk_size, **kwargs)
 
     def recentchanges(self, start=None, end=None, dir='older', namespace=None,
-                      prop=None, show=None, limit=None, type=None, toponly=None):
+                      prop=None, show=None, limit=None, type=None, toponly=None,
+                      max_items=None, api_chunk_size=None):
         """List recent changes to the wiki, à la Special:Recentchanges.
         """
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(listing.List.generate_kwargs('rc', start=start, end=end, dir=dir,
                                                    namespace=namespace, prop=prop,
                                                    show=show, type=type,
                                                    toponly='1' if toponly else None))
-        return listing.List(self, 'recentchanges', 'rc', limit=limit, **kwargs)
+        return listing.List(self, 'recentchanges', 'rc', max_items=max_items,
+                            api_chunk_size=api_chunk_size, **kwargs)
 
     def revisions(self, revids, prop='ids|timestamp|flags|comment|user'):
         """Get data about a list of revisions.
@@ -1353,7 +1388,8 @@ class Site:
                 revisions.append(revision)
         return revisions
 
-    def search(self, search, namespace='0', what=None, redirects=False, limit=None):
+    def search(self, search, namespace='0', what=None, redirects=False, limit=None,
+               max_items=None, api_chunk_size=None):
         """Perform a full text search.
 
         API doc: https://www.mediawiki.org/wiki/API:Search
@@ -1378,24 +1414,28 @@ class Site:
         Returns:
             mwclient.listings.List: Search results iterator
         """
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(listing.List.generate_kwargs('sr', search=search,
                                                    namespace=namespace, what=what))
         if redirects:
             kwargs['srredirects'] = '1'
-        return listing.List(self, 'search', 'sr', limit=limit, **kwargs)
+        return listing.List(self, 'search', 'sr', max_items=max_items,
+                            api_chunk_size=api_chunk_size, **kwargs)
 
     def usercontributions(self, user, start=None, end=None, dir='older', namespace=None,
-                          prop=None, show=None, limit=None, uselang=None):
+                          prop=None, show=None, limit=None, uselang=None, max_items=None,
+                          api_chunk_size=None):
         """
         List the contributions made by a given user to the wiki.
 
         API doc: https://www.mediawiki.org/wiki/API:Usercontribs
         """
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(listing.List.generate_kwargs('uc', user=user, start=start, end=end,
                                                    dir=dir, namespace=namespace,
                                                    prop=prop, show=show))
-        return listing.List(self, 'usercontribs', 'uc', limit=limit, uselang=uselang,
-                            **kwargs)
+        return listing.List(self, 'usercontribs', 'uc', max_items=max_items,
+                            api_chunk_size=api_chunk_size, uselang=uselang, **kwargs)
 
     def users(self, users, prop='blockinfo|groups|editcount'):
         """
@@ -1407,19 +1447,21 @@ class Site:
         return listing.List(self, 'users', 'us', ususers='|'.join(users), usprop=prop)
 
     def watchlist(self, allrev=False, start=None, end=None, namespace=None, dir='older',
-                  prop=None, show=None, limit=None):
+                  prop=None, show=None, limit=None, max_items=None, api_chunk_size=None):
         """
         List the pages on the current user's watchlist.
 
         API doc: https://www.mediawiki.org/wiki/API:Watchlist
         """
 
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         kwargs = dict(listing.List.generate_kwargs('wl', start=start, end=end,
                                                    namespace=namespace, dir=dir,
                                                    prop=prop, show=show))
         if allrev:
             kwargs['wlallrev'] = '1'
-        return listing.List(self, 'watchlist', 'wl', limit=limit, **kwargs)
+        return listing.List(self, 'watchlist', 'wl', max_items=max_items,
+                            api_chunk_size=api_chunk_size, **kwargs)
 
     def expandtemplates(self, text, title=None, generatexml=False):
         """

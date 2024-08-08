@@ -1,3 +1,4 @@
+from mwclient.util import handle_limit
 import mwclient.listing
 import mwclient.page
 
@@ -28,7 +29,7 @@ class Image(mwclient.page.Page):
         )
 
     def imageusage(self, namespace=None, filterredir='all', redirect=False,
-                   limit=None, generator=True):
+                   limit=None, generator=True, max_items=None, api_chunk_size=None):
         """
         List pages that use the given file.
 
@@ -38,19 +39,36 @@ class Image(mwclient.page.Page):
         kwargs = dict(mwclient.listing.List.generate_kwargs(
             prefix, title=self.name, namespace=namespace, filterredir=filterredir
         ))
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         if redirect:
             kwargs['%sredirect' % prefix] = '1'
         return mwclient.listing.List.get_list(generator)(
-            self.site, 'imageusage', 'iu', limit=limit, return_values='title', **kwargs
+            self.site,
+            'imageusage',
+            'iu',
+            max_items=max_items,
+            api_chunk_size=api_chunk_size,
+            return_values='title',
+            **kwargs
         )
 
-    def duplicatefiles(self, limit=None):
+    def duplicatefiles(self, limit=None, max_items=None, api_chunk_size=None):
         """
         List duplicates of the current file.
 
         API doc: https://www.mediawiki.org/wiki/API:Duplicatefiles
+
+        limit sets a hard cap on the total number of results, it does
+        not only specify the API chunk size.
         """
-        return mwclient.listing.PageProperty(self, 'duplicatefiles', 'df', dflimit=limit)
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
+        return mwclient.listing.PageProperty(
+            self,
+            'duplicatefiles',
+            'df',
+            max_items=max_items,
+            api_chunk_size=api_chunk_size
+        )
 
     def download(self, destination=None):
         """

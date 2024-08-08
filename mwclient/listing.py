@@ -1,4 +1,4 @@
-from mwclient.util import parse_timestamp
+from mwclient.util import parse_timestamp, handle_limit
 import mwclient.page
 import mwclient.image
 
@@ -9,12 +9,18 @@ class List:
     This is a class providing lazy iteration.  This means that the
     content is loaded in chunks as long as the response hints at
     continuing content.
+
+    max_items limits the total number of items that will be yielded
+    by this iterator. api_chunk_size sets the number of items that
+    will be requested from the wiki per API call (this iterator itself
+    always yields one item at a time). limit does the same as
+    api_chunk_size for backward compatibility, but is deprecated due
+    to its misleading name.
     """
 
     def __init__(self, site, list_name, prefix,
                  limit=None, return_values=None, max_items=None,
-                 *args, **kwargs):
-        # NOTE: Fix limit
+                 api_chunk_size=None, *args, **kwargs):
         self.site = site
         self.list_name = list_name
         self.generator = 'list'
@@ -23,9 +29,14 @@ class List:
         kwargs.update(args)
         self.args = kwargs
 
-        if limit is None:
-            limit = site.api_limit
-        self.args[self.prefix + 'limit'] = str(limit)
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
+
+        # for efficiency, if max_items is set and api_chunk_size is not,
+        # set the chunk size to max_items so we don't retrieve
+        # unneeded extra items (so long as it's below API limit)
+        api_limit = site.api_limit
+        api_chunk_size = api_chunk_size or min(max_items or api_limit, api_limit)
+        self.args[self.prefix + 'limit'] = str(api_chunk_size)
 
         self.count = 0
         self.max_items = max_items

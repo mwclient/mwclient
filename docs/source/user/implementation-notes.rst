@@ -13,7 +13,7 @@ Some notable exceptions:
 * ``usercontribs`` is ``usercontributions``
 * First parameters of ``search`` and ``usercontributions`` are ``search`` and ``user``, respectively
 
-Properties and generators are implemented as Python generators. Their limit parameter is only an indication of the number of items in one chunk. It is not the total limit. Doing ``list(generator(limit = limit))`` will return ALL items of generator, and not be limited by the limit value. Use ``list(generator(max_items = max_items))`` to limit the amount of items returned. Default chunk size is generally the maximum chunk size.
+Properties and generators are implemented as Python generators which yield one item per iteration. Their deprecated ``limit`` parameter is only an indication of the number of items retrieved from the API per request. It is not the total limit. Doing ``list(generator(limit = 50))`` will return ALL items, not 50, but it will query the API in chunks of 50 items at a time (so after yielding one item from the generator, the next 49 will be "free", then the next will trigger a new API call). The replacement ``api_chunk_size`` parameter does the same thing, but is more clearly named. If both ``limit`` and ``api_chunk_size`` are specified, ``limit`` will be ignored. The ``max_items`` parameter sets a total limit on the number of items which will be yielded. Use ``list(generator(max_items = 50))`` to limit the amount of items returned to 50. Higher level functions that have a ``limit`` parameter also now have ``api_chunk_size`` and ``max_items`` parameters that should be preferred. Default API chunk size is generally the maximum chunk size (500 for most wikis).
 
 Page objects
 ------------
