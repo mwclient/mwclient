@@ -24,7 +24,8 @@
 """
 
 from mwclient.errors import *  # noqa: F401, F403
-from mwclient.client import Site, __version__  # noqa: F401
+from mwclient.client import Site, WikiBaseSite, __version__  # noqa: F401
+from mwclient import entity
 import logging
 import warnings
 
