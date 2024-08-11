@@ -12,7 +12,7 @@ pytest_runner = ['pytest-runner'] if needs_pytest else []
 setup(name='mwclient',
       # See https://mwclient.readthedocs.io/en/latest/development/#making-a-release
       # for how to update this field and release a new version.
-      version='0.10.1',
+      version='0.11.0',
       description='MediaWiki API client',
       long_description=README,
       long_description_content_type='text/markdown',

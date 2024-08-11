@@ -13,7 +13,7 @@ import mwclient.listing as listing
 from mwclient.sleep import Sleepers
 from mwclient.util import parse_timestamp, read_in_chunks, handle_limit
 
-__version__ = '0.10.1'
+__version__ = '0.11.0'
 
 log = logging.getLogger(__name__)
 
