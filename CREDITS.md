@@ -30,9 +30,14 @@ Not long after the git transition, the repository was moved to an organization
   ([#12, comment](https://github.com/mwclient/mwclient/issues/12#issuecomment-20447515)),
   and Dan became the main force behind the 2014 release of version 0.7.0
   (the first after a 3-year hiatus).
-Since then, he has been the lead maintainer of the project,
+From then until the 0.10.1 release in 2020, he was the lead maintainer of the project,
   which has attracted contributions from
   [several other people](../../graphs/contributors).
+
+From 2023, the project is maintained by
+  Marc Trölitzsch ([@marcfrederick](https://github.com/marcfrederick)),
+  Adam Williamson ([@adamwill](https://github.com/adamwill)),
+  and Megan Cutrofello ([@RheingoldRiver](https://github.com/RheingoldRiver)).
 
 For more details on the technical history of the project,
   see the [CHANGELOG.md](CHANGELOG.md) document.
