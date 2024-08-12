@@ -1,6 +1,10 @@
-from mwclient.util import handle_limit
+import io
+from typing import Optional, Mapping, Any, overload
+
 import mwclient.listing
 import mwclient.page
+from mwclient.types import Namespace
+from mwclient.util import handle_limit
 
 
 class Image(mwclient.page.Page):
@@ -17,7 +21,12 @@ class Image(mwclient.page.Page):
             will be fetched from the API.
     """
 
-    def __init__(self, site, name, info=None):
+    def __init__(
+        self,
+        site: 'mwclient.client.Site',
+        name: str,
+        info: Optional[Mapping[str, Any]] = None
+    ) -> None:
         super().__init__(
             site, name, info, extra_properties={
                 'imageinfo': (
@@ -29,7 +38,7 @@ class Image(mwclient.page.Page):
         self.imagerepository = self._info.get('imagerepository', '')
         self.imageinfo = self._info.get('imageinfo', ({}, ))[0]
 
-    def imagehistory(self):
+    def imagehistory(self) -> 'mwclient.listing.PageProperty':
         """
         Get file revision info for the given file.
 
@@ -40,8 +49,16 @@ class Image(mwclient.page.Page):
             iiprop='timestamp|user|comment|url|size|sha1|metadata|mime|archivename'
         )
 
-    def imageusage(self, namespace=None, filterredir='all', redirect=False,
-                   limit=None, generator=True, max_items=None, api_chunk_size=None):
+    def imageusage(
+        self,
+        namespace: Optional[Namespace] = None,
+        filterredir: str = 'all',
+        redirect: bool = False,
+        limit: Optional[int] = None,
+        generator: bool = True,
+        max_items: Optional[int] = None,
+        api_chunk_size: Optional[int] = None
+    ) -> 'mwclient.listing.List':
         """
         List pages that use the given file.
 
@@ -64,7 +81,12 @@ class Image(mwclient.page.Page):
             **kwargs
         )
 
-    def duplicatefiles(self, limit=None, max_items=None, api_chunk_size=None):
+    def duplicatefiles(
+        self,
+        limit: Optional[int] = None,
+        max_items: Optional[int] = None,
+        api_chunk_size: Optional[int] = None
+    ) -> 'mwclient.listing.PageProperty':
         """
         List duplicates of the current file.
 
@@ -82,7 +104,17 @@ class Image(mwclient.page.Page):
             api_chunk_size=api_chunk_size
         )
 
-    def download(self, destination=None):
+    @overload
+    def download(self) -> bytes:
+        ...
+
+    @overload
+    def download(self, destination: io.BufferedWriter) -> None:
+        ...
+
+    def download(
+        self, destination: Optional[io.BufferedWriter] = None
+    ) -> Optional[bytes]:
         """
         Download the file. If `destination` is given, the file will be written
         directly to the stream. Otherwise the file content will be stored in memory
@@ -94,15 +126,16 @@ class Image(mwclient.page.Page):
             ...     image.download(fd)
 
         Args:
-            destination (file object): Destination file
+            destination: Destination file
         """
         url = self.imageinfo['url']
         if destination is not None:
             res = self.site.connection.get(url, stream=True)
             for chunk in res.iter_content(1024):
                 destination.write(chunk)
+            return None
         else:
             return self.site.connection.get(url).content
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{self.__class__.__name__} object '{self.name}' for {self.site}>"

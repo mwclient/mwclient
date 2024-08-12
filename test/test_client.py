@@ -155,8 +155,8 @@ class TestClient(TestCase):
         site = mwclient.Site('test.wikipedia.org')
 
         assert len(responses.calls) == 2
-        assert 'retry-after' in responses.calls[0].response.headers
-        assert 'retry-after' not in responses.calls[1].response.headers
+        assert 'retry-after' in responses.calls[0].response.headers  # type: ignore
+        assert 'retry-after' not in responses.calls[1].response.headers  # type: ignore
 
     @responses.activate
     def test_http_error(self):
@@ -204,6 +204,7 @@ class TestClient(TestCase):
 
         site = mwclient.Site('test.wikipedia.org')
 
+        assert responses.calls[0].request.url is not None
         assert 'action=query' in responses.calls[0].request.url
         assert 'meta=siteinfo%7Cuserinfo' in responses.calls[0].request.url
 
@@ -231,7 +232,8 @@ class TestClient(TestCase):
         self.httpShouldReturn(self.metaResponseAsJson())
 
         with pytest.raises(RuntimeError):
-            site = mwclient.Site('test.wikipedia.org', httpauth=1)
+            site = mwclient.Site('test.wikipedia.org',
+                                 httpauth=1)  # type: ignore[arg-type]
 
     @responses.activate
     def test_oauth(self):

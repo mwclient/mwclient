@@ -274,3 +274,6 @@ texinfo_documents = [
 intersphinx_mapping = {
   'requests': ('http://requests.readthedocs.org/en/latest/', None)
 }
+
+# Controls the display of typehints in the autodoc output.
+autodoc_typehints = 'description'
