@@ -84,11 +84,7 @@ class Page:
             return target_page
 
     def __repr__(self):
-        return "<{} object '{}' for {}>".format(
-            self.__class__.__name__,
-            self.name,
-            self.site
-        )
+        return f"<{self.__class__.__name__} object '{self.name}' for {self.site}>"
 
     @staticmethod
     def strip_namespace(title):
@@ -355,7 +351,7 @@ class Page:
             prefix, namespace=namespace, filterredir=filterredir,
         ))
         if redirect:
-            kwargs['%sredirect' % prefix] = '1'
+            kwargs[f'{prefix}redirect'] = '1'
         kwargs[prefix + 'title'] = self.name
 
         return mwclient.listing.List.get_list(generator)(

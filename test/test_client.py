@@ -24,10 +24,14 @@ logging.basicConfig(level=logging.DEBUG)
 class TestCase(unittest.TestCase):
 
     def metaResponse(self, **kwargs):
-        tpl = '{"query":{"general":{"generator":"MediaWiki %(version)s"},"namespaces":{"-1":{"*":"Special","canonical":"Special","case":"first-letter","id":-1},"-2":{"*":"Media","canonical":"Media","case":"first-letter","id":-2},"0":{"*":"","case":"first-letter","content":"","id":0},"1":{"*":"Talk","canonical":"Talk","case":"first-letter","id":1,"subpages":""},"10":{"*":"Template","canonical":"Template","case":"first-letter","id":10,"subpages":""},"100":{"*":"Test namespace 1","canonical":"Test namespace 1","case":"first-letter","id":100,"subpages":""},"101":{"*":"Test namespace 1 talk","canonical":"Test namespace 1 talk","case":"first-letter","id":101,"subpages":""},"102":{"*":"Test namespace 2","canonical":"Test namespace 2","case":"first-letter","id":102,"subpages":""},"103":{"*":"Test namespace 2 talk","canonical":"Test namespace 2 talk","case":"first-letter","id":103,"subpages":""},"11":{"*":"Template talk","canonical":"Template talk","case":"first-letter","id":11,"subpages":""},"1198":{"*":"Translations","canonical":"Translations","case":"first-letter","id":1198,"subpages":""},"1199":{"*":"Translations talk","canonical":"Translations talk","case":"first-letter","id":1199,"subpages":""},"12":{"*":"Help","canonical":"Help","case":"first-letter","id":12,"subpages":""},"13":{"*":"Help talk","canonical":"Help talk","case":"first-letter","id":13,"subpages":""},"14":{"*":"Category","canonical":"Category","case":"first-letter","id":14},"15":{"*":"Category talk","canonical":"Category talk","case":"first-letter","id":15,"subpages":""},"2":{"*":"User","canonical":"User","case":"first-letter","id":2,"subpages":""},"2500":{"*":"VisualEditor","canonical":"VisualEditor","case":"first-letter","id":2500},"2501":{"*":"VisualEditor talk","canonical":"VisualEditor talk","case":"first-letter","id":2501},"2600":{"*":"Topic","canonical":"Topic","case":"first-letter","defaultcontentmodel":"flow-board","id":2600},"3":{"*":"User talk","canonical":"User talk","case":"first-letter","id":3,"subpages":""},"4":{"*":"Wikipedia","canonical":"Project","case":"first-letter","id":4,"subpages":""},"460":{"*":"Campaign","canonical":"Campaign","case":"case-sensitive","defaultcontentmodel":"Campaign","id":460},"461":{"*":"Campaign talk","canonical":"Campaign talk","case":"case-sensitive","id":461},"5":{"*":"Wikipedia talk","canonical":"Project talk","case":"first-letter","id":5,"subpages":""},"6":{"*":"File","canonical":"File","case":"first-letter","id":6},"7":{"*":"File talk","canonical":"File talk","case":"first-letter","id":7,"subpages":""},"710":{"*":"TimedText","canonical":"TimedText","case":"first-letter","id":710},"711":{"*":"TimedText talk","canonical":"TimedText talk","case":"first-letter","id":711},"8":{"*":"MediaWiki","canonical":"MediaWiki","case":"first-letter","id":8,"subpages":""},"828":{"*":"Module","canonical":"Module","case":"first-letter","id":828,"subpages":""},"829":{"*":"Module talk","canonical":"Module talk","case":"first-letter","id":829,"subpages":""},"866":{"*":"CNBanner","canonical":"CNBanner","case":"first-letter","id":866},"867":{"*":"CNBanner talk","canonical":"CNBanner talk","case":"first-letter","id":867,"subpages":""},"9":{"*":"MediaWiki talk","canonical":"MediaWiki talk","case":"first-letter","id":9,"subpages":""},"90":{"*":"Thread","canonical":"Thread","case":"first-letter","id":90},"91":{"*":"Thread talk","canonical":"Thread talk","case":"first-letter","id":91},"92":{"*":"Summary","canonical":"Summary","case":"first-letter","id":92},"93":{"*":"Summary talk","canonical":"Summary talk","case":"first-letter","id":93}},"userinfo":{"anon":"","groups":["*"],"id":0,"name":"127.0.0.1","rights": %(rights)s}}}'
-        tpl = tpl % {'version': kwargs.get('version', '1.24wmf17'),
-                     'rights': json.dumps(kwargs.get('rights', ["createaccount", "read", "edit", "createpage", "createtalk", "editmyusercss", "editmyuserjs", "viewmywatchlist", "editmywatchlist", "viewmyprivateinfo", "editmyprivateinfo", "editmyoptions", "centralauth-merge", "abusefilter-view", "abusefilter-log", "translate", "vipsscaler-test", "upload"]))
-                     }
+        tpl = '{{"query":{{"general":{{"generator":"MediaWiki {version}"}},"namespaces":{{"-1":{{"*":"Special","canonical":"Special","case":"first-letter","id":-1}},"-2":{{"*":"Media","canonical":"Media","case":"first-letter","id":-2}},"0":{{"*":"","case":"first-letter","content":"","id":0}},"1":{{"*":"Talk","canonical":"Talk","case":"first-letter","id":1,"subpages":""}},"10":{{"*":"Template","canonical":"Template","case":"first-letter","id":10,"subpages":""}},"100":{{"*":"Test namespace 1","canonical":"Test namespace 1","case":"first-letter","id":100,"subpages":""}},"101":{{"*":"Test namespace 1 talk","canonical":"Test namespace 1 talk","case":"first-letter","id":101,"subpages":""}},"102":{{"*":"Test namespace 2","canonical":"Test namespace 2","case":"first-letter","id":102,"subpages":""}},"103":{{"*":"Test namespace 2 talk","canonical":"Test namespace 2 talk","case":"first-letter","id":103,"subpages":""}},"11":{{"*":"Template talk","canonical":"Template talk","case":"first-letter","id":11,"subpages":""}},"1198":{{"*":"Translations","canonical":"Translations","case":"first-letter","id":1198,"subpages":""}},"1199":{{"*":"Translations talk","canonical":"Translations talk","case":"first-letter","id":1199,"subpages":""}},"12":{{"*":"Help","canonical":"Help","case":"first-letter","id":12,"subpages":""}},"13":{{"*":"Help talk","canonical":"Help talk","case":"first-letter","id":13,"subpages":""}},"14":{{"*":"Category","canonical":"Category","case":"first-letter","id":14}},"15":{{"*":"Category talk","canonical":"Category talk","case":"first-letter","id":15,"subpages":""}},"2":{{"*":"User","canonical":"User","case":"first-letter","id":2,"subpages":""}},"2500":{{"*":"VisualEditor","canonical":"VisualEditor","case":"first-letter","id":2500}},"2501":{{"*":"VisualEditor talk","canonical":"VisualEditor talk","case":"first-letter","id":2501}},"2600":{{"*":"Topic","canonical":"Topic","case":"first-letter","defaultcontentmodel":"flow-board","id":2600}},"3":{{"*":"User talk","canonical":"User talk","case":"first-letter","id":3,"subpages":""}},"4":{{"*":"Wikipedia","canonical":"Project","case":"first-letter","id":4,"subpages":""}},"460":{{"*":"Campaign","canonical":"Campaign","case":"case-sensitive","defaultcontentmodel":"Campaign","id":460}},"461":{{"*":"Campaign talk","canonical":"Campaign talk","case":"case-sensitive","id":461}},"5":{{"*":"Wikipedia talk","canonical":"Project talk","case":"first-letter","id":5,"subpages":""}},"6":{{"*":"File","canonical":"File","case":"first-letter","id":6}},"7":{{"*":"File talk","canonical":"File talk","case":"first-letter","id":7,"subpages":""}},"710":{{"*":"TimedText","canonical":"TimedText","case":"first-letter","id":710}},"711":{{"*":"TimedText talk","canonical":"TimedText talk","case":"first-letter","id":711}},"8":{{"*":"MediaWiki","canonical":"MediaWiki","case":"first-letter","id":8,"subpages":""}},"828":{{"*":"Module","canonical":"Module","case":"first-letter","id":828,"subpages":""}},"829":{{"*":"Module talk","canonical":"Module talk","case":"first-letter","id":829,"subpages":""}},"866":{{"*":"CNBanner","canonical":"CNBanner","case":"first-letter","id":866}},"867":{{"*":"CNBanner talk","canonical":"CNBanner talk","case":"first-letter","id":867,"subpages":""}},"9":{{"*":"MediaWiki talk","canonical":"MediaWiki talk","case":"first-letter","id":9,"subpages":""}},"90":{{"*":"Thread","canonical":"Thread","case":"first-letter","id":90}},"91":{{"*":"Thread talk","canonical":"Thread talk","case":"first-letter","id":91}},"92":{{"*":"Summary","canonical":"Summary","case":"first-letter","id":92}},"93":{{"*":"Summary talk","canonical":"Summary talk","case":"first-letter","id":93}}}},"userinfo":{{"anon":"","groups":["*"],"id":0,"name":"127.0.0.1","rights": {rights}}}}}}}' \
+            .format(version=kwargs.get('version', '1.24wmf17'),
+                    rights=json.dumps(kwargs.get('rights', [
+                        "createaccount", "read", "edit", "createpage", "createtalk",
+                        "editmyusercss", "editmyuserjs", "viewmywatchlist",
+                        "editmywatchlist", "viewmyprivateinfo", "editmyprivateinfo",
+                        "editmyoptions", "centralauth-merge", "abusefilter-view",
+                        "abusefilter-log", "translate", "vipsscaler-test", "upload"])))
 
         res = json.loads(tpl)
 
@@ -38,7 +42,7 @@ class TestCase(unittest.TestCase):
 
     def httpShouldReturn(self, body=None, callback=None, scheme='https', host='test.wikipedia.org', path='/w/',
                          script='api', headers=None, status=200, method='GET'):
-        url = '{scheme}://{host}{path}{script}.php'.format(scheme=scheme, host=host, path=path, script=script)
+        url = f'{scheme}://{host}{path}{script}.php'
         mock = responses.GET if method == 'GET' else responses.POST
         if body is None:
             responses.add_callback(mock, url, callback=callback)
@@ -560,7 +564,7 @@ class TestLogin(TestCase):
         # this would be done by site_init usually, but we're mocking it
         site.version = (1, 28, 0)
         success = site.clientlogin(username='myusername', password='mypassword')
-        url = '{}://{}'.format(site.scheme, site.host)
+        url = f'{site.scheme}://{site.host}'
 
         call_args = raw_api.call_args_list
 
@@ -609,7 +613,7 @@ class TestLogin(TestCase):
             'clientlogin', 'POST',
             username='myusername',
             password='mypassword',
-            loginreturnurl='{}://{}'.format(site.scheme, site.host),
+            loginreturnurl=f'{site.scheme}://{site.host}',
             logintoken=login_token
         )
 
@@ -636,7 +640,7 @@ class TestLogin(TestCase):
         # this would be done by site_init usually, but we're mocking it
         site.version = (1, 28, 0)
         success = site.clientlogin(username='myusername', password='mypassword')
-        url = '{}://{}'.format(site.scheme, site.host)
+        url = f'{site.scheme}://{site.host}'
 
         call_args = raw_api.call_args_list
 

@@ -64,7 +64,7 @@ is handled under the hood so you don't have to worry about it.
     >>> from itertools import islice
     >>> for revision in islice(page.revisions(), 5):
     ...     dt = datetime.fromtimestamp(mktime(revision['timestamp']))
-    ...     print '{}'.format(dt.strftime('%F %T'))
+    ...     print(dt.strftime('%F %T'))
 
 Categories
 ----------
