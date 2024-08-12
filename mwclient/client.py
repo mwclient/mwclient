@@ -283,7 +283,7 @@ class Site:
     }
 
     def __repr__(self):
-        return "<%s object '%s%s'>" % (self.__class__.__name__, self.host, self.path)
+        return "<{} object '{}{}'>".format(self.__class__.__name__, self.host, self.path)
 
     def get(self, action, *args, **kwargs):
         """Perform a generic API call using GET.
@@ -816,7 +816,7 @@ class Site:
 
             if 'logincontinue' not in kwargs and 'loginreturnurl' not in kwargs:
                 # should be great if API didn't require this...
-                kwargs['loginreturnurl'] = '%s://%s' % (self.scheme, self.host)
+                kwargs['loginreturnurl'] = '{}://{}'.format(self.scheme, self.host)
 
             while True:
                 login = self.post('clientlogin', **kwargs)
@@ -1529,5 +1529,4 @@ class Site:
                 # with the page title as key.
                 answers = [answer for answer in answers.values()]
 
-            for answer in answers:
-                yield answer
+            yield from answers

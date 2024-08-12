@@ -84,7 +84,7 @@ class Page:
             return target_page
 
     def __repr__(self):
-        return "<%s object '%s' for %s>" % (
+        return "<{} object '{}' for {}>".format(
             self.__class__.__name__,
             self.name,
             self.site

@@ -75,7 +75,7 @@ class List:
         if isinstance(self, GeneratorList):
             return item
         if type(self.return_values) is tuple:
-            return tuple((item[i] for i in self.return_values))
+            return tuple(item[i] for i in self.return_values)
         if self.return_values is not None:
             return item[self.return_values]
         return item
@@ -130,7 +130,7 @@ class List:
             self._iter = iter(data['query'][self.result_member].values())
 
     def __repr__(self):
-        return "<%s object '%s' for %s>" % (
+        return "<{} object '{}' for {}>".format(
             self.__class__.__name__,
             self.list_name,
             self.site
@@ -154,7 +154,7 @@ class List:
 
 class NestedList(List):
     def __init__(self, nested_param, *args, **kwargs):
-        super(NestedList, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.nested_param = nested_param
 
     def set_iter(self, data):
@@ -170,8 +170,7 @@ class GeneratorList(List):
     """
 
     def __init__(self, site, list_name, prefix, *args, **kwargs):
-        super(GeneratorList, self).__init__(site, list_name, prefix,
-                                            *args, **kwargs)
+        super().__init__(site, list_name, prefix, *args, **kwargs)
 
         self.args['g' + self.prefix + 'limit'] = self.args[self.prefix + 'limit']
         del self.args[self.prefix + 'limit']
@@ -185,7 +184,7 @@ class GeneratorList(List):
         self.page_class = mwclient.page.Page
 
     def __next__(self):
-        info = super(GeneratorList, self).__next__()
+        info = super().__next__()
         if info['ns'] == 14:
             return Category(self.site, '', info)
         if info['ns'] == 6:
@@ -196,7 +195,7 @@ class GeneratorList(List):
         # Put this here so that the constructor does not fail
         # on uninitialized sites
         self.args['iiprop'] = 'timestamp|user|comment|url|size|sha1|metadata|archivename'
-        return super(GeneratorList, self).load_chunk()
+        return super().load_chunk()
 
 
 class Category(mwclient.page.Page, GeneratorList):
@@ -210,7 +209,7 @@ class Category(mwclient.page.Page, GeneratorList):
         GeneratorList.__init__(self, site, 'categorymembers', 'cm', **kwargs)
 
     def __repr__(self):
-        return "<%s object '%s' for %s>" % (
+        return "<{} object '{}' for {}>".format(
             self.__class__.__name__,
             self.name,
             self.site
@@ -239,10 +238,8 @@ class PageList(GeneratorList):
         if end:
             kwargs['gapto'] = end
 
-        super(PageList, self).__init__(site, 'allpages', 'ap',
-                                       gapnamespace=str(namespace),
-                                       gapfilterredir=redirects,
-                                       **kwargs)
+        super().__init__(site, 'allpages', 'ap', gapnamespace=str(namespace),
+                         gapfilterredir=redirects, **kwargs)
 
     def __getitem__(self, name):
         return self.get(name, None)
@@ -258,7 +255,7 @@ class PageList(GeneratorList):
             One of Category, Image or Page (default), according to namespace.
         """
         if self.namespace != 0:
-            full_page_name = u"{namespace}:{name}".format(
+            full_page_name = "{namespace}:{name}".format(
                 namespace=self.site.namespaces[self.namespace],
                 name=name,
             )
@@ -306,9 +303,7 @@ class PageList(GeneratorList):
 class PageProperty(List):
 
     def __init__(self, page, prop, prefix, *args, **kwargs):
-        super(PageProperty, self).__init__(page.site, prop, prefix,
-                                           titles=page.name,
-                                           *args, **kwargs)
+        super().__init__(page.site, prop, prefix, titles=page.name, *args, **kwargs)
         self.page = page
         self.generator = 'prop'
 
@@ -323,9 +318,7 @@ class PageProperty(List):
 class PagePropertyGenerator(GeneratorList):
 
     def __init__(self, page, prop, prefix, *args, **kwargs):
-        super(PagePropertyGenerator, self).__init__(page.site, prop, prefix,
-                                                    titles=page.name,
-                                                    *args, **kwargs)
+        super().__init__(page.site, prop, prefix, titles=page.name, *args, **kwargs)
         self.page = page
 
 
@@ -334,4 +327,4 @@ class RevisionsIterator(PageProperty):
     def load_chunk(self):
         if 'rvstartid' in self.args and 'rvstart' in self.args:
             del self.args['rvstart']
-        return super(RevisionsIterator, self).load_chunk()
+        return super().load_chunk()

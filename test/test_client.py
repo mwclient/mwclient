@@ -348,9 +348,9 @@ class TestClient(TestCase):
             }
         }), method='GET')
 
-        answers = set(result['fulltext'] for result in site.ask('test'))
+        answers = {result['fulltext'] for result in site.ask('test')}
 
-        assert answers == set(('Serendipitet', 'Indeks (bibliotekfag)'))
+        assert answers == {'Serendipitet', 'Indeks (bibliotekfag)'}
 
     @responses.activate
     def test_smw_response_v2(self):
@@ -390,9 +390,9 @@ class TestClient(TestCase):
             }
         }), method='GET')
 
-        answers = set(result['fulltext'] for result in site.ask('test'))
+        answers = {result['fulltext'] for result in site.ask('test')}
 
-        assert answers == set(('Serendipitet', 'Indeks (bibliotekfag)'))
+        assert answers == {'Serendipitet', 'Indeks (bibliotekfag)'}
 
     @responses.activate
     def test_repr(self):
@@ -560,7 +560,7 @@ class TestLogin(TestCase):
         # this would be done by site_init usually, but we're mocking it
         site.version = (1, 28, 0)
         success = site.clientlogin(username='myusername', password='mypassword')
-        url = '%s://%s' % (site.scheme, site.host)
+        url = '{}://{}'.format(site.scheme, site.host)
 
         call_args = raw_api.call_args_list
 
@@ -609,7 +609,7 @@ class TestLogin(TestCase):
             'clientlogin', 'POST',
             username='myusername',
             password='mypassword',
-            loginreturnurl='%s://%s' % (site.scheme, site.host),
+            loginreturnurl='{}://{}'.format(site.scheme, site.host),
             logintoken=login_token
         )
 
@@ -636,7 +636,7 @@ class TestLogin(TestCase):
         # this would be done by site_init usually, but we're mocking it
         site.version = (1, 28, 0)
         success = site.clientlogin(username='myusername', password='mypassword')
-        url = '%s://%s' % (site.scheme, site.host)
+        url = '{}://{}'.format(site.scheme, site.host)
 
         call_args = raw_api.call_args_list
 
