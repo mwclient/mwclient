@@ -17,8 +17,7 @@ __version__ = '0.11.0'
 
 log = logging.getLogger(__name__)
 
-USER_AGENT = 'mwclient/{} ({})'.format(__version__,
-                                       'https://github.com/mwclient/mwclient')
+USER_AGENT = f'mwclient/{__version__} (https://github.com/mwclient/mwclient)'
 
 
 class Site:
@@ -245,7 +244,7 @@ class Site:
             A tuple containing the individual elements of the given version number.
         """
         if not string.startswith(prefix):
-            raise errors.MediaWikiVersionError('Unknown generator {}'.format(string))
+            raise errors.MediaWikiVersionError(f'Unknown generator {string}')
 
         version = string[len(prefix):].split('.')
 
@@ -269,8 +268,7 @@ class Site:
         version_tuple = sum((split_num(s) for s in version), ())
 
         if len(version_tuple) < 2:
-            raise errors.MediaWikiVersionError('Unknown MediaWiki {}'
-                                               .format('.'.join(version)))
+            raise errors.MediaWikiVersionError(f'Unknown MediaWiki {".".join(version)}')
 
         return version_tuple
 
@@ -283,7 +281,7 @@ class Site:
     }
 
     def __repr__(self):
-        return "<{} object '{}{}'>".format(self.__class__.__name__, self.host, self.path)
+        return f"<{self.__class__.__name__} object '{self.host}{self.path}'>"
 
     def get(self, action, *args, **kwargs):
         """Perform a generic API call using GET.
@@ -329,9 +327,10 @@ class Site:
             >>> result = site.api('query', prop='coordinates', titles='Oslo|Copenhagen')
             >>> for page in result['query']['pages'].values():
             ...     if 'coordinates' in page:
-            ...         print('{} {} {}'.format(page['title'],
-            ...             page['coordinates'][0]['lat'],
-            ...             page['coordinates'][0]['lon']))
+            ...         title = page['title']
+            ...         lat = page['coordinates'][0]['lat']
+            ...         lon = page['coordinates'][0]['lon']
+            ...         print(f'{title} {lat} {lon}')
             Oslo 59.95 10.75
             Copenhagen 55.6761 12.5683
 
@@ -478,9 +477,7 @@ class Site:
             )
             scheme, host = host
 
-        url = '{scheme}://{host}{path}{script}{ext}'.format(scheme=scheme, host=host,
-                                                            path=self.path, script=script,
-                                                            ext=self.ext)
+        url = f'{scheme}://{host}{self.path}{script}{self.ext}'
 
         while True:
             toraise = None
@@ -497,8 +494,8 @@ class Site:
                 stream = self.connection.request(http_method, url, **args)
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
-                    log.warning('Database lag exceeds max lag. '
-                                'Waiting for {} seconds'.format(wait_time))
+                    log.warning(f'Database lag exceeds max lag. '
+                                f'Waiting for {wait_time} seconds')
                     # fall through to the sleep
                 elif stream.status_code == 200:
                     return stream.text
@@ -507,10 +504,8 @@ class Site:
                 else:
                     if not retry_on_error:
                         stream.raise_for_status()
-                    log.warning('Received {status} response: {text}. '
-                                'Retrying in a moment.'
-                                .format(status=stream.status_code,
-                                        text=stream.text))
+                    log.warning(f'Received {stream.status_code} response: {stream.text}. '
+                                f'Retrying in a moment.')
                     toraise = "stream"
                     # fall through to the sleep
 
@@ -633,18 +628,15 @@ class Site:
             if raise_error is None:
                 return
             # FIXME: Replace this with a specific error
-            raise RuntimeError('Site %s has not yet been initialized' % repr(self))
+            raise RuntimeError(f'Site {repr(self)} has not yet been initialized')
 
         if revision is None:
             if self.version[:2] >= (major, minor):
                 return True
             elif raise_error:
                 raise errors.MediaWikiVersionError(
-                    'Requires version {required[0]}.{required[1]}, '
-                    'current version is {current[0]}.{current[1]}'
-                    .format(required=(major, minor),
-                            current=(self.version[:2]))
-                )
+                    f'Requires version {major}.{minor}, '
+                    f'current version is {self.version[0]}.{self.version[1]}')
             else:
                 return False
         else:
@@ -770,7 +762,7 @@ class Site:
             >>> try:
             ...     site.clientlogin(username='myusername', password='secret')
             ... except mwclient.errors.LoginError as e:
-            ...     print('Could not login to MediaWiki: %s' % e)
+            ...     print(f'Could not login to MediaWiki: {e}' )
 
         Args:
             cookies (dict): Custom cookies to include with the log-in request.
@@ -816,7 +808,7 @@ class Site:
 
             if 'logincontinue' not in kwargs and 'loginreturnurl' not in kwargs:
                 # should be great if API didn't require this...
-                kwargs['loginreturnurl'] = '{}://{}'.format(self.scheme, self.host)
+                kwargs['loginreturnurl'] = f'{self.scheme}://{self.host}'
 
             while True:
                 login = self.post('clientlogin', **kwargs)
@@ -867,7 +859,7 @@ class Site:
                 # Note that for read protected wikis, we don't know the version when
                 # fetching the login token. If it's < 1.27, the request below will
                 # raise a KeyError that we should catch.
-                self.tokens[type] = info['query']['tokens']['%stoken' % type]
+                self.tokens[type] = info['query']['tokens'][f'{type}token']
 
             else:
                 if title is None:
@@ -877,7 +869,7 @@ class Site:
                                  prop='info', intoken=type)
                 for i in info['query']['pages'].values():
                     if i['title'] == title:
-                        self.tokens[type] = i['%stoken' % type]
+                        self.tokens[type] = i[f'{type}token']
 
         return self.tokens[type]
 
@@ -1517,8 +1509,8 @@ class Site:
 
         offset = 0
         while offset is not None:
-            results = self.raw_api('ask', query='{query}|offset={offset}'.format(
-                query=query, offset=offset), http_method='GET', **kwargs)
+            results = self.raw_api('ask', query=f'{query}|offset={offset}',
+                                   http_method='GET', **kwargs)
             self.handle_api_result(results)  # raises APIError on error
             offset = results.get('query-continue-offset')
             answers = results['query'].get('results', [])

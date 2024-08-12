@@ -41,7 +41,7 @@ class Image(mwclient.page.Page):
         ))
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
         if redirect:
-            kwargs['%sredirect' % prefix] = '1'
+            kwargs[f'{prefix}redirect'] = '1'
         return mwclient.listing.List.get_list(generator)(
             self.site,
             'imageusage',
@@ -93,8 +93,4 @@ class Image(mwclient.page.Page):
             return self.site.connection.get(url).content
 
     def __repr__(self):
-        return "<{} object '{}' for {}>".format(
-            self.__class__.__name__,
-            self.name,
-            self.site
-        )
+        return f"<{self.__class__.__name__} object '{self.name}' for {self.site}>"

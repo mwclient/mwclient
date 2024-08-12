@@ -58,8 +58,10 @@ class FileExists(EditError):
         self.file_name = file_name
 
     def __str__(self):
-        return ('The file "{}" already exists. Set ignore=True to overwrite it.'
-                .format(self.file_name))
+        return (
+            f'The file "{self.file_name}" already exists. '
+            f'Set ignore=True to overwrite it.'
+        )
 
 
 class LoginError(MwClientError):

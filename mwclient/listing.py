@@ -130,11 +130,7 @@ class List:
             self._iter = iter(data['query'][self.result_member].values())
 
     def __repr__(self):
-        return "<{} object '{}' for {}>".format(
-            self.__class__.__name__,
-            self.list_name,
-            self.site
-        )
+        return f"<{self.__class__.__name__} object '{self.list_name}' for {self.site}>"
 
     @staticmethod
     def generate_kwargs(_prefix, *args, **kwargs):
@@ -209,11 +205,7 @@ class Category(mwclient.page.Page, GeneratorList):
         GeneratorList.__init__(self, site, 'categorymembers', 'cm', **kwargs)
 
     def __repr__(self):
-        return "<{} object '{}' for {}>".format(
-            self.__class__.__name__,
-            self.name,
-            self.site
-        )
+        return f"<{self.__class__.__name__} object '{self.name}' for {self.site}>"
 
     def members(self, prop='ids|title', namespace=None, sort='sortkey',
                 dir='asc', start=None, end=None, generator=True):
@@ -255,10 +247,7 @@ class PageList(GeneratorList):
             One of Category, Image or Page (default), according to namespace.
         """
         if self.namespace != 0:
-            full_page_name = "{namespace}:{name}".format(
-                namespace=self.site.namespaces[self.namespace],
-                name=name,
-            )
+            full_page_name = f"{self.site.namespaces[self.namespace]}:{name}"
             namespace = self.namespace
         else:
             full_page_name = name
@@ -290,11 +279,11 @@ class PageList(GeneratorList):
         for ns in self.site.namespaces:
             if ns == 0:
                 continue
-            namespace = '%s:' % self.site.namespaces[ns].replace(' ', '_')
+            namespace = f'{self.site.namespaces[ns].replace(" ", "_")}:'
             if name.startswith(namespace):
                 return ns
             elif ns in self.site.default_namespaces:
-                namespace = '%s:' % self.site.default_namespaces[ns].replace(' ', '_')
+                namespace = f'{self.site.default_namespaces[ns].replace(" ", "_")}:'
                 if name.startswith(namespace):
                     return ns
         return 0
