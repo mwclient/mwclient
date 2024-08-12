@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # mwclient documentation build configuration file, created by
 # sphinx-quickstart on Sat Sep 27 11:19:56 2014.
@@ -55,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'mwclient'
-copyright = '{0}, Bryan Tong Minh'.format(datetime.datetime.now().year)
+copyright = '{}, Bryan Tong Minh'.format(datetime.datetime.now().year)
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

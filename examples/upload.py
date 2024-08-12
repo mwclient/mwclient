@@ -24,7 +24,7 @@ site.login(sys.argv[1], sys.argv[2])
 
 name = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)) + '.png'
 
-print('Using http://%s%sindex.php?title=File:' % (host, path) + name)
+print('Using http://{}{}index.php?title=File:'.format(host, path) + name)
 print('Regular upload test')
 
 res = site.upload(open('test-image.png', 'rb'), name, 'Regular upload test', ignore=True)

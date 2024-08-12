@@ -6,7 +6,7 @@ import mwclient.page
 class Image(mwclient.page.Page):
 
     def __init__(self, site, name, info=None):
-        super(Image, self).__init__(
+        super().__init__(
             site, name, info, extra_properties={
                 'imageinfo': (
                     ('iiprop',
@@ -93,7 +93,7 @@ class Image(mwclient.page.Page):
             return self.site.connection.get(url).content
 
     def __repr__(self):
-        return "<%s object '%s' for %s>" % (
+        return "<{} object '{}' for {}>".format(
             self.__class__.__name__,
             self.name,
             self.site

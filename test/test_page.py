@@ -378,10 +378,10 @@ class TestPageApiArgs(unittest.TestCase):
             'gcllimit': repr(self.page.site.api_limit),
         } == args
 
-        assert set([c.name for c in cats]) == set([
+        assert {c.name for c in cats} == {
             'Category:1879 births',
             'Category:1955 deaths',
-        ])
+        }
 
 
 if __name__ == '__main__':
