@@ -494,8 +494,8 @@ class Site:
                 stream = self.connection.request(http_method, url, **args)
                 if stream.headers.get('x-database-lag'):
                     wait_time = int(stream.headers.get('retry-after'))
-                    log.warning(f'Database lag exceeds max lag. '
-                                f'Waiting for {wait_time} seconds')
+                    log.warning('Database lag exceeds max lag. '
+                                'Waiting for %d seconds', wait_time)
                     # fall through to the sleep
                 elif stream.status_code == 200:
                     return stream.text
@@ -504,8 +504,8 @@ class Site:
                 else:
                     if not retry_on_error:
                         stream.raise_for_status()
-                    log.warning(f'Received {stream.status_code} response: {stream.text}. '
-                                f'Retrying in a moment.')
+                    log.warning('Received %d response: %s. Retrying in a moment.',
+                                stream.status_code, stream.text)
                     toraise = "stream"
                     # fall through to the sleep
 
