@@ -64,6 +64,22 @@ Alternatively, you can run the tests directly with pytest:
     $ pip install -e '.[testing]'
     $ py.test
 
+There is a container-based integration test suite which is not run by default
+as it requires docker or podman, is a little slow, and needs to do ~3G of network
+transfer when first run (to download the mediawiki container images). It is
+run as part of CI. To run it locally, make sure you have docker or podman
+installed, then with tox, do:
+
+.. code:: bash
+
+    $ tox -e integration
+
+Or with pytest, do:
+
+.. code:: bash
+
+    $ py.test test/integration.py
+
 If you would like to expand the test suite by adding more tests, please go ahead!
 
 Updating/expanding the documentation
@@ -106,7 +122,8 @@ When it is ready, push your branch to your remote:
     $ git push -u fork my-branch
 
 Then you can open a pull request on GitHub. You should see a URL to do this
-when you push your branch.
+when you push your branch. Tests will be automatically run on your pull
+request via GitHub Actions.
 
 Making a release
 ----------------

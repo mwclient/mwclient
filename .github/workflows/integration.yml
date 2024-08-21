@@ -1,0 +1,28 @@
+---
+name: Run integration tests
+
+on: ["push", "pull_request"]
+
+jobs:
+  build:
+    runs-on: "ubuntu-latest"
+    strategy:
+      max-parallel: 4
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v5.1.1
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install tox tox-gh-actions
+      - name: Install podman
+        run: sudo apt-get -y install podman
+      - name: Integration test with tox
+        run: tox -e integration
