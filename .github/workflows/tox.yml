@@ -39,8 +39,8 @@ jobs:
       - name: Test with tox
         run: tox
       - name: Produce coverage.lcov for coveralls
-        if: matrix.python-version == '3.11'
+        if: matrix.python-version == '3.12'
         run: coverage lcov
       - name: Coveralls
-        if: matrix.python-version == '3.11'
+        if: matrix.python-version == '3.12'
         uses: coverallsapp/github-action@v2
