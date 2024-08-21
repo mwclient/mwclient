@@ -814,6 +814,7 @@ class Site:
                 login = self.post('clientlogin', **kwargs)
                 status = login['clientlogin'].get('status')
                 if status == 'PASS':
+                    self.site_init()
                     return True
                 elif status in ('UI', 'REDIRECT'):
                     return login['clientlogin']
