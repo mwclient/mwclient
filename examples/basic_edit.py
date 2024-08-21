@@ -44,9 +44,11 @@ print('Links:', list(page.links(generator=False)))
 print('External links:', list(page.extlinks()))
 
 print('Uploading image')
-site.upload(open('test-image.png', 'rb'), f'{prefix}-test-image.png', 'desc', ignore=True)
+with open('test-image.png', 'rb', encoding='utf-8') as f:
+    site.upload(f, f'{prefix}-test-image.png', 'desc', ignore=True)
 print('Uploading image for the second time')
-site.upload(open('test-image.png', 'rb'), f'{prefix}-test-image.png', 'desc', ignore=True)
+with open('test-image.png', 'rb', encoding='utf-8') as f:
+    site.upload(f, f'{prefix}-test-image.png', 'desc', ignore=True)
 image = site.Images[f'{prefix}-test-image.png']
 print('Imageinfo:', image.imageinfo)
 history = list(image.imagehistory())
