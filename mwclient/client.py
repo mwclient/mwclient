@@ -777,6 +777,10 @@ class Site:
                      `username` and `password`
                 See https://www.mediawiki.org/wiki/API:Login#Method_2._clientlogin
 
+        Returns:
+            bool | dict: True if login was successful, or the response if it's a
+                multi-steps login process you started.
+
         Raises:
             LoginError (mwclient.errors.LoginError): Login failed, the reason can be
                 obtained from e.code and e.info (where e is the exception object) and
@@ -796,31 +800,28 @@ class Site:
         if cookies:
             self.connection.cookies.update(cookies)
 
-        if kwargs:
-            # Try to login using the scheme for MW 1.27+. If the wiki is read protected,
-            # it is not possible to get the wiki version upfront using the API, so we just
-            # have to try. If the attempt fails, we try the old method.
-            if 'logintoken' not in kwargs:
-                try:
-                    kwargs['logintoken'] = self.get_token('login')
-                except (errors.APIError, KeyError):
-                    log.debug('Failed to get login token, MediaWiki is older than 1.27.')
+        if not kwargs:
+            # TODO: Check if we should raise an error here. It's not clear what the
+            #       expected behavior is when no kwargs are passed. To update the
+            #       cookies, the user can update the connection object directly.
+            return
 
-            if 'logincontinue' not in kwargs and 'loginreturnurl' not in kwargs:
-                # should be great if API didn't require this...
-                kwargs['loginreturnurl'] = f'{self.scheme}://{self.host}'
+        if 'logintoken' not in kwargs:
+            kwargs['logintoken'] = self.get_token('login')
 
-            while True:
-                login = self.post('clientlogin', **kwargs)
-                status = login['clientlogin'].get('status')
-                if status == 'PASS':
-                    self.site_init()
-                    return True
-                elif status in ('UI', 'REDIRECT'):
-                    return login['clientlogin']
-                else:
-                    raise errors.LoginError(self, status,
-                                            login['clientlogin'].get('message'))
+        if 'logincontinue' not in kwargs and 'loginreturnurl' not in kwargs:
+            kwargs['loginreturnurl'] = f'{self.scheme}://{self.host}'
+
+        response = self.post('clientlogin', **kwargs)
+
+        status = response['clientlogin'].get('status')
+        if status == 'PASS':
+            self.site_init()
+            return True
+        elif status in ('UI', 'REDIRECT'):
+            return response['clientlogin']
+        else:
+            raise errors.LoginError(self, status, response['clientlogin'].get('message'))
 
     def get_token(self, type, force=False, title=None):
         """Request a MediaWiki access token of the given `type`.
