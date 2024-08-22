@@ -102,6 +102,7 @@ class Site:
         self.compress = compress
         self.max_lag = str(max_lag)
         self.force_login = force_login
+        self.logged_in = False
         if reqs and connection_options:
             raise ValueError(
                 "reqs is a deprecated alias of connection_options. Do not specify both."
@@ -381,13 +382,14 @@ class Site:
         try:
             userinfo = info['query']['userinfo']
         except KeyError:
-            userinfo = ()
+            userinfo = {}
         if 'blockedby' in userinfo:
             self.blocked = (userinfo['blockedby'], userinfo.get('blockreason', ''))
         else:
             self.blocked = False
         self.hasmsg = 'messages' in userinfo
-        self.logged_in = 'anon' not in userinfo
+        if userinfo:
+            self.logged_in = 'anon' not in userinfo
         if 'warnings' in info:
             for module, warning in info['warnings'].items():
                 if '*' in warning:
