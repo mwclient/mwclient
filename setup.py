@@ -1,13 +1,11 @@
 #!/usr/bin/env python
 import os
-import sys
+
 from setuptools import setup
 
 here = os.path.abspath(os.path.dirname(__file__))
-README = open(os.path.join(here, 'README.md')).read()
-
-needs_pytest = {'pytest', 'test', 'ptr'}.intersection(sys.argv)
-pytest_runner = ['pytest-runner'] if needs_pytest else []
+with open(os.path.join(here, 'README.md'), "r", encoding="utf-8") as f:
+    README = f.read()
 
 setup(name='mwclient',
       # See https://mwclient.readthedocs.io/en/latest/development/#making-a-release
@@ -33,8 +31,9 @@ setup(name='mwclient',
       license='MIT',
       packages=['mwclient'],
       install_requires=['requests-oauthlib'],
-      setup_requires=pytest_runner,
-      tests_require=['pytest', 'pytest-cov',
-                     'responses>=0.3.0', 'responses!=0.6.0', 'setuptools'],
+      extras_require={
+          'testing': ['pytest', 'pytest-cov',
+                      'responses>=0.3.0', 'responses!=0.6.0', 'setuptools'],
+      },
       zip_safe=True
       )

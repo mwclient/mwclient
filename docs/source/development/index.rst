@@ -38,33 +38,31 @@ Create a new branch for your changes:
 Test suite
 ----------
 
-mwclient ships with a test suite based on `pytest <https://pytest.org>`_.
-While it's far from complete, it can sometimes alert you if you break things.
+mwclient ships with a test suite based on `pytest <https://pytest.org>`_. While
+it's far from complete, it can sometimes alert you if you break things.
 
-The easiest way to run the tests is:
-
-.. code:: bash
-
-    $ python setup.py test
-
-This will make an in-place build and download test dependencies locally if needed.
-Tests will run faster, however, if you do an
-`editable install <https://pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs>`_
-and run pytest directly:
-
-.. code:: bash
-
-    $ pip install pytest pytest-cov flake8 responses mock
-    $ pip install -e .
-    $ py.test
-
-If you want to test with different Python versions in isolated virtualenvs,
-you can use `Tox <https://tox.testrun.org/>`_. A `tox.ini` file is included.
+To run the test suite, you can use `tox <https://tox.testrun.org/>`_. Tox will
+create a virtual environment for each Python version you want to test with,
+install the dependencies, and run the tests.
 
 .. code:: bash
 
     $ pip install tox
     $ tox
+
+If you want to run the tests for a single Python version, you can do so by
+specifying the Python version, e.g. to run the tests for Python 3.9:
+
+.. code:: bash
+
+    $ tox -e py39
+
+Alternatively, you can run the tests directly with pytest:
+
+.. code:: bash
+
+    $ pip install -e '.[testing]'
+    $ py.test
 
 If you would like to expand the test suite by adding more tests, please go ahead!
 
@@ -80,7 +78,7 @@ To build the documentation locally for testing:
 
 .. code:: bash
 
-    $ pip install Sphinx sphinx-rtd-theme
+    $ pip install -r docs/requirements.txt
     $ cd docs
     $ make html
 
