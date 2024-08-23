@@ -340,6 +340,8 @@ class Site:
         """
         kwargs.update(args)
 
+        # this enables new-style continuation in mediawiki 1.21
+        # through 1.25, can be dropped when we bump baseline to 1.26
         if action == 'query' and 'continue' not in kwargs:
             kwargs['continue'] = ''
         if action == 'query':
