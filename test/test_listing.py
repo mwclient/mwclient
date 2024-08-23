@@ -184,6 +184,18 @@ class TestList(unittest.TestCase):
         assert type(vals[0]) == tuple
 
     @mock.patch('mwclient.client.Site')
+    def test_list_empty(self, mock_site):
+        # Test that we handle an empty response from get correctly
+        # (stop iterating)
+
+        lst = List(mock_site, 'allpages', 'ap', limit=2,
+                   return_values=('title', 'ns'))
+        mock_site.get.side_effect = [{}]
+        vals = [x for x in lst]
+
+        assert len(vals) == 0
+
+    @mock.patch('mwclient.client.Site')
     def test_generator_list(self, mock_site):
         # Test that the GeneratorList yields Page objects
 
