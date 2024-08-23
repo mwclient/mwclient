@@ -222,6 +222,15 @@ class TestList(unittest.TestCase):
         assert len(vals) == 0
 
     @mock.patch('mwclient.client.Site')
+    def test_list_repr(self, mock_site):
+        # Test __repr__ of a List is as expected
+
+        mock_site.__str__.return_value = "some wiki"
+        lst = List(mock_site, 'allpages', 'ap', limit=2,
+                   return_values=('title', 'ns'))
+        assert repr(lst) == "<List object 'allpages' for some wiki>"
+
+    @mock.patch('mwclient.client.Site')
     def test_generator_list(self, mock_site):
         # Test that the GeneratorList yields Page objects
 
