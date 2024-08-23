@@ -1,7 +1,7 @@
 import unittest
 import pytest
 import mwclient
-from mwclient.listing import List, GeneratorList
+from mwclient.listing import List, NestedList, GeneratorList
 
 import unittest.mock as mock
 
@@ -229,6 +229,56 @@ class TestList(unittest.TestCase):
         lst = List(mock_site, 'allpages', 'ap', limit=2,
                    return_values=('title', 'ns'))
         assert repr(lst) == "<List object 'allpages' for some wiki>"
+
+    @mock.patch('mwclient.client.Site')
+    def test_get_list(self, mock_site):
+        # Test get_list behaves as expected
+
+        lst = List.get_list()(mock_site, 'allpages', 'ap', limit=2,
+                              return_values=('title', 'ns'))
+        genlst = List.get_list(True)(mock_site, 'allpages', 'ap', limit=2,
+                                     return_values=('title', 'ns'))
+        assert isinstance(lst, List)
+        assert not isinstance(lst, GeneratorList)
+        assert isinstance(genlst, GeneratorList)
+
+    @mock.patch('mwclient.client.Site')
+    def test_nested_list(self, mock_site):
+        # Test NestedList class works as expected
+
+        mock_site.api_limit = 500
+        nested = NestedList('entries', mock_site, 'checkuserlog', 'cul')
+        mock_site.get.side_effect = [
+            # this is made-up because I do not have permissions on any
+            # wiki with this extension installed and the extension doc
+            # does not show a sample API response
+            {
+                'query': {
+                    'checkuserlog': {
+                        'entries': [
+                            {
+                                'user': 'Dreamyjazz',
+                                'action': 'users',
+                                'ip': '172.18.0.1',
+                                'message': 'suspected sockpuppet',
+                                'time': 1662328680
+                            },
+                            {
+                                'user': 'Dreamyjazz',
+                                'action': 'ip',
+                                'targetuser': 'JohnDoe124',
+                                'message': 'suspected sockpuppet',
+                                'time': 1662328380
+                            },
+                        ]
+                    }
+                }
+            }
+        ]
+        vals = [x for x in nested]
+        assert len(vals) == 2
+        assert vals[0]['action'] == 'users'
+        assert vals[1]['action'] == 'ip'
 
     @mock.patch('mwclient.client.Site')
     def test_generator_list(self, mock_site):
