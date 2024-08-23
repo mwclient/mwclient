@@ -1,7 +1,7 @@
 import unittest
 import pytest
 import mwclient
-from mwclient.listing import List, NestedList, GeneratorList
+from mwclient.listing import List, NestedList, GeneratorList, Category
 
 import unittest.mock as mock
 
@@ -293,6 +293,78 @@ class TestList(unittest.TestCase):
         assert type(vals[0]) == mwclient.page.Page
         assert type(vals[1]) == mwclient.image.Image
         assert type(vals[2]) == mwclient.listing.Category
+
+    @mock.patch('mwclient.client.Site')
+    def test_category(self, mock_site):
+        # Test that Category works as expected
+
+        mock_site.__str__.return_value = "some wiki"
+        mock_site.api_limit = 500
+        # first response is for Page.__init__ as Category inherits
+        # from both Page and GeneratorList, second response is for
+        # the Category treated as an iterator with the namespace
+        # filter applied, third response is for the Category.members()
+        # call without a namespace filter
+        mock_site.get.side_effect = [
+            {
+                'query': {
+                    'pages': {
+                        '54565': {
+                            'pageid': 54565, 'ns': 14, 'title': 'Category:Furry things'
+                        }
+                    }
+                }
+            },
+            {
+                'query': {
+                    'pages': {
+                        '36245': {
+                            'pageid': 36245,
+                            'ns': 118,
+                            'title': 'Draft:Cat'
+                        },
+                        '36275': {
+                            'pageid': 36275,
+                            'ns': 118,
+                            'title': 'Draft:Dog'
+                        }
+                    }
+                }
+            },
+            {
+                'query': {
+                    'pages': {
+                        '36245': {
+                            'pageid': 36245,
+                            'ns': 118,
+                            'title': 'Draft:Cat'
+                        },
+                        '36275': {
+                            'pageid': 36275,
+                            'ns': 118,
+                            'title': 'Draft:Dog'
+                        },
+                        '36295': {
+                            'pageid': 36295,
+                            'ns': 0,
+                            'title': 'Hamster'
+                        }
+                    }
+                }
+            },
+        ]
+
+        cat = Category(mock_site, 'Category:Furry things', namespace=118)
+        assert repr(cat) == "<Category object 'Category:Furry things' for some wiki>"
+        assert cat.args['gcmnamespace'] == 118
+        vals = [x for x in cat]
+        assert len(vals) == 2
+        assert vals[0].name == "Draft:Cat"
+        newcat = cat.members()
+        assert 'gcmnamespace' not in newcat.args
+        vals = [x for x in newcat]
+        assert len(vals) == 3
+        assert vals[2].name == "Hamster"
 
 
 if __name__ == '__main__':
