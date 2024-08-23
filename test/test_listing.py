@@ -192,7 +192,33 @@ class TestList(unittest.TestCase):
                    return_values=('title', 'ns'))
         mock_site.get.side_effect = [{}]
         vals = [x for x in lst]
+        assert len(vals) == 0
 
+    @mock.patch('mwclient.client.Site')
+    def test_list_invalid(self, mock_site):
+        # Test that we handle the response for a list that doesn't
+        # exist correctly (set an empty iterator, then stop
+        # iterating)
+
+        mock_site.api_limit = 500
+        lst = List(mock_site, 'allpagess', 'ap')
+        mock_site.get.side_effect = [
+            {
+                'batchcomplete': '',
+                'warnings': {
+                    'main': {'*': 'Unrecognized parameter: aplimit.'},
+                    'query': {'*': 'Unrecognized value for parameter "list": allpagess'}
+                },
+                'query': {
+                    'userinfo': {
+                        'id': 0,
+                        'name': 'DEAD:BEEF:CAFE',
+                        'anon': ''
+                    }
+                }
+            }
+        ]
+        vals = [x for x in lst]
         assert len(vals) == 0
 
     @mock.patch('mwclient.client.Site')
