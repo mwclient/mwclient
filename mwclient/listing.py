@@ -88,11 +88,8 @@ class List:
         Else, update the iterator accordingly.
 
         If 'continue' is in the response, it is added to `self.args`
-        (new style continuation, added in MediaWiki 1.21).
-
-        If not, but 'query-continue' is in the response, query its
-        item called `self.list_name` and add this to `self.args` (old
-        style continuation).
+        (new style continuation, added in MediaWiki 1.21, default
+        since MediaWiki 1.26).
 
         Else, set `self.last` to True.
         """
@@ -112,10 +109,6 @@ class List:
         if data.get('continue'):
             # New style continuation, added in MediaWiki 1.21
             self.args.update(data['continue'])
-
-        elif self.list_name in data.get('query-continue', ()):
-            # Old style continuation
-            self.args.update(data['query-continue'][self.list_name])
 
         else:
             self.last = True
