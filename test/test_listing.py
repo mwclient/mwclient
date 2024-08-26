@@ -1,7 +1,8 @@
 import unittest
 import pytest
 import mwclient
-from mwclient.listing import List, NestedList, GeneratorList, Category
+from mwclient.listing import List, NestedList, GeneratorList, Category, PageList
+from mwclient.page import Page
 
 import unittest.mock as mock
 
@@ -365,6 +366,39 @@ class TestList(unittest.TestCase):
         vals = [x for x in newcat]
         assert len(vals) == 3
         assert vals[2].name == "Hamster"
+
+    @mock.patch('mwclient.client.Site')
+    def test_pagelist(self, mock_site):
+        # Test that PageList works as expected
+        mock_site.__str__.return_value = "some wiki"
+        mock_site.api_limit = 500
+        mock_site.namespaces = {0: "", 6: "Image", 14: "Category"}
+        mock_site.get.return_value = {
+            'query': {
+                'pages': {
+                    '8052484': {
+                        'pageid': 8052484, 'ns': 0, 'title': 'Impossible'
+                    }
+                }
+            }
+        }
+        pl = PageList(mock_site, start="Herring", end="Marmalade")
+        assert pl.args["gapfrom"] == "Herring"
+        assert pl.args["gapto"] == "Marmalade"
+        pg = pl["Impossible"]
+        assert isinstance(pg, Page)
+        assert mock_site.get.call_args[0] == ("query",)
+        assert mock_site.get.call_args[1]["titles"] == "Impossible"
+        # covers the catch of AttributeError in get()
+        pg = pl[8052484]
+        assert isinstance(pg, Page)
+        assert mock_site.get.call_args[0] == ("query",)
+        assert mock_site.get.call_args[1]["pageids"] == 8052484
+        pg = pl["Category:Spreads"]
+        assert mock_site.get.call_args[1]["titles"] == "Category:Spreads"
+        assert isinstance(pg, Category)
+        pl = PageList(mock_site, prefix="Ham")
+        assert pl.args["gapprefix"] == "Ham"
 
 
 if __name__ == '__main__':

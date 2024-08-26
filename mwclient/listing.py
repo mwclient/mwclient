@@ -247,7 +247,7 @@ class PageList(GeneratorList):
             try:
                 namespace = self.guess_namespace(name)
             except AttributeError:
-                # raised when `namespace` doesn't have a `startswith` attribute
+                # raised when `name` doesn't have a `startswith` attribute
                 namespace = 0
 
         cls = {
