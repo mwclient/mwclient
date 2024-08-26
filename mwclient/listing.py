@@ -275,10 +275,6 @@ class PageList(GeneratorList):
             namespace = f'{self.site.namespaces[ns].replace(" ", "_")}:'
             if name.startswith(namespace):
                 return ns
-            elif ns in self.site.default_namespaces:
-                namespace = f'{self.site.default_namespaces[ns].replace(" ", "_")}:'
-                if name.startswith(namespace):
-                    return ns
         return 0
 
 
