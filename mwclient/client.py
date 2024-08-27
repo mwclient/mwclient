@@ -13,7 +13,7 @@ from requests_oauthlib import OAuth1
 import mwclient.errors as errors
 import mwclient.listing as listing
 from mwclient.sleep import Sleeper, Sleepers
-from mwclient.types import Namespace
+from mwclient.types import Namespace, VersionTuple
 from mwclient.util import parse_timestamp, read_in_chunks, handle_limit
 
 __version__ = '0.11.0'
@@ -166,7 +166,7 @@ class Site:
         self.groups = []  # type: List[str]  # Groups current user is in
         self.rights = []  # type: List[str]  # Rights current user has
         self.tokens = {}  # type: Dict[str, str]  # Edit tokens of the current user
-        self.version = None  # type: Union[Tuple[int, ...], Tuple[int, str], None]
+        self.version = None  # type: Optional[VersionTuple]
 
         self.namespaces = self.default_namespaces  # type: Dict[int, str]
 
@@ -256,7 +256,7 @@ class Site:
     @staticmethod
     def version_tuple_from_generator(
         string: str, prefix: str = 'MediaWiki '
-    ) -> Union[Tuple[int, ...], Tuple[int, str]]:
+    ) -> VersionTuple:
         """Return a version tuple from a MediaWiki Generator string.
 
         Example:
