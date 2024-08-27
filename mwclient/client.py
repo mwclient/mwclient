@@ -1647,7 +1647,9 @@ class Site:
                             api_chunk_size=api_chunk_size, **kwargs)
 
     def revisions(
-        self, revids: List[int], prop: str = 'ids|timestamp|flags|comment|user'
+        self,
+        revids: List[Union[int, str]],
+        prop: str = 'ids|timestamp|flags|comment|user',
     ) -> List[Dict[str, Any]]:
         """Get data about a list of revisions.
 
@@ -1794,7 +1796,7 @@ class Site:
 
     def expandtemplates(
         self, text: str, title: Optional[str] = None, generatexml: bool = False
-    ) -> Any:
+    ) -> Union[str, Tuple[str, str]]:
         """
         Takes wikitext (text) and expands templates.
 
@@ -1816,9 +1818,9 @@ class Site:
         result = self.post('expandtemplates', text=text, **kwargs)
 
         if generatexml:
-            return result['expandtemplates']['*'], result['parsetree']['*']
+            return str(result['expandtemplates']['*']), str(result['parsetree']['*'])
         else:
-            return result['expandtemplates']['*']
+            return str(result['expandtemplates']['*'])
 
     def ask(self, query: str, title: Optional[str] = None) -> Iterable[Dict[str, Any]]:
         """
