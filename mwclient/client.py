@@ -13,7 +13,7 @@ from requests_oauthlib import OAuth1
 import mwclient.errors as errors
 import mwclient.listing as listing
 from mwclient.sleep import Sleeper, Sleepers
-from mwclient.types import Namespace, VersionTuple
+from mwclient.types import Cookies, Namespace, VersionTuple
 from mwclient.util import parse_timestamp, read_in_chunks, handle_limit
 
 __version__ = '0.11.0'
@@ -776,7 +776,7 @@ class Site:
         self,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        cookies: Optional[Mapping[str, str]] = None,
+        cookies: Optional[Cookies] = None,
         domain: Optional[str] = None
     ) -> None:
         """
@@ -852,9 +852,7 @@ class Site:
 
         self.site_init()
 
-    def clientlogin(
-        self, cookies: Optional[Mapping[str, str]] = None, **kwargs: Any
-    ) -> Any:
+    def clientlogin(self, cookies: Optional[Cookies] = None, **kwargs: Any) -> Any:
         """
         Login to the wiki using a username and password. The method returns
         True if it's a success or the returned response if it's a multi-steps
