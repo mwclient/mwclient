@@ -685,7 +685,7 @@ class Site:
         minor: int,
         revision: Optional[int] = None,
         raise_error: bool = True
-    ) -> bool:
+    ) -> Optional[bool]:
         """Check whether the current wiki matches the required version.
 
         Args:
@@ -697,8 +697,8 @@ class Site:
 
         Returns:
             `False` if the version of the current wiki is below the required version, else
-                `True`. If either `raise_error=True` or the site is uninitialized and
-                `raise_error=None` then nothing is returned.
+                `True`. If `raise_error` is `False` and the version is below the required
+                version, `None` is returned.
 
         Raises:
             errors.MediaWikiVersionError: The current wiki is below the required version
@@ -713,9 +713,17 @@ class Site:
         """
         if self.version is None:
             if raise_error is None:
-                return  # type: ignore[unreachable]
-            # FIXME: Replace this with a specific error
-            raise RuntimeError(f'Site {repr(self)} has not yet been initialized')
+                warnings.warn(  # type: ignore[unreachable]
+                    'Passing raise_error=None to require is deprecated and will be '
+                    'removed in a future version. Use raise_error=False instead.',
+                    DeprecationWarning
+                )
+                return None
+            elif raise_error is False:
+                return None
+            else:
+                # FIXME: Replace this with a specific error
+                raise RuntimeError(f'Site {repr(self)} has not yet been initialized')
 
         if revision is None:
             if self.version[:2] >= (major, minor):
