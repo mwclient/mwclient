@@ -1,9 +1,5 @@
 import unittest
 import pytest
-import logging
-import requests
-import responses
-import json
 import mwclient
 from mwclient.listing import List, GeneratorList
 
@@ -200,6 +196,7 @@ class TestList(unittest.TestCase):
         assert type(vals[0]) == mwclient.page.Page
         assert type(vals[1]) == mwclient.image.Image
         assert type(vals[2]) == mwclient.listing.Category
+
 
 if __name__ == '__main__':
     unittest.main()
