@@ -1,4 +1,4 @@
-from io import StringIO
+from io import BytesIO
 import sys
 import os
 import pprint
@@ -48,4 +48,4 @@ assert 'duplicate' in res['warnings']
 assert 'exists' in res['warnings']
 
 print('Uploading empty file; error expected')
-res = site.upload(StringIO(), name, 'Empty upload test')
+res = site.upload(BytesIO(), name, 'Empty upload test')

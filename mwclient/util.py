@@ -1,6 +1,6 @@
 import time
 import io
-from typing import Optional, Iterable, Tuple
+from typing import Optional, Iterable, Tuple, BinaryIO
 import warnings
 
 
@@ -18,7 +18,7 @@ def parse_timestamp(t: Optional[str]) -> time.struct_time:
     return time.strptime(t, '%Y-%m-%dT%H:%M:%SZ')
 
 
-def read_in_chunks(stream: io.BufferedReader, chunk_size: int) -> Iterable[io.BytesIO]:
+def read_in_chunks(stream: BinaryIO, chunk_size: int) -> Iterable[io.BytesIO]:
     while True:
         data = stream.read(chunk_size)
         if not data:

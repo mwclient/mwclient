@@ -1,10 +1,9 @@
-import io
 import json
 import logging
 import warnings
 from collections import OrderedDict
 from typing import Optional, Callable, Union, Mapping, Any, MutableMapping, List, Dict, \
-    Tuple, cast, Iterable, BinaryIO, TextIO, Iterator
+    Tuple, cast, Iterable, BinaryIO, Iterator
 
 import requests
 from requests.auth import HTTPBasicAuth, AuthBase
@@ -494,9 +493,7 @@ class Site:
         self,
         script: str,
         data: Mapping[str, Any],
-        files: Optional[
-            Mapping[str, Union[io.BytesIO, Tuple[str, io.BufferedReader]]]
-        ] = None,
+        files: Optional[Mapping[str, Union[BinaryIO, Tuple[str, BinaryIO]]]] = None,
         retry_on_error: bool = True,
         http_method: str = 'POST'
     ) -> str:
@@ -978,7 +975,7 @@ class Site:
 
     def upload(
         self,
-        file: Union[str, BinaryIO, TextIO, None] = None,
+        file: Union[str, BinaryIO, None] = None,
         filename: Optional[str] = None,
         description: str = '',
         ignore: bool = False,
@@ -1049,9 +1046,9 @@ class Site:
             if not hasattr(file, 'read'):
                 file = open(file, 'rb')
 
-            # Narrowing the type of file from Union[str, io.BufferedReader] to just
-            # io.BufferedReader, since we know it's not a string at this point.
-            file = cast(io.BufferedReader, file)
+            # Narrowing the type of file from Union[str, BinaryIO, None]
+            # to BinaryIO, since we know it's not a str at this point.
+            file = cast(BinaryIO, file)
 
             content_size = file.seek(0, 2)
             file.seek(0)
@@ -1115,7 +1112,7 @@ class Site:
 
     def chunk_upload(
         self,
-        file: io.BufferedReader,
+        file: BinaryIO,
         filename: str,
         ignorewarnings: bool,
         comment: str,
