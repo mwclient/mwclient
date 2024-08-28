@@ -1,7 +1,8 @@
 import unittest
 import pytest
 import mwclient
-from mwclient.listing import List, NestedList, GeneratorList, Category, PageList
+from mwclient.listing import List, NestedList, GeneratorList
+from mwclient.listing import Category, PageList, RevisionsIterator
 from mwclient.page import Page
 
 import unittest.mock as mock
@@ -399,6 +400,67 @@ class TestList(unittest.TestCase):
         assert isinstance(pg, Category)
         pl = PageList(mock_site, prefix="Ham")
         assert pl.args["gapprefix"] == "Ham"
+
+    @mock.patch('mwclient.client.Site')
+    def test_revisions_iterator(self, mock_site):
+        # Test RevisionsIterator, including covering a line of
+        # PageProperty.set_iter
+        mock_site.api_limit = 500
+        mock_site.get.return_value = {
+            'query': {
+                'pages': {
+                    '8052484': {
+                        'pageid': 8052484,
+                        'ns': 0,
+                        'title': 'Impossible',
+                        'revisions': [
+                            {
+                                "revid": 5000,
+                                "parentid": 4999,
+                                "user": "Bob",
+                                "comment": "an edit"
+                            },
+                            {
+                                "revid": 4999,
+                                "parentid": 4998,
+                                "user": "Alice",
+                                "comment": "an earlier edit"
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+        page = mock.MagicMock()
+        page.site = mock_site
+        page.name = "Impossible"
+        rvi = RevisionsIterator(
+            page, "revisions", "rv", rvstartid=5, rvstart="2001-01-15T14:56:00Z"
+        )
+        assert "rvstart" in rvi.args and "rvstartid" in rvi.args
+        vals = [x for x in rvi]
+        assert "rvstart" not in rvi.args and "rvstartid" in rvi.args
+        assert len(vals) == 2
+        assert vals[0]["comment"] == "an edit"
+        assert vals[1]["comment"] == "an earlier edit"
+        # now test the StopIteration line in PageProperty.set_iter
+        # by mocking a return value for a different page
+        mock_site.get.return_value = {
+            'query': {
+                'pages': {
+                    '8052485': {
+                        'pageid': '8052485',
+                        'ns': 0,
+                        'title': 'Impractical'
+                    }
+                }
+            }
+        }
+        rvi = RevisionsIterator(
+            page, "revisions", "rv", rvstartid=5, rvstart="2001-01-15T14:56:00Z"
+        )
+        vals = [x for x in rvi]
+        assert len(vals) == 0
 
 
 if __name__ == '__main__':
