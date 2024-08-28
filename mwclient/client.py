@@ -986,7 +986,7 @@ class Site:
         url: Optional[str] = None,
         filekey: Optional[str] = None,
         comment: Optional[str] = None
-    ) -> Any:
+    ) -> Dict[str, Any]:
         """Upload a file to the site.
 
         Note that one of `file`, `filekey` and `url` must be specified, but not
@@ -1098,7 +1098,7 @@ class Site:
             if not info:
                 info = {}
             if self.handle_api_result(info, kwargs=predata, sleeper=sleeper):
-                response = info.get('upload', {})
+                response = info.get('upload', {})  # type: Dict[str, Any]
                 # Workaround for https://github.com/mwclient/mwclient/issues/211
                 # ----------------------------------------------------------------
                 # Raise an error if the file already exists. This is necessary because
@@ -1120,7 +1120,7 @@ class Site:
         ignorewarnings: bool,
         comment: str,
         text: Optional[str]
-    ) -> Any:
+    ) -> Dict[str, Any]:
         """Upload a file to the site in chunks.
 
         This method is called by `Site.upload` if you are connecting to a newer
@@ -1158,7 +1158,7 @@ class Site:
                 data = self.raw_call('api', params, files={'chunk': chunk})
                 info = json.loads(data)
                 if self.handle_api_result(info, kwargs=params, sleeper=sleeper):
-                    response = info.get('upload', {})
+                    response = info.get('upload', {})  # type: Dict[str, Any]
                     break
 
             offset += chunk.tell()
