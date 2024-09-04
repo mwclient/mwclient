@@ -241,7 +241,7 @@ class Site:
             prefix (str): The expected prefix of the string.
 
         Returns:
-            A tuple containing the individual elements of the given version number.
+            tuple[int, int, Union[int, str]...]: The version tuple.
         """
         if not string.startswith(prefix):
             raise errors.MediaWikiVersionError(f'Unknown generator {string}')
@@ -279,6 +279,15 @@ class Site:
 
         if len(version_tuple) < 2:
             raise errors.MediaWikiVersionError(f'Unknown MediaWiki {".".join(version)}')
+
+        # Ensure the major and minor version components are integers.
+        # Non-integer values for these components are not supported and will
+        # cause comparison issues.
+        if not all(isinstance(segment, int) for segment in version_tuple[:2]):
+            raise errors.MediaWikiVersionError(
+                f'Unknown MediaWiki {".".join(version)}. '
+                'Major and minor version must be integers.'
+            )
 
         return version_tuple
 
