@@ -1,16 +1,17 @@
-from io import StringIO
-import unittest
-import pytest
-import mwclient
+import json
 import logging
+import time
+import unittest
+import unittest.mock as mock
+from io import StringIO
+
+import pkg_resources  # part of setuptools
+import pytest
 import requests
 import responses
-import pkg_resources  # part of setuptools
-import time
-import json
 from requests_oauthlib import OAuth1
 
-import unittest.mock as mock
+import mwclient
 
 if __name__ == "__main__":
     print()
@@ -728,6 +729,32 @@ class TestClientApiMethods(TestCase):
         assert revisions[0]['revid'] == 689697696
         assert revisions[0]['timestamp'] == time.strptime('2015-11-08T21:52:46Z', '%Y-%m-%dT%H:%M:%SZ')
         assert revisions[1]['revid'] == 689816909
+
+
+class TestVersionTupleFromGenerator:
+
+    @pytest.mark.parametrize('version, expected', [
+        ('MediaWiki 1.24', (1, 24)),
+        ('MediaWiki 1.24.0', (1, 24, 0)),
+        ('MediaWiki 1.24.0-wmf.1', (1, 24, 0, '-wmf', 1)),
+        ('MediaWiki 1.24.1alpha', (1, 24, 1, 'alpha')),
+        ('MediaWiki 1.24.1alpha1', (1, 24, 1, 'alpha1')),
+        ('MediaWiki 1.24.1-rc.3', (1, 24, 1, '-rc', 3)),
+    ])
+    def test_version_tuple_from_generator(self, version, expected):
+        assert mwclient.Site.version_tuple_from_generator(version) == expected
+
+    def test_version_tuple_from_generator_empty(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('')
+
+    def test_version_tuple_from_generator_invalid_prefix(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('Foo 1.24.1')
+
+    def test_version_tuple_from_generator_no_minor(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('MediaWiki 1')
 
 
 class TestClientUploadArgs(TestCase):
