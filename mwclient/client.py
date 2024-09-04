@@ -1,9 +1,8 @@
-import warnings
+import json
 import logging
-
+import warnings
 from collections import OrderedDict
 
-import json
 import requests
 from requests.auth import HTTPBasicAuth, AuthBase
 from requests_oauthlib import OAuth1
@@ -247,26 +246,36 @@ class Site:
         if not string.startswith(prefix):
             raise errors.MediaWikiVersionError(f'Unknown generator {string}')
 
-        version = string[len(prefix):].split('.')
+        version = string[len(prefix):]
 
-        def split_num(s):
-            """Split the string on the first non-digit character.
+        def _split_version(version):
+            """Split a version string into segments.
 
-            Returns:
-                A tuple of the digit part as int and, if available,
-                the rest of the string.
+            Args:
+                version (str): The version string (without the prefix).
+
+            Yields:
+                str: The individual segments of the version string.
             """
-            i = 0
-            while i < len(s):
-                if s[i] < '0' or s[i] > '9':
-                    break
-                i += 1
-            if s[i:]:
-                return (int(s[:i]), s[i:], )
-            else:
-                return (int(s[:i]), )
+            current_segment = ''
+            for curr_char in version:
+                if curr_char in "-+_.":
+                    yield current_segment
+                    current_segment = ''
+                elif current_segment and (
+                    (current_segment[-1].isdigit() and curr_char.isalpha())
+                    or (current_segment[-1].isalpha() and curr_char.isdigit())
+                ):
+                    yield current_segment
+                    current_segment = curr_char
+                else:
+                    current_segment += curr_char
+            yield current_segment
 
-        version_tuple = sum((split_num(s) for s in version), ())
+        version_tuple = tuple(
+            int(segment) if segment.isdigit() else segment
+            for segment in _split_version(version)
+        )
 
         if len(version_tuple) < 2:
             raise errors.MediaWikiVersionError(f'Unknown MediaWiki {".".join(version)}')
