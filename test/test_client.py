@@ -736,10 +736,10 @@ class TestVersionTupleFromGenerator:
     @pytest.mark.parametrize('version, expected', [
         ('MediaWiki 1.24', (1, 24)),
         ('MediaWiki 1.24.0', (1, 24, 0)),
-        ('MediaWiki 1.24.0-wmf.1', (1, 24, 0, '-wmf', 1)),
+        ('MediaWiki 1.24.0-wmf.1', (1, 24, 0, 'wmf', 1)),
         ('MediaWiki 1.24.1alpha', (1, 24, 1, 'alpha')),
-        ('MediaWiki 1.24.1alpha1', (1, 24, 1, 'alpha1')),
-        ('MediaWiki 1.24.1-rc.3', (1, 24, 1, '-rc', 3)),
+        ('MediaWiki 1.24.1alpha1', (1, 24, 1, 'alpha', 1)),
+        ('MediaWiki 1.24.1-rc.3', (1, 24, 1, 'rc', 3)),
     ])
     def test_version_tuple_from_generator(self, version, expected):
         assert mwclient.Site.version_tuple_from_generator(version) == expected
