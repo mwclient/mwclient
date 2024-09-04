@@ -756,6 +756,21 @@ class TestVersionTupleFromGenerator:
         with pytest.raises(mwclient.errors.MediaWikiVersionError):
             mwclient.Site.version_tuple_from_generator('MediaWiki 1')
 
+    def test_version_tuple_from_generator_major_is_not_number(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('MediaWiki foo.24.1')
+
+    def test_version_tuple_from_generator_minor_is_not_number(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('MediaWiki 1.foo.1')
+
+    def test_version_tuple_from_generator_major_and_minor_are_not_numbers(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('MediaWiki foo.bar.1')
+
+    def test_version_tuple_from_generator_patch_is_not_number(self):
+        assert mwclient.Site.version_tuple_from_generator('MediaWiki 1.24.foo') == (1, 24, 'foo')
+
 
 class TestClientUploadArgs(TestCase):
 
