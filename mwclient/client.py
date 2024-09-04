@@ -864,7 +864,7 @@ class Site:
         Raises:
             errors.APIError: A token of the given type could not be retrieved.
         """
-        if self.version is None or self.version[:2] >= (1, 24):
+        if self.version is None or self.require(1, 24, raise_error=False):
             # The 'csrf' (cross-site request forgery) token introduced in 1.24 replaces
             # the majority of older tokens, like edittoken and movetoken.
             if type not in {'watch', 'patrol', 'rollback', 'userrights', 'login'}:
@@ -874,8 +874,7 @@ class Site:
             self.tokens[type] = '0'
 
         if self.tokens.get(type, '0') == '0' or force:
-
-            if self.version is None or self.version[:2] >= (1, 24):
+            if self.version is None or self.require(1, 24, raise_error=False):
                 # We use raw_api() rather than api() because api() is adding "userinfo"
                 # to the query and this raises a readapideniederror if the wiki is read
                 # protected, and we're trying to fetch a login token.
@@ -967,7 +966,7 @@ class Site:
             content_size = file.seek(0, 2)
             file.seek(0)
 
-            if self.version[:2] >= (1, 20) and content_size > self.chunk_size:
+            if self.require(1, 20, raise_error=False) and content_size > self.chunk_size:
                 return self.chunk_upload(file, filename, ignore, comment, text)
 
         predata = {
@@ -986,7 +985,7 @@ class Site:
 
         # sessionkey was renamed to filekey in MediaWiki 1.18
         # https://phabricator.wikimedia.org/rMW5f13517e36b45342f228f3de4298bb0fe186995d
-        if self.version[:2] < (1, 18):
+        if not self.require(1, 18, raise_error=False):
             predata['sessionkey'] = filekey
         else:
             predata['filekey'] = filekey
