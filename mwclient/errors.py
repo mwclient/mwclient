@@ -104,10 +104,6 @@ class NoSpecifiedEmail(EmailError):
     pass
 
 
-class NoWriteApi(MwClientError):
-    pass
-
-
 class InvalidResponse(MwClientError):
 
     def __init__(self, response_text=None):
