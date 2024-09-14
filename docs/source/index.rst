@@ -6,9 +6,9 @@ mwclient: lightweight MediaWiki client
    :align: right
    :width: 30%
 
-Mwclient is a :ref:`MIT licensed <license>` client library to the `MediaWiki API`_
-that should work well with both Wikimedia wikis and other wikis running
-MediaWiki 1.16 or above. It works with Python 2.7 and 3.3+.
+Mwclient is an :ref:`MIT licensed <license>` client library for the `MediaWiki API`_
+that works well with both Wikimedia wikis and other wikis running
+MediaWiki 1.21 or above. It is compatible with Python 3.6 and above.
 
 .. _install:
 
