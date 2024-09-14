@@ -63,6 +63,15 @@ There is also some documentation on the [GitHub wiki](https://github.com/mwclien
 that hasn't been ported yet.
 If you want to help, you're welcome!
 
+## License
+
+mwclient is licensed under the MIT license. See the [LICENSE.md](LICENSE.md)
+file for details.
+
+## Versioning
+
+This project adheres to [Semantic Versioning](http://semver.org/).
+
 ## Contributing
 
 Patches are welcome! See [this page](https://mwclient.readthedocs.io/en/latest/development/)
