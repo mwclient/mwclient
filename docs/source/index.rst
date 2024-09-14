@@ -81,7 +81,23 @@ Looking for information on contributing to mwclient development?
 MIT License
 -----------
 
-    .. include:: ../../LICENSE.md
+This project is licensed under the MIT License. The full text of the license
+is reproduced below:
+
+    .. literalinclude:: ../../LICENSE.md
+        :language: text
+
+Versioning
+----------
+
+Mwclient uses `Semantic Versioning 2.0.0 <http://semver.org>`_. Versions are
+numbered ``MAJOR.MINOR.PATCH``. The version will be incremented based on the
+following:
+
+* `MAJOR` version is incremented when backwards incompatible changes are made.
+* `MINOR` version is incremented when functionality is added in a backwards
+  compatible manner.
+* `PATCH` version is incremented when backwards compatible bug fixes are made.
 
 Indices and tables
 ------------------
