@@ -188,6 +188,20 @@ class GeneratorList(List):
 
 
 class Category(mwclient.page.Page, GeneratorList):
+    """
+    Represents a category on a MediaWiki wiki represented by a
+    :class:`~mwclient.client.Site` object.
+
+    Args:
+        site (mwclient.client.Site): The site object this page belongs to.
+        name (Union[str, int, Page]): The title of the page, the page ID, or
+            another :class:`Page` object to copy.
+        info (Optional[dict]): Page info, if already fetched, e.g., when
+            iterating over a list of pages. If not provided, the page info
+            will be fetched from the API.
+        namespace (Union[int, str, None]): The namespace of the category
+            members to list.
+    """
 
     def __init__(self, site, name, info=None, namespace=None):
         mwclient.page.Page.__init__(self, site, name, info)

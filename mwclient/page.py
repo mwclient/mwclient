@@ -5,6 +5,30 @@ import mwclient.errors
 
 
 class Page:
+    """
+    Represents a page on a MediaWiki wiki represented by a
+    :class:`~mwclient.client.Site` object.
+
+    Args:
+        site (mwclient.client.Site): The site object this page belongs to.
+        name (Union[str, int, Page]): The title of the page, the page ID, or
+            another :class:`Page` object to copy.
+        info (Optional[dict]): Page info, if already fetched, e.g., when
+            iterating over a list of pages. If not provided, the page info
+            will be fetched from the API.
+        extra_properties (Optional[dict]): Extra properties to fetch when
+            initializing the page.
+
+    Examples:
+        >>> site = mwclient.Site('en.wikipedia.org')
+        >>> page1 = Page(site, 'Main Page')
+        >>> page2 = Page(site, 123456)
+        >>> page3 = Page(site, 'Main Page', extra_properties={
+        ...     'imageinfo': [
+        ...         ('iiprop', 'timestamp|user|comment|url|size|sha1|metadata'),
+        ...     ],
+        ... })
+    """
 
     def __init__(self, site, name, info=None, extra_properties=None):
         if type(name) is type(self):
