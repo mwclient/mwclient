@@ -1,7 +1,9 @@
 .. _errors:
 
-:class:`InsufficientPermission`
+:mod:`Errors <mwclient.errors>`
 -------------------------------
 
-.. autoclass:: mwclient.errors.InsufficientPermission
+.. automodule:: mwclient.errors
    :members:
+   :undoc-members:
+   :show-inheritance:

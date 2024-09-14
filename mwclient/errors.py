@@ -1,20 +1,31 @@
 class MwClientError(RuntimeError):
+    """Base class for all mwclient errors."""
     pass
 
 
 class MediaWikiVersionError(MwClientError):
+    """The version of MediaWiki is not supported."""
     pass
 
 
 class APIDisabledError(MwClientError):
+    """The API is disabled on the wiki."""
     pass
 
 
 class MaximumRetriesExceeded(MwClientError):
+    """The maximum number of retries for a request has been exceeded."""
     pass
 
 
 class APIError(MwClientError):
+    """Base class for errors returned by the MediaWiki API.
+
+    Attributes:
+        code (Optional[str]): The error code returned by the API.
+        info (str): The error message returned by the API.
+        kwargs (Optional[Any]): Additional information.
+    """
 
     def __init__(self, code, info, kwargs):
         self.code = code
@@ -23,18 +34,29 @@ class APIError(MwClientError):
 
 
 class InsufficientPermission(MwClientError):
+    """Raised when the user does not have sufficient permissions to perform an
+    action."""
     pass
 
 
 class UserBlocked(InsufficientPermission):
+    """Raised when attempting to perform an action while blocked."""
     pass
 
 
 class EditError(MwClientError):
+    """Base class for errors related to editing pages."""
     pass
 
 
 class ProtectedPageError(EditError, InsufficientPermission):
+    """Raised when attempting to edit a protected page.
+
+    Attributes:
+        page (mwclient.page.Page): The page for which the edit attempt was made.
+        code (Optional[str]): The error code returned by the API.
+        info (Optional[str]): The error message returned by the API.
+    """
 
     def __init__(self, page, code=None, info=None):
         self.page = page
@@ -52,6 +74,9 @@ class FileExists(EditError):
     Raised when trying to upload a file that already exists.
 
     See also: https://www.mediawiki.org/wiki/API:Upload#Upload_warnings
+
+    Attributes:
+        file_name (str): The name of the file that already exists.
     """
 
     def __init__(self, file_name):
@@ -65,6 +90,14 @@ class FileExists(EditError):
 
 
 class LoginError(MwClientError):
+    """Base class for login errors.
+
+    Attributes:
+        site (mwclient.site.Site): The site object on which the login attempt
+            was made.
+        code (str): The error code returned by the API.
+        info (str): The error message returned by the API.
+    """
 
     def __init__(self, site, code, info):
         super().__init__(
@@ -80,11 +113,19 @@ class LoginError(MwClientError):
 
 
 class OAuthAuthorizationError(LoginError):
+    """Raised when OAuth authorization fails.
+
+    Attributes:
+        site (mwclient.site.Site): The site object on which the login attempt
+            was made.
+        code (str): The error code returned by the API.
+        info (str): The error message returned by the API.
+    """
     pass
 
 
 class AssertUserFailedError(MwClientError):
-
+    """Raised when the user assertion fails."""
     def __init__(self):
         super().__init__(
             'By default, mwclient protects you from accidentally editing '
@@ -97,14 +138,21 @@ class AssertUserFailedError(MwClientError):
 
 
 class EmailError(MwClientError):
+    """Base class for email errors."""
     pass
 
 
 class NoSpecifiedEmail(EmailError):
+    """Raised when trying to email a user who has not specified an email"""
     pass
 
 
 class InvalidResponse(MwClientError):
+    """Raised when the server returns an invalid JSON response.
+
+    Attributes:
+        response_text (str): The response text from the server.
+    """
 
     def __init__(self, response_text=None):
         super().__init__((
@@ -120,4 +168,5 @@ class InvalidResponse(MwClientError):
 
 
 class InvalidPageTitle(MwClientError):
+    """Raised when an invalid page title is used."""
     pass
