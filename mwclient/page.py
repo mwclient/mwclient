@@ -1,5 +1,7 @@
 import time
-from typing import Optional, Mapping, Any, cast, Dict, Union, Tuple  # noqa: F401
+from typing import (  # noqa: F401
+    Optional, Mapping, Any, cast, Dict, Union, Tuple, Iterable, List
+)
 
 import mwclient.errors
 import mwclient.listing
@@ -38,7 +40,7 @@ class Page:
         site: 'mwclient.client.Site',
         name: Union[int, str, 'Page'],
         info: Optional[Mapping[str, Any]] = None,
-        extra_properties: Optional[Mapping[str, Any]] = None
+        extra_properties: Optional[Mapping[str, Iterable[Tuple[str, str]]]] = None
     ) -> None:
         if type(name) is type(self):
             self.__dict__.update(name.__dict__)
@@ -49,7 +51,7 @@ class Page:
         if not info:
             if extra_properties:
                 prop = 'info|' + '|'.join(extra_properties.keys())
-                extra_props = []
+                extra_props = []  # type: List[Tuple[str, str]]
                 for extra_prop in extra_properties.values():
                     extra_props.extend(extra_prop)
             else:
