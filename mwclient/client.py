@@ -301,7 +301,7 @@ class Site:
         version_tuple = tuple(
             int(segment) if segment.isdigit() else segment
             for segment in _split_version(version)
-        )
+        )  # type: Tuple[Union[int, str], ...]
 
         if len(version_tuple) < 2:
             raise errors.MediaWikiVersionError(f'Unknown MediaWiki {".".join(version)}')
@@ -1061,7 +1061,7 @@ class Site:
             content_size = file.seek(0, 2)
             file.seek(0)
 
-            if (self.require(1, 20, raise_error=False)  # type: ignore[index]
+            if (self.require(1, 20, raise_error=False)
                     and content_size > self.chunk_size):
                 return self.chunk_upload(file, filename, ignore, comment, text)
 
@@ -1081,7 +1081,7 @@ class Site:
 
         # sessionkey was renamed to filekey in MediaWiki 1.18
         # https://phabricator.wikimedia.org/rMW5f13517e36b45342f228f3de4298bb0fe186995d
-        if not self.require(1, 18, raise_error=False):  # type: ignore[index]
+        if not self.require(1, 18, raise_error=False):
             predata['sessionkey'] = filekey
         else:
             predata['filekey'] = filekey
@@ -1589,9 +1589,9 @@ class Site:
                                                    end=end, dir=dir, user=user))
         return listing.NestedList(
             'entries',
-            self,  # type: ignore[arg-type]
-            'checkuserlog',  # type: ignore[arg-type]
-            'cul',  # type: ignore[arg-type]
+            self,
+            'checkuserlog',
+            'cul',
             max_items=max_items,
             api_chunk_size=api_chunk_size,
             **kwargs,

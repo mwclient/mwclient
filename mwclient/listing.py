@@ -159,8 +159,8 @@ class List:
 
 
 class NestedList(List):
-    def __init__(self, nested_param: str, *args: Tuple[str, Any], **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)  # type: ignore[arg-type]
+    def __init__(self, nested_param: str, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
         self.nested_param = nested_param
 
     def set_iter(self, data: Mapping[str, Any]) -> None:
