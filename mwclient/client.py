@@ -1530,7 +1530,7 @@ class Site:
             >>>         print(data)
         """
         kwargs = {}
-        if title is None:
+        if title is not None:
             kwargs['title'] = title
 
         offset = 0
