@@ -545,7 +545,7 @@ class Site:
         url = f'{scheme}://{host}{self.path}{script}{self.ext}'
 
         while True:
-            toraise = None
+            toraise = None  # type: Optional[Union[requests.RequestException, str]]
             wait_time = 0
             args = {'files': files, 'headers': headers}  # type: Dict[str, Any]
             for k, v in self.requests.items():
@@ -589,7 +589,7 @@ class Site:
                 if not retry_on_error:
                     raise
                 log.warning('Connection error. Retrying in a moment.')
-                toraise = err  # type: ignore[assignment]
+                toraise = err
                 # proceed to the sleep
 
             # all retry paths come here
@@ -598,8 +598,8 @@ class Site:
             except errors.MaximumRetriesExceeded:
                 if toraise == "stream":
                     stream.raise_for_status()
-                elif toraise:
-                    raise toraise  # type: ignore[misc]
+                elif toraise and isinstance(toraise, BaseException):
+                    raise toraise
                 else:
                     raise
 
