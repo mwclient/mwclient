@@ -4,7 +4,7 @@ from typing import (  # noqa: F401
 
 import mwclient.image
 import mwclient.page
-from mwclient.types import Namespace
+from mwclient._types import Namespace
 from mwclient.util import parse_timestamp, handle_limit
 
 

@@ -5,7 +5,7 @@ from typing import (  # noqa: F401
 
 import mwclient.errors
 import mwclient.listing
-from mwclient.types import Namespace
+from mwclient._types import Namespace
 from mwclient.util import parse_timestamp, handle_limit
 
 
