@@ -12,7 +12,7 @@ from requests_oauthlib import OAuth1
 import mwclient.errors as errors
 import mwclient.listing as listing
 from mwclient.sleep import Sleeper, Sleepers
-from mwclient.types import Cookies, Namespace, VersionTuple
+from mwclient._types import Cookies, Namespace, VersionTuple
 from mwclient.util import parse_timestamp, read_in_chunks, handle_limit
 
 __version__ = '0.11.0'

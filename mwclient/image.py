@@ -3,7 +3,7 @@ from typing import Optional, Mapping, Any, overload
 
 import mwclient.listing
 import mwclient.page
-from mwclient.types import Namespace
+from mwclient._types import Namespace
 from mwclient.util import handle_limit
 
 
