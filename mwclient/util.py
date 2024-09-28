@@ -1,13 +1,14 @@
 import time
 import io
+from typing import Optional, Iterable, Tuple, BinaryIO
 import warnings
 
 
-def parse_timestamp(t):
+def parse_timestamp(t: Optional[str]) -> time.struct_time:
     """Parses a string containing a timestamp.
 
     Args:
-        t (str): A string containing a timestamp.
+        t: A string containing a timestamp.
 
     Returns:
         time.struct_time: A timestamp.
@@ -17,7 +18,7 @@ def parse_timestamp(t):
     return time.strptime(t, '%Y-%m-%dT%H:%M:%SZ')
 
 
-def read_in_chunks(stream, chunk_size):
+def read_in_chunks(stream: BinaryIO, chunk_size: int) -> Iterable[io.BytesIO]:
     while True:
         data = stream.read(chunk_size)
         if not data:
@@ -25,7 +26,9 @@ def read_in_chunks(stream, chunk_size):
         yield io.BytesIO(data)
 
 
-def handle_limit(limit, max_items, api_chunk_size):
+def handle_limit(
+    limit: Optional[int], max_items: Optional[int], api_chunk_size: Optional[int]
+) -> Tuple[Optional[int], Optional[int]]:
     """
     Consistently handles 'limit', 'api_chunk_size' and 'max_items' -
     https://github.com/mwclient/mwclient/issues/259 . In version 0.11,

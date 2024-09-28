@@ -3,7 +3,7 @@ import logging
 import time
 import unittest
 import unittest.mock as mock
-from io import StringIO
+from io import BytesIO
 
 import pkg_resources  # part of setuptools
 import pytest
@@ -155,8 +155,8 @@ class TestClient(TestCase):
         site = mwclient.Site('test.wikipedia.org')
 
         assert len(responses.calls) == 2
-        assert 'retry-after' in responses.calls[0].response.headers
-        assert 'retry-after' not in responses.calls[1].response.headers
+        assert 'retry-after' in responses.calls[0].response.headers  # type: ignore
+        assert 'retry-after' not in responses.calls[1].response.headers  # type: ignore
 
     @responses.activate
     def test_http_error(self):
@@ -204,6 +204,7 @@ class TestClient(TestCase):
 
         site = mwclient.Site('test.wikipedia.org')
 
+        assert responses.calls[0].request.url is not None
         assert 'action=query' in responses.calls[0].request.url
         assert 'meta=siteinfo%7Cuserinfo' in responses.calls[0].request.url
 
@@ -231,7 +232,8 @@ class TestClient(TestCase):
         self.httpShouldReturn(self.metaResponseAsJson())
 
         with pytest.raises(RuntimeError):
-            site = mwclient.Site('test.wikipedia.org', httpauth=1)
+            site = mwclient.Site('test.wikipedia.org',
+                                 httpauth=1)  # type: ignore[arg-type]
 
     @responses.activate
     def test_oauth(self):
@@ -822,7 +824,7 @@ class TestClientUploadArgs(TestCase):
         # Test that methods are called, and arguments sent as expected
         self.configure()
 
-        self.site.upload(file=StringIO('test'), filename=self.vars['fname'], comment=self.vars['comment'])
+        self.site.upload(file=BytesIO(b'test'), filename=self.vars['fname'], comment=self.vars['comment'])
 
         args, kwargs = self.raw_call.call_args
         data = args[1]
@@ -838,19 +840,19 @@ class TestClientUploadArgs(TestCase):
         self.configure()
 
         with pytest.raises(TypeError):
-            self.site.upload(file=StringIO('test'))
+            self.site.upload(file=BytesIO(b'test'))
 
     def test_upload_ambigitious_args(self):
         self.configure()
 
         with pytest.raises(TypeError):
-            self.site.upload(filename='Test', file=StringIO('test'), filekey='abc')
+            self.site.upload(filename='Test', file=BytesIO(b'test'), filekey='abc')
 
     def test_upload_missing_upload_permission(self):
         self.configure(rights=['read'])
 
         with pytest.raises(mwclient.errors.InsufficientPermission):
-            self.site.upload(filename='Test', file=StringIO('test'))
+            self.site.upload(filename='Test', file=BytesIO(b'test'))
 
     def test_upload_file_exists(self):
         self.configure()
@@ -877,7 +879,7 @@ class TestClientUploadArgs(TestCase):
         ]
 
         with pytest.raises(mwclient.errors.FileExists):
-            self.site.upload(file=StringIO('test'), filename='Test.jpg', ignore=False)
+            self.site.upload(file=BytesIO(b'test'), filename='Test.jpg', ignore=False)
 
 
 class TestClientGetTokens(TestCase):

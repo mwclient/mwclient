@@ -1,6 +1,8 @@
+import http.client
 import shutil
 import subprocess
 import time
+from typing import Optional
 from urllib.error import URLError, HTTPError
 from urllib.request import urlopen
 
@@ -8,7 +10,6 @@ import mwclient
 import pytest
 
 
-_CONTAINER_RUNTIME = None
 if shutil.which("podman"):
     _CONTAINER_RUNTIME = "podman"
 elif shutil.which("docker"):
@@ -33,46 +34,46 @@ def site(request):
     container = f"mwclient-{tag}"
     # create the container, using upstream's official image. see
     # https://hub.docker.com/_/mediawiki
-    args = (_CONTAINER_RUNTIME, "run", "--name", container, "-p", f"{port}:80",
-            "-d", f"docker.io/library/mediawiki:{tag}")
+    args = [_CONTAINER_RUNTIME, "run", "--name", container, "-p", f"{port}:80",
+            "-d", f"docker.io/library/mediawiki:{tag}"]
     subprocess.run(args)
     # configure the wiki far enough that we can use the API. if you
     # use this interactively the CSS doesn't work, I don't know why,
     # don't think it really matters
-    args = (_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
+    args = [_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
             "php", "/var/www/html/maintenance/install.php", "--server",
             f"http://localhost:{port}", "--dbtype", "sqlite", "--pass", "weakpassword",
-            "--dbpath", "/var/www/data", "mwclient-test-wiki", "root")
+            "--dbpath", "/var/www/data", "mwclient-test-wiki", "root"]
     subprocess.run(args)
     # create a regular user
-    args = (_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
+    args = [_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
             "php", "/var/www/html/maintenance/createAndPromote.php", "testuser",
-            "weakpassword")
+            "weakpassword"]
     subprocess.run(args)
     # create an admin user
-    args = (_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
+    args = [_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
             "php", "/var/www/html/maintenance/createAndPromote.php", "sysop",
-            "weakpassword", "--bureaucrat", "--sysop", "--interface-admin")
+            "weakpassword", "--bureaucrat", "--sysop", "--interface-admin"]
     subprocess.run(args)
     # create a bot user
-    args = (_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
+    args = [_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
             "php", "/var/www/html/maintenance/createAndPromote.php", "testbot",
-            "weakpassword", "--bot")
+            "weakpassword", "--bot"]
     subprocess.run(args)
     # disable anonymous editing (we can't use redirection via podman
     # exec for some reason, so we use sed)
-    args = (_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
+    args = [_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
             "sed", "-i", r"$ a\$wgGroupPermissions['*']['edit'] = false;",
-            "/var/www/html/LocalSettings.php")
+            "/var/www/html/LocalSettings.php"]
     subprocess.run(args)
     # allow editing by users
-    args = (_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
+    args = [_CONTAINER_RUNTIME, "exec", container, "runuser", "-u", "www-data", "--",
             "sed", "-i", r"$ a\$wgGroupPermissions['user']['edit'] = true;",
-            "/var/www/html/LocalSettings.php")
+            "/var/www/html/LocalSettings.php"]
     subprocess.run(args)
     # block until the server is actually running, up to 30 seconds
     start = int(time.time())
-    resp = None
+    resp: Optional[http.client.HTTPResponse] = None
     while not resp:
         try:
             resp = urlopen(f"http://localhost:{port}")
@@ -85,9 +86,9 @@ def site(request):
     # set up mwclient.site instance and yield it
     yield mwclient.Site(f"localhost:{port}", path="/", scheme="http", force_login=False)
     # -t=0 just hard stops it immediately, saves time
-    args = (_CONTAINER_RUNTIME, "stop", "-t=0", container)
+    args = [_CONTAINER_RUNTIME, "stop", "-t=0", container]
     subprocess.run(args)
-    args = (_CONTAINER_RUNTIME, "rm", container)
+    args = [_CONTAINER_RUNTIME, "rm", container]
     subprocess.run(args)
 
 

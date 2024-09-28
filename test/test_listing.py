@@ -391,7 +391,7 @@ class TestList(unittest.TestCase):
         assert mock_site.get.call_args[0] == ("query",)
         assert mock_site.get.call_args[1]["titles"] == "Impossible"
         # covers the catch of AttributeError in get()
-        pg = pl[8052484]
+        pg = pl[8052484]  # type: ignore[index]
         assert isinstance(pg, Page)
         assert mock_site.get.call_args[0] == ("query",)
         assert mock_site.get.call_args[1]["pageids"] == 8052484
