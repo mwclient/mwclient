@@ -288,12 +288,14 @@ class PageList(GeneratorList):
                          gapfilterredir=redirects, **kwargs)
 
     def __getitem__(
-        self, name: str
+        self, name: Union[str, int, 'mwclient.page.Page']
     ) -> Union['mwclient.page.Page', 'mwclient.image.Image', 'Category']:
         return self.get(name, None)
 
     def get(
-        self, name: str, info: Optional[Mapping[str, Any]] = None
+        self,
+        name: Union[str, int, 'mwclient.page.Page'],
+        info: Optional[Mapping[str, Any]] = None
     ) -> Union['mwclient.page.Page', 'mwclient.image.Image', 'Category']:
         """Return the page of name `name` as an object.
 
@@ -301,18 +303,25 @@ class PageList(GeneratorList):
         page name, otherwise guess the namespace from the name using
         `self.guess_namespace`.
 
+        Args:
+            name: The name of the page as a string, the page ID as an int, or
+                another :class:`Page` object.
+            info: Page info, if already fetched, e.g., when iterating over a
+                list of pages. If not provided, the page info will be fetched
+                from the API.
+
         Returns:
             One of Category, Image or Page (default), according to namespace.
         """
         if self.namespace != 0:
-            full_page_name = f"{self.site.namespaces[self.namespace]}:{name}"
+            full_page_name = f"{self.site.namespaces[self.namespace]}:{name}" \
+                # type: Union[str, int, 'mwclient.page.Page']
             namespace = self.namespace
         else:
             full_page_name = name
-            try:
+            if isinstance(name, str):
                 namespace = self.guess_namespace(name)
-            except AttributeError:
-                # raised when `name` doesn't have a `startswith` attribute
+            else:
                 namespace = 0
 
         cls = {
@@ -329,7 +338,7 @@ class PageList(GeneratorList):
         default_namespaces, use that.  Else, return zero.
 
         Args:
-            name: The pagename as a string (having `.startswith`)
+            name: The name of the page.
 
         Returns:
             The id of the guessed namespace or zero.
