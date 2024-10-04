@@ -1,6 +1,9 @@
+import time
 import unittest
 import unittest.mock as mock
+
 import pytest
+
 import mwclient
 from mwclient.errors import APIError, AssertUserFailedError, ProtectedPageError, \
     InvalidPageTitle
@@ -210,6 +213,40 @@ class TestPage(unittest.TestCase):
         # <https://github.com/mwclient/mwclient/issues/33>
         with pytest.raises(mwclient.errors.EditError):
             page.edit('Some text')
+
+    @mock.patch('mwclient.client.Site')
+    def test_edit(self, mock_site):
+        mock_site.blocked = False
+        mock_site.rights = ['read', 'edit']
+        mock_site.get.return_value = {'query': {'pages': {
+            '-1': {'ns': 1, 'title': 'Talk:Some page/Archive 1', 'missing': ''}
+        }}}
+        page = Page(mock_site, 'Talk:Some page/Archive 1')
+
+        mock_site.post.return_value = {
+            'edit': {'result': 'Success', 'pageid': 1234,
+                     'title': 'Talk:Some page/Archive 1', 'contentmodel': 'wikitext',
+                     'oldrevid': 123456, 'newrevid': 123457,
+                     'newtimestamp': '2024-10-02T12:34:07Z'}
+
+        }
+        page.edit('Some text')
+
+        mock_site.post.assert_called_once()
+        assert page.exists
+        assert page.pageid == 1234
+        assert page.name == 'Talk:Some page/Archive 1'
+        assert page.page_title == 'Some page/Archive 1'
+        assert page.base_title == 'Some page'
+        assert page.base_name == 'Talk:Some page'
+        assert page.contentmodel == 'wikitext'
+        assert page.revision == 123457
+        assert page.last_rev_time == time.struct_time(
+            (2024, 10, 2, 12, 34, 7, 2, 276, -1)
+        )
+        assert page.touched == time.struct_time(
+            (2024, 10, 2, 12, 34, 7, 2, 276, -1)
+        )
 
 
 class TestPageApiArgs(unittest.TestCase):

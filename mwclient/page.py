@@ -1,6 +1,6 @@
 import time
 from typing import (  # noqa: F401
-    Optional, Mapping, Any, cast, Dict, Union, Tuple, Iterable, List
+    Optional, Mapping, Any, cast, Dict, Union, Tuple, Iterable, List, NoReturn
 )
 
 import mwclient.errors
@@ -73,15 +73,7 @@ class Page:
             raise mwclient.errors.InvalidPageTitle(info.get('invalidreason'))
 
         self.namespace = info.get('ns', 0)
-        self.name = info.get('title', '')
-        if self.namespace:
-            self.page_title = self.strip_namespace(self.name)
-        else:
-            self.page_title = self.name
-
-        self.base_title = self.page_title.split('/')[0]
-        self.base_name = self.name.split('/')[0]
-
+        self.name = info.get('title', '')  # type: str
         self.touched = parse_timestamp(info.get('touched'))
         self.revision = info.get('lastrevid', 0)
         self.exists = 'missing' not in info
@@ -99,6 +91,21 @@ class Page:
 
         self.last_rev_time = None  # type: Optional[time.struct_time]
         self.edit_time = None  # type: Optional[time.struct_time]
+
+    @property
+    def page_title(self) -> str:
+        if self.namespace:
+            return self.strip_namespace(self.name)
+        else:
+            return self.name
+
+    @property
+    def base_title(self) -> str:
+        return self.page_title.split('/')[0]
+
+    @property
+    def base_name(self) -> str:
+        return self.name.split('/')[0]
 
     def redirects_to(self) -> Optional['Page']:
         """ Get the redirect target page, or None if the page is not a redirect."""
@@ -286,7 +293,7 @@ class Page:
         if self.site.force_login:
             data['assert'] = 'user'
 
-        def do_edit() -> Any:
+        def do_edit() -> Dict[str, Any]:
             result = self.site.post('edit', title=self.name, summary=summary,
                                     token=self.get_token('edit'),
                                     **data)
@@ -307,9 +314,16 @@ class Page:
             else:
                 self.handle_edit_error(e, summary)
 
+        self.exists = True
+        self.name = result['edit'].get('title', self.name)
+        self.pageid = result['edit'].get('pageid', self.pageid)
+        self.revision = result['edit'].get('newrevid', self.revision)
+        self.contentmodel = result['edit'].get('contentmodel', self.contentmodel)
         # 'newtimestamp' is not included if no change was made
         if 'newtimestamp' in result['edit'].keys():
-            self.last_rev_time = parse_timestamp(result['edit'].get('newtimestamp'))
+            new_timestamp = parse_timestamp(result['edit'].get('newtimestamp'))
+            self.last_rev_time = new_timestamp
+            self.touched = new_timestamp
 
         # Workaround for https://phabricator.wikimedia.org/T211233
         for cookie in self.site.connection.cookies:
@@ -321,7 +335,7 @@ class Page:
         self._textcache = {}
         return result['edit']
 
-    def handle_edit_error(self, e: 'mwclient.errors.APIError', summary: str) -> None:
+    def handle_edit_error(self, e: 'mwclient.errors.APIError', summary: str) -> NoReturn:
         if e.code == 'editconflict':
             raise mwclient.errors.EditError(self, summary, e.info)
         elif e.code in {'protectedtitle', 'cantcreate', 'cantcreate-anon',
