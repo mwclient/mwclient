@@ -233,7 +233,7 @@ class TestPage(unittest.TestCase):
         page.edit('Some text')
 
         mock_site.post.assert_called_once()
-        assert page.exists
+        assert page.exists, 'Page should exist after edit'
         assert page.pageid == 1234
         assert page.name == 'Talk:Some page/Archive 1'
         assert page.page_title == 'Some page/Archive 1'
@@ -247,6 +247,89 @@ class TestPage(unittest.TestCase):
         assert page.touched == time.struct_time(
             (2024, 10, 2, 12, 34, 7, 2, 276, -1)
         )
+
+    @mock.patch('mwclient.client.Site')
+    def test_delete(self, mock_site):
+        mock_site.rights = ['read', 'delete']
+        page_title = 'Some page'
+        page = Page(mock_site, page_title, info={
+            'contentmodel': 'wikitext',
+            'counter': '',
+            'lastrevid': 13355471,
+            'length': 58487,
+            'ns': 0,
+            'pageid': 728,
+            'pagelanguage': 'nb',
+            'protection': [],
+            'title': page_title,
+            'touched': '2014-09-14T21:11:52Z'
+        })
+
+        reason = 'Some reason'
+        mock_site.post.return_value = {
+            'delete': {'title': page_title, 'reason': reason, 'logid': 1234}
+        }
+        page.delete(reason)
+
+        mock_site.post.assert_called_once_with(
+            'delete', title=page_title, reason=reason, token=mock.ANY
+        )
+        assert not page.exists, 'Page should not exist after delete'
+
+    @mock.patch('mwclient.client.Site')
+    def test_move(self, mock_site):
+        mock_site.rights = ['read', 'move']
+        page_title = 'Some page'
+        page = Page(mock_site, page_title, info={
+            'contentmodel': 'wikitext',
+            'counter': '',
+            'lastrevid': 13355471,
+            'length': 58487,
+            'ns': 0,
+            'pageid': 728,
+            'pagelanguage': 'nb',
+            'protection': [],
+            'title': page_title,
+            'touched': '2014-09-14T21:11:52Z'
+        })
+
+        new_title = 'Some new page'
+        reason = 'Some reason'
+        mock_site.post.return_value = {
+            'move': {'from': page_title, 'to': new_title, 'reason': reason,
+                     'redirectcreated': ''}
+        }
+        page.move(new_title, reason)
+
+        assert page.exists, 'Page should still exist after move'
+        assert page.redirect, 'Page should be a redirect after move'
+
+    @mock.patch('mwclient.client.Site')
+    def test_move_no_redirect(self, mock_site):
+        mock_site.rights = ['read', 'move']
+        page_title = 'Some page'
+        page = Page(mock_site, page_title, info={
+            'contentmodel': 'wikitext',
+            'counter': '',
+            'lastrevid': 13355471,
+            'length': 58487,
+            'ns': 0,
+            'pageid': 728,
+            'pagelanguage': 'nb',
+            'protection': [],
+            'title': page_title,
+            'touched': '2014-09-14T21:11:52Z'
+        })
+
+        new_title = 'Some new page'
+        reason = 'Some reason'
+        mock_site.post.return_value = {
+            'move': {'from': page_title, 'to': new_title, 'reason': reason}
+        }
+        page.move(new_title, reason, no_redirect=True)
+
+        assert not page.exists, 'Page should not exist after move'
+        assert not page.redirect, 'Page should not be a redirect after move'
 
 
 class TestPageApiArgs(unittest.TestCase):

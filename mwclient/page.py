@@ -390,8 +390,15 @@ class Page:
             data['movesubpages'] = '1'
         if ignore_warnings:
             data['ignorewarnings'] = '1'
+
         result = self.site.post('move', ('from', self.name), to=new_title,
                                 token=self.get_token('move'), reason=reason, **data)
+
+        if 'redirectcreated' in result['move']:
+            self.redirect = True
+        else:
+            self.exists = False
+
         return result['move']
 
     def delete(
@@ -418,9 +425,12 @@ class Page:
             data['unwatch'] = '1'
         if oldimage:
             data['oldimage'] = oldimage
+
         result = self.site.post('delete', title=self.name,
                                 token=self.get_token('delete'),
                                 reason=reason, **data)
+
+        self.exists = False
         return result['delete']
 
     def purge(self) -> None:
