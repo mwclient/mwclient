@@ -1,5 +1,5 @@
 from typing import (  # noqa: F401
-    Optional, Tuple, Any, Union, Iterator, Mapping, Iterable, Type
+    Optional, Tuple, Any, Union, Iterator, Mapping, Iterable, Type, Dict
 )
 
 import mwclient.image
@@ -237,7 +237,7 @@ class Category(mwclient.page.Page, GeneratorList):
         namespace: Optional[Namespace] = None
     ) -> None:
         mwclient.page.Page.__init__(self, site, name, info)
-        kwargs = {}
+        kwargs = {}  # type: Dict[str, Any]
         kwargs['gcmtitle'] = self.name
         if namespace:
             kwargs['gcmnamespace'] = namespace
