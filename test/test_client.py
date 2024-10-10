@@ -1,11 +1,11 @@
 import json
 import logging
+import sys
 import time
 import unittest
 import unittest.mock as mock
 from io import BytesIO
 
-import pkg_resources  # part of setuptools
 import pytest
 import requests
 import responses
@@ -125,7 +125,15 @@ class TestClient(TestCase):
 
     def testVersion(self):
         # The version specified in setup.py should equal the one specified in client.py
-        version = pkg_resources.require("mwclient")[0].version
+
+        if sys.version_info >= (3, 8):
+            import importlib.metadata
+
+            version = importlib.metadata.version("mwclient")
+        else:
+            import pkg_resources  # part of setuptools
+
+            version = pkg_resources.require("mwclient")[0].version
 
         assert version == mwclient.__version__
 

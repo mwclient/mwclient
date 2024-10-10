@@ -36,7 +36,7 @@ testing = [
     "pytest-cov",
     "responses>=0.3.0",
     "responses!=0.6.0",
-    "setuptools",
+    "setuptools; python_version < '3.8'",
 ]
 
 [project.urls]
