@@ -33,7 +33,8 @@ setup(name='mwclient',
       install_requires=['requests-oauthlib'],
       extras_require={
           'testing': ['pytest', 'pytest-cov',
-                      'responses>=0.3.0', 'responses!=0.6.0', 'setuptools'],
+                      'responses>=0.3.0', 'responses!=0.6.0',
+                      'setuptools; python_version < "3.8"'],
       },
       zip_safe=True
       )
