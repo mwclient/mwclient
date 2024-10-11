@@ -45,12 +45,6 @@ Repository = "https://github.com/mwclient/mwclient"
 Issues = "https://github.com/mwclient/mwclient/issues"
 Changelog = "https://github.com/mwclient/mwclient/releases"
 
-[tool.pytest.ini_options]
-addopts = "--cov=mwtp --cov-report=html --color=yes"
-testpaths = [
-    "test"
-]
-
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
