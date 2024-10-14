@@ -94,7 +94,7 @@ To build the documentation locally for testing:
 
 .. code:: bash
 
-    $ pip install -r docs/requirements.txt
+    $ pip install -e '.[docs]'
     $ cd docs
     $ make html
 
