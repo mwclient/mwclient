@@ -31,6 +31,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+]
 testing = [
     "pytest",
     "pytest-cov",
