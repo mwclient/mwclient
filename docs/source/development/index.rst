@@ -85,21 +85,75 @@ If you would like to expand the test suite by adding more tests, please go ahead
 Updating/expanding the documentation
 ------------------------------------
 
-Documentation consists of both a manually compiled user guide
-(under ``docs/user``) and a reference guide generated from the docstrings,
-using Sphinx autodoc with the napoleon extension.
-Documentation is built automatically on `ReadTheDocs <https://mwclient.readthedocs.io/>`_
-after each commit.
-To build the documentation locally for testing:
+The documentation for this project consists of two main parts:
 
-.. code:: bash
+1. A manually compiled user guide (located in ``docs/user/``).
+2. A reference guide automatically generated from docstrings using Sphinx
+   autodoc with the napoleon extension.
 
-    $ pip install -e '.[docs]'
-    $ cd docs
-    $ make html
+Builds
+^^^^^^
+
+Automatic Builds
+""""""""""""""""
+
+Documentation is automatically built on `ReadTheDocs <https://mwclient.readthedocs.io/>`_
+after each commit. The configuration for this can be found in ``.readthedocs.yaml``.
+
+Local Builds
+""""""""""""
+
+To build and test the documentation on your local machine:
+
+1. Install the documentation dependencies:
+
+    .. code:: bash
+
+        $ pip install -e '.[docs]'
+
+2. Build the documentation:
+
+    .. code:: bash
+
+        $ cd docs
+        $ make html
+
+The generated HTML documentation will be available in ``docs/build/html/``.
+Open ``docs/build/html/index.html`` in your browser to view it.
+
+If you make
+changes to the documentation, you can rebuild it by running ``make html``
+again and then refreshing the page in your browser. To rebuild after making
+changes, run ``make html`` again and refresh your browser.
+
+Writing Docstrings
+^^^^^^^^^^^^^^^^^^
 
 When writing docstrings, try to adhere to the
 `Google style <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`_.
+For example:
+
+.. code:: python
+
+    def my_function(foo: str) -> str:
+        """This is a function that does something.
+
+        Args:
+            foo: A string to do something with.
+
+        Returns:
+            A string with the result.
+        """
+
+
+You can also use `Sphinx-specific directives <https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html>`_
+in your docstrings to provide additional information. Some useful directives
+include:
+
+    - ``.. warning ::``: Highlight potential issues.
+    - ``.. note ::``: Provide additional information.
+    - ``.. seealso ::``: Link to related documentation.
+    - ``.. deprecated ::``: Mark a function as deprecated.
 
 Making a pull request
 ---------------------
