@@ -987,5 +987,74 @@ class TestClientPatrol(TestCase):
         get_token.assert_called_once_with('edit')
 
 
+class TestClientExpandtemplates(TestCase):
+
+    def setUp(self):
+        self.raw_call = mock.patch('mwclient.client.Site.raw_call').start()
+
+    def configure(self, version='1.24'):
+        self.raw_call.return_value = self.metaResponseAsJson(version=version)
+        self.site = mwclient.Site('test.wikipedia.org')
+
+    def tearDown(self):
+        mock.patch.stopall()
+
+    def test_expandtemplates_1_13(self):
+        self.configure('1.16')
+        self.raw_call.return_value = json.dumps({
+            'expandtemplates': {
+                '*': '2024'
+            }
+        })
+
+        wikitext = self.site.expandtemplates('{{CURRENTYEAR}}')
+
+        assert wikitext == '2024'
+
+    def test_expandtemplates_1_13_generatexml(self):
+        self.configure('1.16')
+        self.raw_call.return_value = json.dumps({
+            'parsetree': {
+                '*': '<root><template><title>CURRENTYEAR</title></template></root>'
+            },
+            'expandtemplates': {
+                '*': '2024'
+            }
+        })
+
+        expanded = self.site.expandtemplates('{{CURRENTYEAR}}', generatexml=True)
+
+        assert isinstance(expanded, tuple)
+        assert expanded[0] == '2024'
+        assert expanded[1] == '<root><template><title>CURRENTYEAR</title></template></root>'
+
+    def test_expandtemplates_1_24(self):
+        self.configure('1.24')
+        self.raw_call.return_value = json.dumps({
+            'expandtemplates': {
+                'wikitext': '2024'
+            }
+        })
+
+        wikitext = self.site.expandtemplates('{{CURRENTYEAR}}')
+
+        assert wikitext == '2024'
+
+    def test_expandtemplates_1_24_generatexml(self):
+        self.configure('1.24')
+        self.raw_call.return_value = json.dumps({
+            'expandtemplates': {
+                'parsetree': '<root><template><title>CURRENTYEAR</title></template></root>',
+                'wikitext': '2024'
+            }
+        })
+
+        expanded = self.site.expandtemplates('{{CURRENTYEAR}}', generatexml=True)
+
+        assert isinstance(expanded, tuple)
+        assert expanded[0] == '2024'
+        assert expanded[1] == '<root><template><title>CURRENTYEAR</title></template></root>'
+
+
 if __name__ == '__main__':
     unittest.main()

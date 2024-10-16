@@ -1809,21 +1809,50 @@ class Site:
             text: Wikitext to convert.
             title: Title of the page.
             generatexml: Generate the XML parse tree. Defaults to `False`.
+
+        Returns:
+            If generatexml is False, returns the expanded wikitext as a string.
+            If generatexml is True, returns a tuple of (expanded wikitext,
+            XML parse tree).
         """
-
-        kwargs = {}
-        if title is not None:
-            kwargs['title'] = title
-        if generatexml:
-            # FIXME: Deprecated and replaced by `prop=parsetree`.
-            kwargs['generatexml'] = '1'
-
-        result = self.post('expandtemplates', text=text, **kwargs)
-
-        if generatexml:
-            return str(result['expandtemplates']['*']), str(result['parsetree']['*'])
+        if self.require(1, 24, raise_error=False):
+            return self._expandtemplates_1_24(text, title, generatexml)
         else:
-            return str(result['expandtemplates']['*'])
+            return self._expandtemplates_1_13(text, title, generatexml)
+
+    def _expandtemplates_1_24(
+        self, text: str, title: Optional[str], generatexml: bool
+    ) -> Union[str, Tuple[str, str]]:
+        """Expand templates using the 1.24 API."""
+        result = self.post(
+            'expandtemplates',
+            text=text,
+            title=title,
+            prop='wikitext|parsetree' if generatexml else 'wikitext',
+        )
+
+        wikitext = str(result['expandtemplates']['wikitext'])
+        if generatexml:
+            parsetree = str(result['expandtemplates']['parsetree'])
+            return wikitext, parsetree
+        return wikitext
+
+    def _expandtemplates_1_13(
+        self, text: str, title: Optional[str], generatexml: bool
+    ) -> Union[str, Tuple[str, str]]:
+        """Expand templates using the 1.13-1.23 API."""
+        result = self.post(
+            'expandtemplates',
+            text=text,
+            title=title,
+            generatexml='1' if generatexml else None,
+        )
+
+        wikitext = str(result['expandtemplates']['*'])
+        if generatexml:
+            parsetree = str(result['parsetree']['*'])
+            return wikitext, parsetree
+        return wikitext
 
     def ask(self, query: str, title: Optional[str] = None) -> Iterable[Dict[str, Any]]:
         """
