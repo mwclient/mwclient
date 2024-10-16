@@ -6,9 +6,9 @@ from typing import Optional
 from urllib.error import URLError, HTTPError
 from urllib.request import urlopen
 
-import mwclient
 import pytest
 
+import mwclient
 
 if shutil.which("podman"):
     _CONTAINER_RUNTIME = "podman"
@@ -104,6 +104,17 @@ class TestAnonymous:
         pg = site.pages["Anonymous New Page"]
         with pytest.raises(mwclient.errors.ProtectedPageError):
             pg.edit("Hi I'm a new page", "create new page")
+
+    def test_expandtemplates(self, site):
+        """Test we can expand templates."""
+        wikitext = site.expandtemplates("{{CURRENTYEAR}}")
+        assert wikitext == str(time.localtime().tm_year)
+
+    def test_expandtemplates_with_parsetree(self, site):
+        """Test we can expand templates and get the parse tree."""
+        wikitext, parsetree = site.expandtemplates("{{CURRENTYEAR}}", generatexml=True)
+        assert wikitext == str(time.localtime().tm_year)
+        assert parsetree == "<root><template><title>CURRENTYEAR</title></template></root>"
 
 class TestLogin:
     def test_login_wrong_password(self, site):
