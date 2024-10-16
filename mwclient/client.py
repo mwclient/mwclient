@@ -11,8 +11,8 @@ from requests_oauthlib import OAuth1
 
 import mwclient.errors as errors
 import mwclient.listing as listing
-from mwclient.sleep import Sleeper, Sleepers
 from mwclient._types import Cookies, Namespace, VersionTuple
+from mwclient.sleep import Sleeper, Sleepers
 from mwclient.util import parse_timestamp, read_in_chunks, handle_limit
 
 __version__ = '0.11.0'
@@ -336,6 +336,11 @@ class Site:
 
         Args:
             action: The MediaWiki API action to be performed.
+            *args: Tupled key-value pairs to be passed to the `api.php` script
+                as data. In most cases, it is preferable to pass these as
+                keyword arguments instead. This can be useful when the
+                parameter name is a reserved Python keyword (e.g. `from`).
+            **kwargs: Arguments to be passed to the API call.
 
         Returns:
             The raw response from the API call, as a dictionary.
@@ -350,6 +355,11 @@ class Site:
 
         Args:
             action: The MediaWiki API action to be performed.
+            *args: Tupled key-value pairs to be passed to the `api.php` script
+                as data. In most cases, it is preferable to pass these as
+                keyword arguments instead. This can be useful when the
+                parameter name is a reserved Python keyword (e.g. `from`).
+            **kwargs: Arguments to be passed to the API call.
 
         Returns:
             The raw response from the API call, as a dictionary.
@@ -370,6 +380,11 @@ class Site:
         Args:
             action: The MediaWiki API action to be performed.
             http_method: The HTTP method to use.
+            *args: Tupled key-value pairs to be passed to the `api.php` script
+                as data. In most cases, it is preferable to pass these as
+                keyword arguments instead. This can be useful when the
+                parameter name is a reserved Python keyword (e.g. `from`).
+            **kwargs: Arguments to be passed to the API call.
 
         Example:
             To get coordinates from the GeoData MediaWiki extension at English Wikipedia:
@@ -617,7 +632,10 @@ class Site:
             action: The MediaWiki API action to perform.
             http_method: The HTTP method to use in the request.
             retry_on_error: Whether to retry API call on connection errors.
-            *args: Arguments to be passed to the `api.php` script as data.
+            *args: Tupled key-value pairs to be passed to the `api.php` script
+                as data. In most cases, it is preferable to pass these as
+                keyword arguments instead. This can be useful when the
+                parameter name is a reserved Python keyword (e.g. `from`).
             **kwargs: Arguments to be passed to the `api.php` script as data.
 
         Returns:
@@ -659,7 +677,10 @@ class Site:
         Args:
             action: The MediaWiki API action to perform.
             http_method: The HTTP method to use in the request.
-            *args: Arguments to be passed to the `index.php` script as data.
+            *args: Tupled key-value pairs to be passed to the `index.php`
+                script as data. In most cases, it is preferable to pass these
+                as keyword arguments instead. This can be useful when the
+                parameter name is a reserved Python keyword (e.g. `from`).
             **kwargs: Arguments to be passed to the `index.php` script as data.
 
         Returns:
