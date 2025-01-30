@@ -39,6 +39,14 @@ class APIError(MwClientError):
         super().__init__(code, info, kwargs)
 
 
+class UserNotFound(APIError):
+    pass
+
+
+class UserCreateError(APIError):
+    pass
+
+
 class InsufficientPermission(MwClientError):
     """Raised when the user does not have sufficient permissions to perform an
     action."""
