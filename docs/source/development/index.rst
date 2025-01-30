@@ -38,54 +38,122 @@ Create a new branch for your changes:
 Test suite
 ----------
 
-mwclient ships with a test suite based on `pytest <https://pytest.org>`_.
-While it's far from complete, it can sometimes alert you if you break things.
+mwclient ships with a test suite based on `pytest <https://pytest.org>`_. While
+it's far from complete, it can sometimes alert you if you break things.
 
-The easiest way to run the tests is:
-
-.. code:: bash
-
-    $ python setup.py test
-
-This will make an in-place build and download test dependencies locally if needed.
-Tests will run faster, however, if you do an
-`editable install <https://pip.readthedocs.org/en/latest/reference/pip_install.html#editable-installs>`_
-and run pytest directly:
-
-.. code:: bash
-
-    $ pip install pytest pytest-cov flake8 responses mock
-    $ pip install -e .
-    $ py.test
-
-If you want to test with different Python versions in isolated virtualenvs,
-you can use `Tox <https://tox.testrun.org/>`_. A `tox.ini` file is included.
+To run the test suite, you can use `tox <https://tox.testrun.org/>`_. Tox will
+create a virtual environment for each Python version you want to test with,
+install the dependencies, and run the tests.
 
 .. code:: bash
 
     $ pip install tox
     $ tox
 
+If you want to run the tests for a single Python version, you can do so by
+specifying the Python version, e.g. to run the tests for Python 3.9:
+
+.. code:: bash
+
+    $ tox -e py39
+
+Alternatively, you can run the tests directly with pytest:
+
+.. code:: bash
+
+    $ pip install -e '.[testing]'
+    $ py.test
+
+There is a container-based integration test suite which is not run by default
+as it requires docker or podman, is a little slow, and needs to do ~3G of network
+transfer when first run (to download the mediawiki container images). It is
+run as part of CI. To run it locally, make sure you have docker or podman
+installed, then with tox, do:
+
+.. code:: bash
+
+    $ tox -e integration
+
+Or with pytest, do:
+
+.. code:: bash
+
+    $ py.test test/integration.py
+
 If you would like to expand the test suite by adding more tests, please go ahead!
 
 Updating/expanding the documentation
 ------------------------------------
 
-Documentation consists of both a manually compiled user guide
-(under ``docs/user``) and a reference guide generated from the docstrings,
-using Sphinx autodoc with the napoleon extension.
-Documentation is built automatically on `ReadTheDocs <https://mwclient.readthedocs.io/>`_
-after each commit.
-To build the documentation locally for testing:
+The documentation for this project consists of two main parts:
 
-.. code:: bash
+1. A manually compiled user guide (located in ``docs/user/``).
+2. A reference guide automatically generated from docstrings using Sphinx
+   autodoc with the napoleon extension.
 
-    $ pip install Sphinx sphinx-rtd-theme
-    $ cd docs
-    $ make html
+Builds
+^^^^^^
+
+Automatic Builds
+""""""""""""""""
+
+Documentation is automatically built on `ReadTheDocs <https://mwclient.readthedocs.io/>`_
+after each commit. The configuration for this can be found in ``.readthedocs.yaml``.
+
+Local Builds
+""""""""""""
+
+To build and test the documentation on your local machine:
+
+1. Install the documentation dependencies:
+
+    .. code:: bash
+
+        $ pip install -e '.[docs]'
+
+2. Build the documentation:
+
+    .. code:: bash
+
+        $ cd docs
+        $ make html
+
+The generated HTML documentation will be available in ``docs/build/html/``.
+Open ``docs/build/html/index.html`` in your browser to view it.
+
+If you make
+changes to the documentation, you can rebuild it by running ``make html``
+again and then refreshing the page in your browser. To rebuild after making
+changes, run ``make html`` again and refresh your browser.
+
+Writing Docstrings
+^^^^^^^^^^^^^^^^^^
 
 When writing docstrings, try to adhere to the
 `Google style <https://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html>`_.
+For example:
+
+.. code:: python
+
+    def my_function(foo: str) -> str:
+        """This is a function that does something.
+
+        Args:
+            foo: A string to do something with.
+
+        Returns:
+            A string with the result.
+        """
+
+
+You can also use `Sphinx-specific directives <https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html>`_
+in your docstrings to provide additional information. Some useful directives
+include:
+
+    - ``.. warning ::``: Highlight potential issues.
+    - ``.. note ::``: Provide additional information.
+    - ``.. seealso ::``: Link to related documentation.
+    - ``.. deprecated ::``: Mark a function as deprecated.
 
 Making a pull request
 ---------------------
@@ -108,7 +176,8 @@ When it is ready, push your branch to your remote:
     $ git push -u fork my-branch
 
 Then you can open a pull request on GitHub. You should see a URL to do this
-when you push your branch.
+when you push your branch. Tests will be automatically run on your pull
+request via GitHub Actions.
 
 Making a release
 ----------------

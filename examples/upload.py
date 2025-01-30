@@ -1,4 +1,4 @@
-from io import StringIO
+from io import BytesIO
 import sys
 import os
 import pprint
@@ -24,7 +24,7 @@ site.login(sys.argv[1], sys.argv[2])
 
 name = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in range(8)) + '.png'
 
-print('Using http://%s%sindex.php?title=File:' % (host, path) + name)
+print(f'Using http://{host}{path}index.php?title=File:{name}')
 print('Regular upload test')
 
 res = site.upload(open('test-image.png', 'rb'), name, 'Regular upload test', ignore=True)
@@ -48,4 +48,4 @@ assert 'duplicate' in res['warnings']
 assert 'exists' in res['warnings']
 
 print('Uploading empty file; error expected')
-res = site.upload(StringIO(), name, 'Empty upload test')
+res = site.upload(BytesIO(), name, 'Empty upload test')

@@ -1,19 +1,19 @@
+from copy import deepcopy
+from datetime import date
 import json
+from io import BytesIO
 import logging
 import sys
 import time
 import unittest
 import unittest.mock as mock
-from copy import deepcopy
-from datetime import date
-from io import StringIO
 
-import mwclient
-import pkg_resources  # part of setuptools
 import pytest
 import requests
 import responses
 from requests_oauthlib import OAuth1
+
+import mwclient
 
 if __name__ == "__main__":
     print()
@@ -26,24 +26,61 @@ logging.basicConfig(level=logging.DEBUG)
 
 class TestCase(unittest.TestCase):
 
-    def metaResponse(self, **kwargs):
-        tpl = '{"query":{"general":{"generator":"MediaWiki %(version)s"},"namespaces":{"-1":{"*":"Special","canonical":"Special","case":"first-letter","id":-1},"-2":{"*":"Media","canonical":"Media","case":"first-letter","id":-2},"0":{"*":"","case":"first-letter","content":"","id":0},"1":{"*":"Talk","canonical":"Talk","case":"first-letter","id":1,"subpages":""},"10":{"*":"Template","canonical":"Template","case":"first-letter","id":10,"subpages":""},"100":{"*":"Test namespace 1","canonical":"Test namespace 1","case":"first-letter","id":100,"subpages":""},"101":{"*":"Test namespace 1 talk","canonical":"Test namespace 1 talk","case":"first-letter","id":101,"subpages":""},"102":{"*":"Test namespace 2","canonical":"Test namespace 2","case":"first-letter","id":102,"subpages":""},"103":{"*":"Test namespace 2 talk","canonical":"Test namespace 2 talk","case":"first-letter","id":103,"subpages":""},"11":{"*":"Template talk","canonical":"Template talk","case":"first-letter","id":11,"subpages":""},"1198":{"*":"Translations","canonical":"Translations","case":"first-letter","id":1198,"subpages":""},"1199":{"*":"Translations talk","canonical":"Translations talk","case":"first-letter","id":1199,"subpages":""},"12":{"*":"Help","canonical":"Help","case":"first-letter","id":12,"subpages":""},"13":{"*":"Help talk","canonical":"Help talk","case":"first-letter","id":13,"subpages":""},"14":{"*":"Category","canonical":"Category","case":"first-letter","id":14},"15":{"*":"Category talk","canonical":"Category talk","case":"first-letter","id":15,"subpages":""},"2":{"*":"User","canonical":"User","case":"first-letter","id":2,"subpages":""},"2500":{"*":"VisualEditor","canonical":"VisualEditor","case":"first-letter","id":2500},"2501":{"*":"VisualEditor talk","canonical":"VisualEditor talk","case":"first-letter","id":2501},"2600":{"*":"Topic","canonical":"Topic","case":"first-letter","defaultcontentmodel":"flow-board","id":2600},"3":{"*":"User talk","canonical":"User talk","case":"first-letter","id":3,"subpages":""},"4":{"*":"Wikipedia","canonical":"Project","case":"first-letter","id":4,"subpages":""},"460":{"*":"Campaign","canonical":"Campaign","case":"case-sensitive","defaultcontentmodel":"Campaign","id":460},"461":{"*":"Campaign talk","canonical":"Campaign talk","case":"case-sensitive","id":461},"5":{"*":"Wikipedia talk","canonical":"Project talk","case":"first-letter","id":5,"subpages":""},"6":{"*":"File","canonical":"File","case":"first-letter","id":6},"7":{"*":"File talk","canonical":"File talk","case":"first-letter","id":7,"subpages":""},"710":{"*":"TimedText","canonical":"TimedText","case":"first-letter","id":710},"711":{"*":"TimedText talk","canonical":"TimedText talk","case":"first-letter","id":711},"8":{"*":"MediaWiki","canonical":"MediaWiki","case":"first-letter","id":8,"subpages":""},"828":{"*":"Module","canonical":"Module","case":"first-letter","id":828,"subpages":""},"829":{"*":"Module talk","canonical":"Module talk","case":"first-letter","id":829,"subpages":""},"866":{"*":"CNBanner","canonical":"CNBanner","case":"first-letter","id":866},"867":{"*":"CNBanner talk","canonical":"CNBanner talk","case":"first-letter","id":867,"subpages":""},"9":{"*":"MediaWiki talk","canonical":"MediaWiki talk","case":"first-letter","id":9,"subpages":""},"90":{"*":"Thread","canonical":"Thread","case":"first-letter","id":90},"91":{"*":"Thread talk","canonical":"Thread talk","case":"first-letter","id":91},"92":{"*":"Summary","canonical":"Summary","case":"first-letter","id":92},"93":{"*":"Summary talk","canonical":"Summary talk","case":"first-letter","id":93}},"userinfo":{"anon":"","groups":["*"],"id":0,"name":"127.0.0.1","rights": %(rights)s}}}'
-        tpl = tpl % {'version': kwargs.get('version', '1.24wmf17'),
-                     'rights': json.dumps(kwargs.get('rights', ["createaccount", "read", "edit", "createpage", "createtalk", "writeapi", "editmyusercss", "editmyuserjs", "viewmywatchlist", "editmywatchlist", "viewmyprivateinfo", "editmyprivateinfo", "editmyoptions", "centralauth-merge", "abusefilter-view", "abusefilter-log", "translate", "vipsscaler-test", "upload"]))
-                     }
+    def metaResponse(self, version='1.24wmf17', rights=None):
+        if rights is None:
+            rights = [
+                "createaccount", "read", "edit", "createpage", "createtalk",
+                "editmyusercss", "editmyuserjs", "viewmywatchlist",
+                "editmywatchlist", "viewmyprivateinfo", "editmyprivateinfo",
+                "editmyoptions", "centralauth-merge", "abusefilter-view",
+                "abusefilter-log", "translate", "vipsscaler-test", "upload"
+            ]
 
-        res = json.loads(tpl)
-        if kwargs.get('writeapi', True):
-            res['query']['general']['writeapi'] = ''
+        # @formatter:off
+        namespaces = {
+            -2: {"id": -2, "*": "Media", "canonical": "Media", "case": "first-letter"},
+            -1: {"id": -1, "*": "Special", "canonical": "Special", "case": "first-letter"},
+            0: {"id": 0, "*": "", "case": "first-letter", "content": ""},
+            1: {"id": 1, "*": "Talk", "canonical": "Talk", "case": "first-letter", "subpages": ""},
+            2: {"id": 2, "*": "User", "canonical": "User", "case": "first-letter", "subpages": ""},
+            3: {"id": 3, "*": "User talk", "canonical": "User talk", "case": "first-letter", "subpages": ""},
+            4: {"id": 4, "*": "Wikipedia", "canonical": "Project", "case": "first-letter", "subpages": ""},
+            5: {"id": 5, "*": "Wikipedia talk", "canonical": "Project talk", "case": "first-letter", "subpages": ""},
+            6: {"id": 6, "*": "File", "canonical": "File", "case": "first-letter"},
+            7: {"id": 7, "*": "File talk", "canonical": "File talk", "case": "first-letter", "subpages": ""},
+            8: {"id": 8, "*": "MediaWiki", "canonical": "MediaWiki", "case": "first-letter", "subpages": ""},
+            9: {"id": 9, "*": "MediaWiki talk", "canonical": "MediaWiki talk", "case": "first-letter", "subpages": ""},
+            10: {"id": 10, "*": "Template", "canonical": "Template", "case": "first-letter", "subpages": ""},
+            11: {"id": 11, "*": "Template talk", "canonical": "Template talk", "case": "first-letter", "subpages": ""},
+            12: {"id": 12, "*": "Help", "canonical": "Help", "case": "first-letter", "subpages": ""},
+            13: {"id": 13, "*": "Help talk", "canonical": "Help talk", "case": "first-letter", "subpages": ""},
+            14: {"id": 14, "*": "Category", "canonical": "Category", "case": "first-letter"},
+            15: {"id": 15, "*": "Category talk", "canonical": "Category talk", "case": "first-letter", "subpages": ""},
+        }
+        # @formatter:on
 
-        return res
+        return {
+            "query": {
+                "general": {
+                    "generator": f"MediaWiki {version}"
+                },
+                "namespaces": namespaces,
+                "userinfo": {
+                    "anon": "",
+                    "groups": ["*"],
+                    "id": 0,
+                    "name": "127.0.0.1",
+                    "rights": rights
+                }
+            }
+        }
 
     def metaResponseAsJson(self, **kwargs):
         return json.dumps(self.metaResponse(**kwargs))
 
     def httpShouldReturn(self, body=None, callback=None, scheme='https', host='test.wikipedia.org', path='/w/',
                          script='api', headers=None, status=200, method='GET'):
-        url = '{scheme}://{host}{path}{script}.php'.format(scheme=scheme, host=host, path=path, script=script)
+        url = f'{scheme}://{host}{path}{script}.php'
         mock = responses.GET if method == 'GET' else responses.POST
         if body is None:
             responses.add_callback(mock, url, callback=callback)
@@ -90,7 +127,15 @@ class TestClient(TestCase):
 
     def testVersion(self):
         # The version specified in setup.py should equal the one specified in client.py
-        version = pkg_resources.require("mwclient")[0].version
+
+        if sys.version_info >= (3, 8):
+            import importlib.metadata
+
+            version = importlib.metadata.version("mwclient")
+        else:
+            import pkg_resources  # part of setuptools
+
+            version = pkg_resources.require("mwclient")[0].version
 
         assert version == mwclient.__version__
 
@@ -120,8 +165,8 @@ class TestClient(TestCase):
         site = mwclient.Site('test.wikipedia.org')
 
         assert len(responses.calls) == 2
-        assert 'retry-after' in responses.calls[0].response.headers
-        assert 'retry-after' not in responses.calls[1].response.headers
+        assert 'retry-after' in responses.calls[0].response.headers  # type: ignore
+        assert 'retry-after' not in responses.calls[1].response.headers  # type: ignore
 
     @responses.activate
     def test_http_error(self):
@@ -169,6 +214,7 @@ class TestClient(TestCase):
 
         site = mwclient.Site('test.wikipedia.org')
 
+        assert responses.calls[0].request.url is not None
         assert 'action=query' in responses.calls[0].request.url
         assert 'meta=siteinfo%7Cuserinfo' in responses.calls[0].request.url
 
@@ -196,7 +242,8 @@ class TestClient(TestCase):
         self.httpShouldReturn(self.metaResponseAsJson())
 
         with pytest.raises(RuntimeError):
-            site = mwclient.Site('test.wikipedia.org', httpauth=1)
+            site = mwclient.Site('test.wikipedia.org',
+                                 httpauth=1)  # type: ignore[arg-type]
 
     @responses.activate
     def test_oauth(self):
@@ -353,9 +400,9 @@ class TestClient(TestCase):
             }
         }), method='GET')
 
-        answers = set(result['fulltext'] for result in site.ask('test'))
+        answers = {result['fulltext'] for result in site.ask('test')}
 
-        assert answers == set(('Serendipitet', 'Indeks (bibliotekfag)'))
+        assert answers == {'Serendipitet', 'Indeks (bibliotekfag)'}
 
     @responses.activate
     def test_smw_response_v2(self):
@@ -395,9 +442,9 @@ class TestClient(TestCase):
             }
         }), method='GET')
 
-        answers = set(result['fulltext'] for result in site.ask('test'))
+        answers = {result['fulltext'] for result in site.ask('test')}
 
-        assert answers == set(('Serendipitet', 'Indeks (bibliotekfag)'))
+        assert answers == {'Serendipitet', 'Indeks (bibliotekfag)'}
 
     @responses.activate
     def test_repr(self):
@@ -468,6 +515,18 @@ class TestClient(TestCase):
         with pytest.raises(mwclient.errors.MaximumRetriesExceeded):
             site.raw_api("query", "GET", retry_on_error=False)
         assert timesleep.call_count == 25
+
+    @responses.activate
+    def test_connection_options(self):
+        self.httpShouldReturn(self.metaResponseAsJson())
+        args = {"timeout": 60, "stream": False}
+        site = mwclient.Site('test.wikipedia.org', connection_options=args)
+        assert site.requests == args
+        with pytest.warns(DeprecationWarning):
+            site = mwclient.Site('test.wikipedia.org', reqs=args)
+        assert site.requests == args
+        with pytest.raises(ValueError):
+            site = mwclient.Site('test.wikipedia.org', reqs=args, connection_options=args)
 
 class TestLogin(TestCase):
 
@@ -553,7 +612,7 @@ class TestLogin(TestCase):
         # this would be done by site_init usually, but we're mocking it
         site.version = (1, 28, 0)
         success = site.clientlogin(username='myusername', password='mypassword')
-        url = '%s://%s' % (site.scheme, site.host)
+        url = f'{site.scheme}://{site.host}'
 
         call_args = raw_api.call_args_list
 
@@ -602,7 +661,7 @@ class TestLogin(TestCase):
             'clientlogin', 'POST',
             username='myusername',
             password='mypassword',
-            loginreturnurl='%s://%s' % (site.scheme, site.host),
+            loginreturnurl=f'{site.scheme}://{site.host}',
             logintoken=login_token
         )
 
@@ -629,7 +688,7 @@ class TestLogin(TestCase):
         # this would be done by site_init usually, but we're mocking it
         site.version = (1, 28, 0)
         success = site.clientlogin(username='myusername', password='mypassword')
-        url = '%s://%s' % (site.scheme, site.host)
+        url = f'{site.scheme}://{site.host}'
 
         call_args = raw_api.call_args_list
 
@@ -684,6 +743,47 @@ class TestClientApiMethods(TestCase):
         assert revisions[1]['revid'] == 689816909
 
 
+class TestVersionTupleFromGenerator:
+
+    @pytest.mark.parametrize('version, expected', [
+        ('MediaWiki 1.24', (1, 24)),
+        ('MediaWiki 1.24.0', (1, 24, 0)),
+        ('MediaWiki 1.24.0-wmf.1', (1, 24, 0, 'wmf', 1)),
+        ('MediaWiki 1.24.1alpha', (1, 24, 1, 'alpha')),
+        ('MediaWiki 1.24.1alpha1', (1, 24, 1, 'alpha', 1)),
+        ('MediaWiki 1.24.1-rc.3', (1, 24, 1, 'rc', 3)),
+    ])
+    def test_version_tuple_from_generator(self, version, expected):
+        assert mwclient.Site.version_tuple_from_generator(version) == expected
+
+    def test_version_tuple_from_generator_empty(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('')
+
+    def test_version_tuple_from_generator_invalid_prefix(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('Foo 1.24.1')
+
+    def test_version_tuple_from_generator_no_minor(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('MediaWiki 1')
+
+    def test_version_tuple_from_generator_major_is_not_number(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('MediaWiki foo.24.1')
+
+    def test_version_tuple_from_generator_minor_is_not_number(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('MediaWiki 1.foo.1')
+
+    def test_version_tuple_from_generator_major_and_minor_are_not_numbers(self):
+        with pytest.raises(mwclient.errors.MediaWikiVersionError):
+            mwclient.Site.version_tuple_from_generator('MediaWiki foo.bar.1')
+
+    def test_version_tuple_from_generator_patch_is_not_number(self):
+        assert mwclient.Site.version_tuple_from_generator('MediaWiki 1.24.foo') == (1, 24, 'foo')
+
+
 class TestClientUploadArgs(TestCase):
 
     def setUp(self):
@@ -734,7 +834,7 @@ class TestClientUploadArgs(TestCase):
         # Test that methods are called, and arguments sent as expected
         self.configure()
 
-        self.site.upload(file=StringIO('test'), filename=self.vars['fname'], comment=self.vars['comment'])
+        self.site.upload(file=BytesIO(b'test'), filename=self.vars['fname'], comment=self.vars['comment'])
 
         args, kwargs = self.raw_call.call_args
         data = args[1]
@@ -750,19 +850,46 @@ class TestClientUploadArgs(TestCase):
         self.configure()
 
         with pytest.raises(TypeError):
-            self.site.upload(file=StringIO('test'))
+            self.site.upload(file=BytesIO(b'test'))
 
     def test_upload_ambigitious_args(self):
         self.configure()
 
         with pytest.raises(TypeError):
-            self.site.upload(filename='Test', file=StringIO('test'), filekey='abc')
+            self.site.upload(filename='Test', file=BytesIO(b'test'), filekey='abc')
 
     def test_upload_missing_upload_permission(self):
         self.configure(rights=['read'])
 
         with pytest.raises(mwclient.errors.InsufficientPermission):
-            self.site.upload(filename='Test', file=StringIO('test'))
+            self.site.upload(filename='Test', file=BytesIO(b'test'))
+
+    def test_upload_file_exists(self):
+        self.configure()
+        self.raw_call.side_effect = [
+            self.makePageResponse(title='File:Test.jpg', imagerepository='local',
+                                  imageinfo=[{
+                                      "comment": "",
+                                      "height": 1440,
+                                      "metadata": [],
+                                      "sha1": "69a764a9cf8307ea4130831a0aa0b9b7f9585726",
+                                      "size": 123,
+                                      "timestamp": "2013-12-22T07:11:07Z",
+                                      "user": "TestUser",
+                                      "width": 2160
+                                  }]),
+            json.dumps({'query': {'tokens': {'csrftoken': self.vars['token']}}}),
+            json.dumps({
+                'upload': {'result': 'Warning',
+                           'warnings': {'duplicate': ['Test.jpg'],
+                                        'exists': 'Test.jpg'},
+                           'filekey': '1apyzwruya84.da2cdk.1.jpg',
+                           'sessionkey': '1apyzwruya84.da2cdk.1.jpg'}
+            })
+        ]
+
+        with pytest.raises(mwclient.errors.FileExists):
+            self.site.upload(file=BytesIO(b'test'), filename='Test.jpg', ignore=False)
 
 
 class TestClientGetTokens(TestCase):
@@ -1419,6 +1546,74 @@ class TestUser(TestCase):
         if sys.version_info >= (3,8,0):
             assert real_call_kwargs == mock_call_kwargs
             assert mock_call.args == call_args[2].args
+
+class TestClientExpandtemplates(TestCase):
+
+    def setUp(self):
+        self.raw_call = mock.patch('mwclient.client.Site.raw_call').start()
+
+    def configure(self, version='1.24'):
+        self.raw_call.return_value = self.metaResponseAsJson(version=version)
+        self.site = mwclient.Site('test.wikipedia.org')
+
+    def tearDown(self):
+        mock.patch.stopall()
+
+    def test_expandtemplates_1_13(self):
+        self.configure('1.16')
+        self.raw_call.return_value = json.dumps({
+            'expandtemplates': {
+                '*': '2024'
+            }
+        })
+
+        wikitext = self.site.expandtemplates('{{CURRENTYEAR}}')
+
+        assert wikitext == '2024'
+
+    def test_expandtemplates_1_13_generatexml(self):
+        self.configure('1.16')
+        self.raw_call.return_value = json.dumps({
+            'parsetree': {
+                '*': '<root><template><title>CURRENTYEAR</title></template></root>'
+            },
+            'expandtemplates': {
+                '*': '2024'
+            }
+        })
+
+        expanded = self.site.expandtemplates('{{CURRENTYEAR}}', generatexml=True)
+
+        assert isinstance(expanded, tuple)
+        assert expanded[0] == '2024'
+        assert expanded[1] == '<root><template><title>CURRENTYEAR</title></template></root>'
+
+    def test_expandtemplates_1_24(self):
+        self.configure('1.24')
+        self.raw_call.return_value = json.dumps({
+            'expandtemplates': {
+                'wikitext': '2024'
+            }
+        })
+
+        wikitext = self.site.expandtemplates('{{CURRENTYEAR}}')
+
+        assert wikitext == '2024'
+
+    def test_expandtemplates_1_24_generatexml(self):
+        self.configure('1.24')
+        self.raw_call.return_value = json.dumps({
+            'expandtemplates': {
+                'parsetree': '<root><template><title>CURRENTYEAR</title></template></root>',
+                'wikitext': '2024'
+            }
+        })
+
+        expanded = self.site.expandtemplates('{{CURRENTYEAR}}', generatexml=True)
+
+        assert isinstance(expanded, tuple)
+        assert expanded[0] == '2024'
+        assert expanded[1] == '<root><template><title>CURRENTYEAR</title></template></root>'
 
 
 if __name__ == '__main__':

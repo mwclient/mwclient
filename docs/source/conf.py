@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # mwclient documentation build configuration file, created by
 # sphinx-quickstart on Sat Sep 27 11:19:56 2014.
@@ -55,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'mwclient'
-copyright = '{0}, Bryan Tong Minh'.format(datetime.datetime.now().year)
+copyright = f'{datetime.datetime.now().year}, Bryan Tong Minh'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -275,3 +274,6 @@ texinfo_documents = [
 intersphinx_mapping = {
   'requests': ('http://requests.readthedocs.org/en/latest/', None)
 }
+
+# Controls the display of typehints in the autodoc output.
+autodoc_typehints = 'description'

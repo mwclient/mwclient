@@ -1,22 +1,92 @@
-[build-system]
-requires = ["setuptools>=40.6.0", "wheel"]
-build-backend = "setuptools.build_meta"
+[project]
+name = "mwclient"
+dynamic = ["version"]
+description = "MediaWiki API client"
+readme = "README.md"
+requires-python = ">=3.6"
+authors = [
+    { name = "Bryan Tong Minh", email = "bryan.tongminh@gmail.com" },
+]
+keywords = ["mediawiki", "wikipedia"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "requests",
+    "requests-oauthlib",
+]
 
-[tool.pytest.ini_options]
-addopts = "--cov mwclient test"
+[project.optional-dependencies]
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+]
+testing = [
+    "pytest",
+    "pytest-cov",
+    "responses>=0.3.0",
+    "responses!=0.6.0",
+    "setuptools; python_version < '3.8'",
+]
+
+[project.urls]
+Documentation = "https://mwclient.readthedocs.io/"
+Repository = "https://github.com/mwclient/mwclient"
+Issues = "https://github.com/mwclient/mwclient/issues"
+Changelog = "https://github.com/mwclient/mwclient/releases"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "mwclient/client.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.flake8",
+    "/.gitattributes",
+    "/.github",
+    "/.readthedocs.yaml",
+]
 
 [tool.bumpversion]
-current_version = "0.10.1"
+current_version = "0.11.0"
 commit = true
 tag = true
 
 [[tool.bumpversion.files]]
-filename = "setup.py"
-search = "version='{current_version}'"
-replace = "version='{new_version}'"
-
-[[tool.bumpversion.files]]
 filename = "mwclient/client.py"
+search = "__version__ = '{current_version}'"
+replace = "__version__ = '{new_version}'"
 
 [[tool.bumpversion.files]]
 filename = "README.md"
+
+[tool.mypy]
+packages = ["mwclient", "test"]
+strict = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = "test.*"
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = "requests_oauthlib"
+ignore_missing_imports = true

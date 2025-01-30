@@ -18,9 +18,12 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
-          - "3.13.0-alpha - 3.13"
+          - "3.13"
+          - "3.14.0-alpha - 3.14"
         include:
           - os: "ubuntu-latest"
+          - os: "ubuntu-22.04"
+            python-version: "3.7"
           - os: "ubuntu-20.04"
             python-version: "3.6"
 
@@ -29,7 +32,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5.1.1
+        uses: actions/setup-python@v5.4.0
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -39,8 +42,8 @@ jobs:
       - name: Test with tox
         run: tox
       - name: Produce coverage.lcov for coveralls
-        if: matrix.python-version == '3.11'
+        if: matrix.python-version == '3.13'
         run: coverage lcov
       - name: Coveralls
-        if: matrix.python-version == '3.11'
+        if: matrix.python-version == '3.13'
         uses: coverallsapp/github-action@v2
