@@ -970,7 +970,14 @@ class Site:
         if self.version is None or self.require(1, 24, raise_error=False):
             # The 'csrf' (cross-site request forgery) token introduced in 1.24 replaces
             # the majority of older tokens, like edittoken and movetoken.
-            if type not in {'watch', 'patrol', 'rollback', 'userrights', 'login'}:
+            if type not in {
+                'watch',
+                'patrol',
+                'rollback',
+                'userrights',
+                'login',
+                'createaccount',
+            }:
                 type = 'csrf'
 
         if type not in self.tokens:
