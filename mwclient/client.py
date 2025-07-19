@@ -895,15 +895,15 @@ class Site:
                             prefix like 'File:'
             description (str): Wikitext for the file description page.
             ignore (bool): True to upload despite any warnings.
-            stash (bool): If set, the file will be stashed instead of uploaded immediately.
+            stash (bool): If set, the file will be stashed instead of uploaded right away.
             file_size (int): Deprecated in mwclient 0.7
             url (str): URL to fetch the file from.
             filekey (str): Key that identifies a previous upload that was
                            stashed temporarily.
             comment (str): Upload comment. Also used as the initial page text
                            for new files if `description` is not specified.
-            asynchronous (bool): Whether the server should upload the file asynchronously. 
-                                Must be used with the filekey of a previously stashed file. 
+            asynchronous (bool): Whether the server should upload the file asynchronously.
+                            Must be used with the filekey of a previously stashed file.
 
         Example:
 
@@ -963,7 +963,7 @@ class Site:
             'text': text,
             'token': image.get_token('edit'),
         }
-        if stash:   
+        if stash:
             predata['stash'] = 'true'
         if ignore:
             predata['ignorewarnings'] = 'true'
@@ -972,7 +972,7 @@ class Site:
         if asynchronous:
             if filekey is None:
                 raise TypeError(
-                    "'asynchronous' must be used with the filekey from a previously stashed upload."
+        "'asynchronous' must be used with the filekey from a previously stashed upload."
                 )
 
             predata['async'] = 'true'
