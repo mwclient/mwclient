@@ -887,7 +887,10 @@ class Site:
         """Upload a file to the site.
 
         Note that one of `file`, `filekey` and `url` must be specified, but not
-        more than one. For normal uploads, you specify `file`.
+        more than one. For normal uploads, you specify `file`. For asynchronous
+        uploads, upload specifying `stash=True`, then take the parameter `filekey`
+        from the response JSON and call `upload` again, specifying the `filekey`
+        and `asynchronous=True`.
 
         Args:
             file (str): File object or stream to upload.
@@ -909,6 +912,15 @@ class Site:
 
             >>> client.upload(open('somefile', 'rb'), filename='somefile.jpg',
                               description='Some description')
+
+        Async Example:
+            >>> response = client.upload(open('somefile','rb'),
+                                        filename='somefile.jpg'
+                                        description='Some description',
+                                        stash=True)
+
+            >>> client.upload(filekey=response["filekey"], filename='somefile.jpg',
+                            asynchronous=True)
 
         Returns:
             JSON result from the API.
