@@ -895,14 +895,15 @@ class Site:
                             prefix like 'File:'
             description (str): Wikitext for the file description page.
             ignore (bool): True to upload despite any warnings.
+            stash (bool): If set, the file will be stashed instead of uploaded immediately.
             file_size (int): Deprecated in mwclient 0.7
             url (str): URL to fetch the file from.
             filekey (str): Key that identifies a previous upload that was
                            stashed temporarily.
             comment (str): Upload comment. Also used as the initial page text
                            for new files if `description` is not specified.
-            asynchronous (bool): Whether the server should make large file
-                                operations asynchronous. 
+            asynchronous (bool): Whether the server should upload the file asynchronously. 
+                                Must be used with the filekey of a previously stashed file. 
 
         Example:
 
