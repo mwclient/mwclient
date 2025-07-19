@@ -972,7 +972,7 @@ class Site:
         if asynchronous:
             if filekey is None:
                 raise TypeError(
-                    """'asynchronous' must be used with the filekey 
+                    """'asynchronous' must be used with the filekey
                     from a previously stashed upload."""
                 )
 
