@@ -901,7 +901,7 @@ class Site:
                            stashed temporarily.
             comment (str): Upload comment. Also used as the initial page text
                            for new files if `description` is not specified.
-            asynchronous (str): Whether the server should make large file
+            asynchronous (bool): Whether the server should make large file
                                 operations asynchronous. 
 
         Example:
