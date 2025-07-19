@@ -809,6 +809,12 @@ class TestClientUploadArgs(TestCase):
 
         with pytest.raises(mwclient.errors.InsufficientPermission):
             self.site.upload(filename='Test', file=StringIO('test'))
+    
+    def test_async_without_filekey(self):
+        self.configure()
+
+        with pytest.raises(TypeError):
+            self.site.upload(filename='Test', file=StringIO('test'), asynchronous=True)
 
     def test_upload_file_exists(self):
         self.configure()
