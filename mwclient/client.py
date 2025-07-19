@@ -882,7 +882,7 @@ class Site:
 
         return self.tokens[type]
 
-    def upload(self, file=None, filename=None, description='', ignore=False,
+    def upload(self, file=None, filename=None, description='', ignore=False, stash=False,
                file_size=None, url=None, filekey=None, comment=None, asynchronous=False):
         """Upload a file to the site.
 
@@ -962,12 +962,18 @@ class Site:
             'text': text,
             'token': image.get_token('edit'),
         }
-
+        if stash:   
+            predata['stash'] = 'true'
         if ignore:
             predata['ignorewarnings'] = 'true'
         if url:
             predata['url'] = url
         if asynchronous:
+            if filekey is None:
+                raise TypeError(
+                    "'asynchronous' must be used with the filekey from a previously stashed upload."
+                )
+
             predata['async'] = 'true'
 
         # sessionkey was renamed to filekey in MediaWiki 1.18
