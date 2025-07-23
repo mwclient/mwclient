@@ -37,7 +37,9 @@ class Site:
             located). Must contain a trailing slash (`/`). Defaults to `/w/`.
         ext: The file extension used by the MediaWiki API scripts. Defaults to `.php`.
         pool: A preexisting :class:`~requests.Session` to be used when executing API
-            requests.
+            requests. When this is set, the `client_certificate`, `clients_useragent`,
+            `custom_headers`, `http_auth` and all OAuth related parameters are all
+            ignored.
         retry_timeout: The number of seconds to sleep for each past retry of a failing API
             request. Defaults to `30`.
         max_retries: The maximum number of retries to perform for failing API requests.
