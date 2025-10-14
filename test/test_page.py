@@ -496,6 +496,46 @@ class TestPageApiArgs(unittest.TestCase):
             'Category:1955 deaths',
         }
 
+    def test_get_page_templates(self):
+        # Check that page.templates() works, and that a correct API call is made
+        # This test specifically verifies the fix for the 'ggtllimit' bug
+
+        self.site.get.return_value = {
+            "batchcomplete": "",
+            "query": {
+                "pages": {
+                    "12345": {
+                        "pageid": 12345,
+                        "ns": 10,
+                        "title": "Template:Infobox",
+                    },
+                    "12346": {
+                        "pageid": 12346,
+                        "ns": 10,
+                        "title": "Template:Citation",
+                    }
+                }
+            }
+        }
+
+        templates = list(self.page.templates())
+        args = self.get_last_api_call_args(http_method='GET')
+
+        # The critical assertion: should have 'gtllimit', NOT 'ggtllimit'
+        assert {
+            'generator': 'templates',
+            'titles': self.page.page_title,
+            'iiprop': 'timestamp|user|comment|url|size|sha1|metadata|archivename',
+            'inprop': 'protection',
+            'prop': 'info|imageinfo',
+            'gtllimit': repr(self.page.site.api_limit),
+        } == args
+
+        assert {t.name for t in templates} == {
+            'Template:Infobox',
+            'Template:Citation',
+        }
+
 
 if __name__ == '__main__':
     unittest.main()
