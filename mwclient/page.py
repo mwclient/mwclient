@@ -684,8 +684,8 @@ class Page:
         prefix = mwclient.listing.List.get_prefix('tl', generator)
         kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace))
         if generator:
-            return mwclient.listing.PagePropertyGenerator(self, 'templates', prefix,
+            return mwclient.listing.PagePropertyGenerator(self, 'templates', 'tl',
                                                           **kwargs)
         else:
-            return mwclient.listing.PageProperty(self, 'templates', prefix,
+            return mwclient.listing.PageProperty(self, 'templates', 'tl',
                                                  return_values='title', **kwargs)
