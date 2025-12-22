@@ -115,8 +115,11 @@ unauthenticated, just set
 
 .. _oauth:
 
-OAuth Authentication
-^^^^^^^^^^^^^^^^^^^^
+OAuth 1 Authentication
+^^^^^^^^^^^^^^^^^^^^^^
+
+Currently, mwclient does not support OAuth 2, only OAuth 1. When reading the
+upstream documentation, please refer to the OAuth 1 section.
 
 On Wikimedia wikis, the recommended authentication method is to authenticate as
 a `owner-only consumer`_. Once you have obtained the *consumer token* (also
