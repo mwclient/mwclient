@@ -1,4 +1,5 @@
 import http.client
+import logging
 import shutil
 import subprocess
 import time
@@ -162,7 +163,7 @@ class TestLogin:
         assert pg.exists == False
 
 
-class TestClientLogin:
+class TestClient:
     def test_clientlogin_wrong_password(self, site):
         """Test we raise correct error for clientlogin() with wrong password."""
         with pytest.raises(mwclient.errors.LoginError):
@@ -180,6 +181,19 @@ class TestClientLogin:
         pg.edit("Hi I'm a new page", "create new page")
         pg = site.pages["Anonymous New Page"]
         assert pg.text() == "Hi I'm a new page"
+
+    def test_site_revisions(self, site, caplog):
+        caplog.set_level(logging.WARNING)
+        # as per docstring example, make sure we don't crash for lack
+        # of timestamp here
+        rev = site.revisions([1], prop="content")[0]
+        assert rev["pagetitle"] == "Main Page"
+        # without limiting response
+        rev = site.revisions([1])[0]
+        assert rev["pagetitle"] == "Main Page"
+        # check timestamp parsing
+        assert isinstance(rev["timestamp"], time.struct_time)
+        assert not caplog.text
 
 
 class TestUploadAsync:
