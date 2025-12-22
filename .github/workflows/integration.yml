@@ -6,6 +6,8 @@ on: ["push", "pull_request"]
 jobs:
   build:
     runs-on: "ubuntu-latest"
+    permissions:
+      contents: read
     strategy:
       max-parallel: 4
       fail-fast: false
