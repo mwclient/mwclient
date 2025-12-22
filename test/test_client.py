@@ -724,7 +724,6 @@ class TestClientApiMethods(TestCase):
                     'comment': 'Test comment 1'
                 }, {
                     'revid': 689816909,
-                    'timestamp': '2015-11-09T16:09:28Z',
                     'comment': 'Test comment 2'
                 }]
             }}}}

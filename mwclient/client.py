@@ -1709,6 +1709,7 @@ class Site:
         self,
         revids: List[Union[int, str]],
         prop: str = 'ids|timestamp|flags|comment|user',
+        slots: str = 'main',
     ) -> List[Dict[str, Any]]:
         """Get data about a list of revisions.
 
@@ -1733,6 +1734,9 @@ class Site:
             'rvprop': prop,
             'revids': '|'.join(map(str, revids))
         }
+        if self.version[:2] > (1, 31):  # type: ignore[index]
+            # https://github.com/mwclient/mwclient/issues/389
+            kwargs['rvslots'] = slots
 
         revisions = []
         pages = self.get('query', **kwargs).get('query', {}).get('pages', {}).values()
@@ -1740,7 +1744,8 @@ class Site:
             for revision in page.get('revisions', ()):
                 revision['pageid'] = page.get('pageid')
                 revision['pagetitle'] = page.get('title')
-                revision['timestamp'] = parse_timestamp(revision['timestamp'])
+                if 'timestamp' in revision:
+                    revision['timestamp'] = parse_timestamp(revision['timestamp'])
                 revisions.append(revision)
         return revisions
 
