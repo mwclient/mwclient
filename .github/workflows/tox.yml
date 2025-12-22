@@ -20,7 +20,8 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
-          - "3.14.0-alpha - 3.14"
+          - "3.14"
+          - "3.15.0-alpha - 3.15"
         include:
           - os: "ubuntu-latest"
           - os: "ubuntu-22.04"
@@ -41,8 +42,8 @@ jobs:
       - name: Test with tox
         run: tox
       - name: Produce coverage.lcov for coveralls
-        if: matrix.python-version == '3.13'
+        if: matrix.python-version == '3.14'
         run: coverage lcov
       - name: Coveralls
-        if: matrix.python-version == '3.13'
+        if: matrix.python-version == '3.14'
         uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2.3.7
