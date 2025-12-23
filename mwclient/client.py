@@ -47,7 +47,7 @@ class Site:
         wait_callback: A callback function to be executed for each failing API request.
         clients_useragent: A prefix to be added to the default mwclient user-agent. Should
             follow the pattern `'{tool_name}/{tool_version} ({contact})'`. Check the
-            `User-Agent policy <https://meta.wikimedia.org/wiki/User-Agent_policy>`_
+            `User-Agent policy <https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_User-Agent_Policy>`_
             for more information.
         max_lag: A `maxlag` parameter to be used in `index.php` calls. Consult the
             `documentation <https://www.mediawiki.org/wiki/Manual:Maxlag_parameter>`_ for
@@ -86,7 +86,7 @@ class Site:
         errors.LoginError: Login failed, the reason can be obtained from e.code and e.info
             (where e is the exception object) and will be one of the API:Login errors. The
             most common error code is "Failed", indicating a wrong username or password.
-    """
+    """  # noqa: E501
     api_limit = 500
 
     def __init__(
