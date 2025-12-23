@@ -183,3 +183,10 @@ class InvalidResponse(MwClientError):
 class InvalidPageTitle(MwClientError):
     """Raised when an invalid page title is used."""
     pass
+
+
+class UserAgentError(MwClientError):
+    """Raised when attempting to use a Wikimedia site without a custom
+    User-Agent.
+    """
+    pass

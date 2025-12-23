@@ -76,7 +76,7 @@ class TestCase(unittest.TestCase):
     def metaResponseAsJson(self, **kwargs):
         return json.dumps(self.metaResponse(**kwargs))
 
-    def httpShouldReturn(self, body=None, callback=None, scheme='https', host='test.wikipedia.org', path='/w/',
+    def httpShouldReturn(self, body=None, callback=None, scheme='https', host='test.notwikipedia.org', path='/w/',
                          script='api', headers=None, status=200, method='GET'):
         url = f'{scheme}://{host}{path}{script}.php'
         mock = responses.GET if method == 'GET' else responses.POST
@@ -88,7 +88,7 @@ class TestCase(unittest.TestCase):
 
     def stdSetup(self):
         self.httpShouldReturn(self.metaResponseAsJson())
-        site = mwclient.Site('test.wikipedia.org')
+        site = mwclient.Site('test.notwikipedia.org')
         responses.reset()
         return site
 
@@ -143,7 +143,7 @@ class TestClient(TestCase):
 
         self.httpShouldReturn(self.metaResponseAsJson(), scheme='https')
 
-        site = mwclient.Site('test.wikipedia.org')
+        site = mwclient.Site('test.notwikipedia.org')
 
         assert len(responses.calls) == 1
         assert responses.calls[0].request.method == 'GET'
@@ -160,7 +160,7 @@ class TestClient(TestCase):
 
         self.httpShouldReturn(callback=request_callback, scheme='https')
 
-        site = mwclient.Site('test.wikipedia.org')
+        site = mwclient.Site('test.notwikipedia.org')
 
         assert len(responses.calls) == 2
         assert 'retry-after' in responses.calls[0].response.headers  # type: ignore
@@ -173,7 +173,7 @@ class TestClient(TestCase):
         self.httpShouldReturn('Uh oh', scheme='https', status=400)
 
         with pytest.raises(requests.exceptions.HTTPError):
-            site = mwclient.Site('test.wikipedia.org')
+            site = mwclient.Site('test.notwikipedia.org')
 
     @responses.activate
     def test_force_http(self):
@@ -181,7 +181,7 @@ class TestClient(TestCase):
 
         self.httpShouldReturn(self.metaResponseAsJson(), scheme='http')
 
-        site = mwclient.Site('test.wikipedia.org', scheme='http')
+        site = mwclient.Site('test.notwikipedia.org', scheme='http')
 
         assert len(responses.calls) == 1
 
@@ -191,7 +191,7 @@ class TestClient(TestCase):
 
         self.httpShouldReturn(self.metaResponseAsJson())
 
-        site = mwclient.Site('test.wikipedia.org', clients_useragent='MyFabulousClient')
+        site = mwclient.Site('test.notwikipedia.org', clients_useragent='MyFabulousClient')
 
         assert 'MyFabulousClient' in responses.calls[0].request.headers['user-agent']
 
@@ -201,16 +201,45 @@ class TestClient(TestCase):
 
         self.httpShouldReturn(self.metaResponseAsJson())
 
-        site = mwclient.Site('test.wikipedia.org', custom_headers={'X-Wikimedia-Debug': 'host=mw1099.eqiad.wmnet; log'})
+        site = mwclient.Site('test.notwikipedia.org', custom_headers={'X-Wikimedia-Debug': 'host=mw1099.eqiad.wmnet; log'})
 
         assert 'host=mw1099.eqiad.wmnet; log' in responses.calls[0].request.headers['X-Wikimedia-Debug']
+
+    @responses.activate
+    def test_wikimedia_agent_requirements(self):
+        """Test the User-Agent requirements: should be required on
+        Wikimedia sites, not otherwise.
+        """
+        self.httpShouldReturn(self.metaResponseAsJson(), host='notwikipedia.org')
+        # should not error
+        site = mwclient.Site('notwikipedia.org')
+        self.httpShouldReturn(self.metaResponseAsJson(), host='wikipedia.org')
+        site = mwclient.Site('wikipedia.org', clients_useragent='MyFabulousClient')
+        site = mwclient.Site('wikipedia.org', custom_headers={'User-Agent': 'MyFabulousClient'})
+        pool = requests.Session()
+        pool.headers['User-Agent'] = 'MyFabulousClient'
+        site = mwclient.Site('wikipedia.org', pool=pool)
+        # should error
+        with pytest.raises(mwclient.errors.UserAgentError):
+            site = mwclient.Site('wikipedia.org')
+        with pytest.raises(mwclient.errors.UserAgentError):
+            site = mwclient.Site('wikipedia.org', custom_headers={'SomeOtherHeader': 'foo'})
+        self.httpShouldReturn(self.metaResponseAsJson(), host='en.wikisource.org')
+        with pytest.raises(mwclient.errors.UserAgentError):
+            site = mwclient.Site('en.wikisource.org', custom_headers={
+                'User-Agent': mwclient.client.USER_AGENT
+            })
+        self.httpShouldReturn(self.metaResponseAsJson(), host='wikidata.org')
+        with pytest.raises(mwclient.errors.UserAgentError):
+            pool = requests.Session()
+            site = mwclient.Site('wikidata.org', pool=pool)
 
     @responses.activate
     def test_basic_request(self):
 
         self.httpShouldReturn(self.metaResponseAsJson())
 
-        site = mwclient.Site('test.wikipedia.org')
+        site = mwclient.Site('test.notwikipedia.org')
 
         assert responses.calls[0].request.url is not None
         assert 'action=query' in responses.calls[0].request.url
@@ -221,7 +250,7 @@ class TestClient(TestCase):
 
         self.httpShouldReturn(self.metaResponseAsJson())
 
-        site = mwclient.Site('test.wikipedia.org', httpauth=('me', 'verysecret'))
+        site = mwclient.Site('test.notwikipedia.org', httpauth=('me', 'verysecret'))
 
         assert isinstance(site.connection.auth, requests.auth.HTTPBasicAuth)
 
@@ -230,7 +259,7 @@ class TestClient(TestCase):
 
         self.httpShouldReturn(self.metaResponseAsJson())
 
-        site = mwclient.Site('test.wikipedia.org', httpauth=('我', '非常秘密'))
+        site = mwclient.Site('test.notwikipedia.org', httpauth=('我', '非常秘密'))
 
         assert isinstance(site.connection.auth, requests.auth.HTTPBasicAuth)
 
@@ -240,7 +269,7 @@ class TestClient(TestCase):
         self.httpShouldReturn(self.metaResponseAsJson())
 
         with pytest.raises(RuntimeError):
-            site = mwclient.Site('test.wikipedia.org',
+            site = mwclient.Site('test.notwikipedia.org',
                                  httpauth=1)  # type: ignore[arg-type]
 
     @responses.activate
@@ -248,7 +277,7 @@ class TestClient(TestCase):
 
         self.httpShouldReturn(self.metaResponseAsJson())
 
-        site = mwclient.Site('test.wikipedia.org',
+        site = mwclient.Site('test.notwikipedia.org',
                              consumer_token='a', consumer_secret='b',
                              access_token='c', access_secret='d')
         assert isinstance(site.connection.auth, OAuth1)
@@ -260,7 +289,7 @@ class TestClient(TestCase):
         self.httpShouldReturn('MediaWiki API is not enabled for this site.')
 
         with pytest.raises(mwclient.errors.APIDisabledError):
-            site = mwclient.Site('test.wikipedia.org')
+            site = mwclient.Site('test.notwikipedia.org')
 
     @responses.activate
     def test_version(self):
@@ -268,7 +297,7 @@ class TestClient(TestCase):
 
         self.httpShouldReturn(self.metaResponseAsJson(version='1.16'))
 
-        site = mwclient.Site('test.wikipedia.org')
+        site = mwclient.Site('test.notwikipedia.org')
 
         assert site.initialized is True
         assert site.version == (1, 16)
@@ -280,7 +309,7 @@ class TestClient(TestCase):
         self.httpShouldReturn(self.metaResponseAsJson(version='1.15'))
 
         with pytest.raises(mwclient.errors.MediaWikiVersionError):
-            site = mwclient.Site('test.wikipedia.org')
+            site = mwclient.Site('test.notwikipedia.org')
 
     @responses.activate
     def test_private_wiki(self):
@@ -293,7 +322,7 @@ class TestClient(TestCase):
             }
         }))
 
-        site = mwclient.Site('test.wikipedia.org')
+        site = mwclient.Site('test.notwikipedia.org')
 
         assert site.initialized is False
 
@@ -450,7 +479,7 @@ class TestClient(TestCase):
 
         site = self.stdSetup()
 
-        assert repr(site) == '<Site object \'test.wikipedia.org/w/\'>'
+        assert repr(site) == '<Site object \'test.notwikipedia.org/w/\'>'
 
     @mock.patch("time.sleep")
     @responses.activate
@@ -518,13 +547,13 @@ class TestClient(TestCase):
     def test_connection_options(self):
         self.httpShouldReturn(self.metaResponseAsJson())
         args = {"timeout": 60, "stream": False}
-        site = mwclient.Site('test.wikipedia.org', connection_options=args)
+        site = mwclient.Site('test.notwikipedia.org', connection_options=args)
         assert site.requests == args
         with pytest.warns(DeprecationWarning):
-            site = mwclient.Site('test.wikipedia.org', reqs=args)
+            site = mwclient.Site('test.notwikipedia.org', reqs=args)
         assert site.requests == args
         with pytest.raises(ValueError):
-            site = mwclient.Site('test.wikipedia.org', reqs=args, connection_options=args)
+            site = mwclient.Site('test.notwikipedia.org', reqs=args, connection_options=args)
 
 class TestLogin(TestCase):
 
@@ -548,7 +577,7 @@ class TestLogin(TestCase):
 
         raw_api.side_effect = side_effect
 
-        site = mwclient.Site('test.wikipedia.org')
+        site = mwclient.Site('test.notwikipedia.org')
         site.login('myusername', 'mypassword')
 
         call_args = raw_api.call_args_list
@@ -578,7 +607,7 @@ class TestLogin(TestCase):
 
         raw_api.side_effect = side_effect
 
-        site = mwclient.Site('test.wikipedia.org')
+        site = mwclient.Site('test.notwikipedia.org')
         site.login('myusername', 'mypassword')
 
         call_args = raw_api.call_args_list
@@ -606,7 +635,7 @@ class TestLogin(TestCase):
 
         raw_api.side_effect = api_side_effect
 
-        site = mwclient.Site('test.wikipedia.org')
+        site = mwclient.Site('test.notwikipedia.org')
         # this would be done by site_init usually, but we're mocking it
         site.version = (1, 28, 0)
         success = site.clientlogin(username='myusername', password='mypassword')
@@ -644,7 +673,7 @@ class TestLogin(TestCase):
 
         raw_api.side_effect = side_effect
 
-        site = mwclient.Site('test.wikipedia.org')
+        site = mwclient.Site('test.notwikipedia.org')
         # this would be done by site_init usually, but we're mocking it
         site.version = (1, 28, 0)
 
@@ -682,7 +711,7 @@ class TestLogin(TestCase):
 
         raw_api.side_effect = side_effect
 
-        site = mwclient.Site('test.wikipedia.org')
+        site = mwclient.Site('test.notwikipedia.org')
         # this would be done by site_init usually, but we're mocking it
         site.version = (1, 28, 0)
         success = site.clientlogin(username='myusername', password='mypassword')
@@ -707,7 +736,7 @@ class TestClientApiMethods(TestCase):
     def setUp(self):
         self.api = mock.patch('mwclient.client.Site.api').start()
         self.api.return_value = self.metaResponse()
-        self.site = mwclient.Site('test.wikipedia.org')
+        self.site = mwclient.Site('test.notwikipedia.org')
 
     def tearDown(self):
         mock.patch.stopall()
@@ -790,7 +819,7 @@ class TestClientUploadArgs(TestCase):
     def configure(self, rights=['read', 'upload']):
 
         self.raw_call.side_effect = [self.metaResponseAsJson(rights=rights)]
-        self.site = mwclient.Site('test.wikipedia.org')
+        self.site = mwclient.Site('test.notwikipedia.org')
 
         self.vars = {
             'fname': 'Some "ßeta" æøå.jpg',
@@ -915,7 +944,7 @@ class TestClientGetTokens(TestCase):
 
     def configure(self, version='1.24'):
         self.raw_call.return_value = self.metaResponseAsJson(version=version)
-        self.site = mwclient.Site('test.wikipedia.org')
+        self.site = mwclient.Site('test.notwikipedia.org')
         responses.reset()
 
     def tearDown(self):
@@ -975,7 +1004,7 @@ class TestClientPatrol(TestCase):
 
     def configure(self, version='1.24'):
         self.raw_call.return_value = self.metaResponseAsJson(version=version)
-        self.site = mwclient.Site('test.wikipedia.org')
+        self.site = mwclient.Site('test.notwikipedia.org')
 
     def tearDown(self):
         mock.patch.stopall()
@@ -1012,7 +1041,7 @@ class TestClientExpandtemplates(TestCase):
 
     def configure(self, version='1.24'):
         self.raw_call.return_value = self.metaResponseAsJson(version=version)
-        self.site = mwclient.Site('test.wikipedia.org')
+        self.site = mwclient.Site('test.notwikipedia.org')
 
     def tearDown(self):
         mock.patch.stopall()

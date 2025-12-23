@@ -20,6 +20,20 @@ __version__ = '0.11.0'
 log = logging.getLogger(__name__)
 
 USER_AGENT = f'mwclient/{__version__} (https://github.com/mwclient/mwclient)'
+WIKIMEDIA_SITES = (
+    # https://meta.wikimedia.org/wiki/Complete_list_of_Wikimedia_projects
+    'wikipedia.org',
+    'wikimedia.org',
+    'wiktionary.org',
+    'wikiquote.org',
+    'wikivotage.org',
+    'wikinews.org',
+    'wikisource.org',
+    'wikibooks.org',
+    'wikiversity.org',
+    'wikidata.org',
+    'wikifunctions.org',
+)
 
 
 class Site:
@@ -189,6 +203,18 @@ class Site:
                 self.connection.headers.update(custom_headers)
         else:
             self.connection = pool
+
+        if any(host == wm or host.endswith(f'.{wm}') for wm in WIKIMEDIA_SITES):
+            checkua = self.connection.headers.get('User-Agent', USER_AGENT)
+            # technically it can be bytes, let's not worry about that
+            if isinstance(checkua, str):
+                if checkua == USER_AGENT or checkua.startswith('python-requests'):
+                    raise errors.UserAgentError(
+                        'Custom User-Agent required for Wikimedia sites. '
+                        'Use clients_useragent or custom_headers["User-Agent"]. '
+                        'See https://mwclient.readthedocs.io/'
+                        'en/latest/user/connecting.html#specifying-a-user-agent'
+                    )
 
         # Page generators
         self.pages = listing.PageList(self)
