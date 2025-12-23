@@ -63,10 +63,13 @@ be your user name and the tool version may be omitted:
 Note that MwClient appends its own user agent to the end of your string.
 The final user agent will look like this:
 
-    >>> site.clients_useragent
-    'MyCoolTool/0.2 (xyz@example.org) mwclient/0.8.0'
+    >>> site.connection.headers["User-Agent"]
+    'MyCoolTool/0.2 (xyz@example.org) mwclient/0.11.0 (https://github.com/mwclient/mwclient)'
 
-.. _Wikimedia User-Agent policy: https://meta.wikimedia.org/wiki/User-Agent_policy
+If you want to leave mwclient's agent string out entirely, you can use
+the ``custom_headers`` argument instead of ``clients_useragent``.
+
+.. _Wikimedia User-Agent policy: https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_User-Agent_Policy
 
 .. _errors:
 
