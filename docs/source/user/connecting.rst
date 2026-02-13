@@ -124,9 +124,11 @@ OAuth 1 Authentication
 Currently, mwclient does not support OAuth 2, only OAuth 1. When reading the
 upstream documentation, please refer to the OAuth 1 section.
 
-On Wikimedia wikis, OAuth consumers can optionally be created as `owner-only`;
-either type works with mwclient. Once you have obtained the *consumer token* (also
-called *consumer key*), the *consumer secret*, the *access token* and the
+On Wikimedia wikis, the recommended authentication method is to use OAuth.
+OAuth credentials ('consumers') can be optionally be created as `owner-only`,
+a simplified way for bots and tools which only ever need to use a single account.
+Either type works with mwclient. Once you have obtained the *consumer token*
+(also called *consumer key*), the *consumer secret*, the *access token* and the
 *access secret*, you can authenticate like so:
 
     >>> site = Site('test.wikipedia.org',
@@ -136,7 +138,8 @@ called *consumer key*), the *consumer secret*, the *access token* and the
                     access_secret='my_access_secret')
 
 
-.. _MediaWiki OAuth docs: https://www.mediawiki.org/wiki/OAuth
+.. _General MediaWiki OAuth docs: https://www.mediawiki.org/wiki/OAuth
+.. _owner-only consumer: https://www.mediawiki.org/wiki/OAuth/Owner-only_consumers
 
 .. _clientlogin:
 
