@@ -126,8 +126,8 @@ upstream documentation, please refer to the OAuth 1 section.
 
 On Wikimedia wikis, the recommended authentication method is to use OAuth.
 OAuth credentials (`consumers`) can optionally be created as `owner-only`,
-a simplified way for bots and tools which only ever need to use a single account.
-Either type works with mwclient. Once you have obtained the *consumer token*
+a simplified way for bots and tools which only ever need to use a single account;
+either type works with mwclient. Once you have obtained the *consumer token*
 (also called *consumer key*), the *consumer secret*, the *access token* and the
 *access secret*, you can authenticate like so:
 
