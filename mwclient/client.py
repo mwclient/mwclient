@@ -68,10 +68,10 @@ class Site:
         connection_options: Additional arguments to be passed to the
             :py:meth:`requests.Session.request` method when performing API calls. If the
             `timeout` key is empty, a default timeout of 30 seconds is added.
-        consumer_token: OAuth1 consumer key for owner-only consumers.
-        consumer_secret: OAuth1 consumer secret for owner-only consumers.
-        access_token: OAuth1 access key for owner-only consumers.
-        access_secret: OAuth1 access secret for owner-only consumers.
+        consumer_token: OAuth1 consumer key.
+        consumer_secret: OAuth1 consumer secret.
+        access_token: OAuth1 access key.
+        access_secret: OAuth1 access secret.
         client_certificate: A client certificate to be added
             to the session.
         custom_headers: A dictionary of custom headers to be added to all
