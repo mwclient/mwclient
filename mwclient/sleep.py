@@ -101,3 +101,6 @@ class Sleeper:
             timeout = min_time
         log.debug('Sleeping for %d seconds', timeout)
         time.sleep(timeout)
+
+
+__all__ = ['Sleepers', 'Sleeper']

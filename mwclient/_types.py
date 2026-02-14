@@ -6,3 +6,5 @@ Cookies = Union[Mapping[str, str], CookieJar]
 Namespace = Union[str, int]
 
 VersionTuple = Tuple[Union[int, str], ...]
+
+__all__ = ['Cookies', 'Namespace', 'VersionTuple']

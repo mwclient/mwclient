@@ -1956,3 +1956,6 @@ class Site:
                 answers = [answer for answer in answers.values()]
 
             yield from answers
+
+
+__all__ = ['Site', '__version__', 'USER_AGENT']

@@ -689,3 +689,6 @@ class Page:
         else:
             return mwclient.listing.PageProperty(self, 'templates', 'tl',
                                                  return_values='title', **kwargs)
+
+
+__all__ = ['Page']

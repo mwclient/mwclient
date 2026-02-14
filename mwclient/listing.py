@@ -401,3 +401,15 @@ class RevisionsIterator(PageProperty):
         if 'rvstartid' in self.args and 'rvstart' in self.args:
             del self.args['rvstart']
         return super().load_chunk()
+
+
+__all__ = [
+    'List',
+    'NestedList',
+    'GeneratorList',
+    'Category',
+    'PageList',
+    'PageProperty',
+    'PagePropertyGenerator',
+    'RevisionsIterator',
+]

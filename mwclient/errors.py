@@ -183,3 +183,24 @@ class InvalidResponse(MwClientError):
 class InvalidPageTitle(MwClientError):
     """Raised when an invalid page title is used."""
     pass
+
+
+__all__ = [
+    'MwClientError',
+    'MediaWikiVersionError',
+    'APIDisabledError',
+    'MaximumRetriesExceeded',
+    'APIError',
+    'InsufficientPermission',
+    'UserBlocked',
+    'EditError',
+    'ProtectedPageError',
+    'FileExists',
+    'LoginError',
+    'OAuthAuthorizationError',
+    'AssertUserFailedError',
+    'EmailError',
+    'NoSpecifiedEmail',
+    'InvalidResponse',
+    'InvalidPageTitle',
+]

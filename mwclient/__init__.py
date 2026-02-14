@@ -25,6 +25,7 @@
 
 from mwclient.errors import *  # noqa: F401, F403
 from mwclient.client import Site as Site, __version__ as __version__  # noqa: F401
+
 import logging
 import warnings
 
@@ -32,3 +33,26 @@ import warnings
 warnings.simplefilter('always', DeprecationWarning)
 
 logging.getLogger(__name__).addHandler(logging.NullHandler())
+
+__all__ = [
+    'Site',
+    '__version__',
+    # Errors
+    'MwClientError',
+    'MediaWikiVersionError',
+    'APIDisabledError',
+    'MaximumRetriesExceeded',
+    'APIError',
+    'InsufficientPermission',
+    'UserBlocked',
+    'EditError',
+    'ProtectedPageError',
+    'FileExists',
+    'LoginError',
+    'OAuthAuthorizationError',
+    'AssertUserFailedError',
+    'EmailError',
+    'NoSpecifiedEmail',
+    'InvalidResponse',
+    'InvalidPageTitle',
+]
