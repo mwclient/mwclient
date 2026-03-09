@@ -1263,7 +1263,7 @@ class Site:
             title: Title of page the text belongs to.
             page: The name of a page to parse. Cannot be used together with text
                 and title.
-            prop: Which pieces of information to get. Multiple alues should be
+            prop: Which pieces of information to get. Multiple values should be
                 separated using the pipe (`|`) character.
             redirects: Resolve the redirect, if the given `page` is a redirect.
                 Defaults to `False`.
