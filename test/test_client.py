@@ -739,6 +739,48 @@ class TestClientApiMethods(TestCase):
         assert revisions[0]['timestamp'] == time.strptime('2015-11-08T21:52:46Z', '%Y-%m-%dT%H:%M:%SZ')
         assert revisions[1]['revid'] == 689816909
 
+    def test_allpages_with_content(self):
+        self.api.return_value = {
+            "query": {
+                "pages": {
+                    "1886677": {
+                        "pageid": 1886677,
+                        "ns": 0,
+                        "title": "Test",
+                        "contentmodel": "wikitext",
+                        "pagelanguage": "en",
+                        "pagelanguagehtmlcode": "en",
+                        "pagelanguagedir": "ltr",
+                        "touched": "2026-02-23T06:55:21Z",
+                        "lastrevid": 6267986,
+                        "length": 38,
+                        "redirect": "",
+                        "new": "",
+                        "protection": [],
+                        "restrictiontypes": [
+                            "edit",
+                            "move"
+                        ],
+                        "revisions": [
+                            {
+                                "contentmodel": "wikitext",
+                                "contentformat": "text/x-wiki",
+                                "*": "test content"
+                            }
+                        ]
+                    },
+                }
+            }
+        }
+
+        pages = [p for p in self.site.allpages(with_content=True)]
+        args, _ = self.api.call_args
+
+        assert ('prop', 'info|imageinfo|revisions') in args
+        assert ('rvprop', 'content') in args
+        assert len(pages) == 1
+        assert pages[0].text() == 'test content'
+
 
 class TestVersionTupleFromGenerator:
 

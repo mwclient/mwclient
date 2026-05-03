@@ -57,20 +57,25 @@ class Image(mwclient.page.Page):
         limit: Optional[int] = None,
         generator: bool = True,
         max_items: Optional[int] = None,
-        api_chunk_size: Optional[int] = None
+        api_chunk_size: Optional[int] = None,
+        with_content: bool = False
     ) -> 'mwclient.listing.List':
         """
         List pages that use the given file.
 
         API doc: https://www.mediawiki.org/wiki/API:Imageusage
         """
-        prefix = mwclient.listing.List.get_prefix('iu', generator)
-        kwargs = dict(mwclient.listing.List.generate_kwargs(
-            prefix, title=self.name, namespace=namespace, filterredir=filterredir
-        ))
+
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        if redirect:
-            kwargs[f'{prefix}redirect'] = '1'
+
+        kwargs = mwclient.listing.List.get_page_listing_args(
+            'iu', generator, with_content, {
+                'title': self.name,
+                'namespace': namespace,
+                'filterredir': filterredir,
+                'redirect': '1' if redirect else None
+            })
+
         return mwclient.listing.List.get_list(generator)(
             self.site,
             'imageusage',

@@ -1354,7 +1354,8 @@ class Site:
         generator: bool = True,
         end: Optional[str] = None,
         max_items: Optional[int] = None,
-        api_chunk_size: Optional[int] = None
+        api_chunk_size: Optional[int] = None,
+        with_content: bool = False
     ) -> listing.List:
         """
         Retrieve all pages on the wiki as a generator.
@@ -1363,13 +1364,19 @@ class Site:
         """
 
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        pfx = listing.List.get_prefix('ap', generator)
-        kwargs = dict(listing.List.generate_kwargs(
-            pfx, ('from', start), ('to', end), prefix=prefix,
-            minsize=minsize, maxsize=maxsize, prtype=prtype, prlevel=prlevel,
-            namespace=namespace, filterredir=filterredir, dir=dir,
-            filterlanglinks=filterlanglinks,
-        ))
+
+        kwargs = listing.List.get_page_listing_args('ap', generator, with_content, {
+            'from': start,
+            'to': end,
+            'minsize': minsize,
+            'maxsize': maxsize,
+            'prtype': prtype,
+            'prlevel': prlevel,
+            'namespace': namespace,
+            'filterredir': filterredir,
+            'dir': dir,
+            'filterlanglinks': filterlanglinks
+        })
         return listing.List.get_list(generator)(self, 'allpages', 'ap',
                                                 max_items=max_items,
                                                 api_chunk_size=api_chunk_size,
@@ -1389,7 +1396,8 @@ class Site:
         generator: bool = True,
         end: Optional[str] = None,
         max_items: Optional[int] = None,
-        api_chunk_size: Optional[int] = None
+        api_chunk_size: Optional[int] = None,
+        with_content: bool = False
     ) -> listing.List:
         """
         Retrieve all images on the wiki as a generator.
@@ -1398,12 +1406,16 @@ class Site:
         """
 
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        pfx = listing.List.get_prefix('ai', generator)
-        kwargs = dict(listing.List.generate_kwargs(
-            pfx, ('from', start), ('to', end), prefix=prefix,
-            minsize=minsize, maxsize=maxsize,
-            dir=dir, sha1=sha1, sha1base36=sha1base36
-        ))
+
+        kwargs = listing.List.get_page_listing_args('ai', generator, with_content, {
+            'from': start,
+            'to': end,
+            'minsize': minsize,
+            'maxsize': maxsize,
+            'dir': dir,
+            'sha1': sha1,
+            'sha1base36': sha1base36
+        })
         return listing.List.get_list(generator)(self, 'allimages', 'ai',
                                                 max_items=max_items,
                                                 api_chunk_size=api_chunk_size,
@@ -1421,7 +1433,8 @@ class Site:
         generator: bool = True,
         end: Optional[str] = None,
         max_items: Optional[int] = None,
-        api_chunk_size: Optional[int] = None
+        api_chunk_size: Optional[int] = None,
+        with_content: bool = False
     ) -> listing.List:
         """
         Retrieve a list of all links on the wiki as a generator.
@@ -1430,12 +1443,16 @@ class Site:
         """
 
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        pfx = listing.List.get_prefix('al', generator)
-        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end),
-                                                   prefix=prefix,
-                                                   prop=prop, namespace=namespace))
-        if unique:
-            kwargs[pfx + 'unique'] = '1'
+
+        kwargs = listing.List.get_page_listing_args('al', generator, with_content, {
+            'from': start,
+            'to': end,
+            'prefix': prefix,
+            'prop': prop,
+            'namespace': namespace,
+            'unique': '1' if unique else False
+        })
+
         return listing.List.get_list(generator)(self, 'alllinks', 'al',
                                                 max_items=max_items,
                                                 api_chunk_size=api_chunk_size,
@@ -1450,7 +1467,8 @@ class Site:
         generator: bool = True,
         end: Optional[str] = None,
         max_items: Optional[int] = None,
-        api_chunk_size: Optional[int] = None
+        api_chunk_size: Optional[int] = None,
+        with_content: bool = False
     ) -> listing.List:
         """
         Retrieve all categories on the wiki as a generator.
@@ -1459,9 +1477,14 @@ class Site:
         """
 
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        pfx = listing.List.get_prefix('ac', generator)
-        kwargs = dict(listing.List.generate_kwargs(pfx, ('from', start), ('to', end),
-                                                   prefix=prefix, dir=dir))
+
+        kwargs = listing.List.get_page_listing_args('ac', generator, with_content, {
+            'from': start,
+            'to': end,
+            'prefix': prefix,
+            'dir': dir
+        })
+
         return listing.List.get_list(generator)(self, 'allcategories', 'ac',
                                                 max_items=max_items,
                                                 api_chunk_size=api_chunk_size, **kwargs)
@@ -1487,12 +1510,18 @@ class Site:
         """
 
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        kwargs = dict(listing.List.generate_kwargs('au', ('from', start), ('to', end),
-                                                   prefix=prefix,
-                                                   group=group, prop=prop,
-                                                   rights=rights,
-                                                   witheditsonly=witheditsonly,
-                                                   activeusers=activeusers))
+
+        kwargs = listing.List.get_listing_args('au', False, {
+            'from': start,
+            'to': end,
+            'prefix': prefix,
+            'group': group,
+            'prop': prop,
+            'rights': rights,
+            'witheditsonly': witheditsonly,
+            'activeusers': activeusers
+        })
+
         return listing.List(self, 'allusers', 'au', max_items=max_items,
                             api_chunk_size=api_chunk_size, **kwargs)
 
@@ -1534,8 +1563,15 @@ class Site:
 
         # TODO: Fix. Fix what?
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        kwargs = dict(listing.List.generate_kwargs('bk', start=start, end=end, dir=dir,
-                                                   ids=ids, users=users, prop=prop))
+
+        kwargs = listing.List.get_listing_args('bk', False, {
+            'start': start,
+            'end': end,
+            'dir': dir,
+            'ids': ids,
+            'users': users,
+            'prop': prop
+        })
         return listing.List(self, 'blocks', 'bk', max_items=max_items,
                             api_chunk_size=api_chunk_size, **kwargs)
 
@@ -1557,8 +1593,14 @@ class Site:
         """
         # TODO: Fix
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        kwargs = dict(listing.List.generate_kwargs('dr', start=start, end=end, dir=dir,
-                                                   namespace=namespace, prop=prop))
+
+        kwargs = listing.List.get_listing_args('dr', False, {
+            'start': start,
+            'end': end,
+            'dir': dir,
+            'namespace': namespace,
+            'prop': prop,
+        })
         return listing.List(self, 'deletedrevs', 'dr', max_items=max_items,
                             api_chunk_size=api_chunk_size, **kwargs)
 
@@ -1596,9 +1638,13 @@ class Site:
         """
 
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        kwargs = dict(listing.List.generate_kwargs('eu', query=query, prop=prop,
-                                                   protocol=protocol,
-                                                   namespace=namespace))
+
+        kwargs = listing.List.get_listing_args('eu', False, {
+            'query': query,
+            'protocol': protocol,
+            'namespace': namespace,
+            'prop': prop,
+        })
         return listing.List(self, 'exturlusage', 'eu', max_items=max_items,
                             api_chunk_size=api_chunk_size, **kwargs)
 
@@ -1621,9 +1667,17 @@ class Site:
 
         API doc: https://www.mediawiki.org/wiki/API:Logevents
         """
-        kwargs = dict(listing.List.generate_kwargs('le', prop=prop, type=type,
-                                                   start=start, end=end, dir=dir,
-                                                   user=user, title=title, action=action))
+
+        kwargs = listing.List.get_listing_args('le', False, {
+            'start': start,
+            'end': end,
+            'dir': dir,
+            'type': type,
+            'user': user,
+            'title': title,
+            'action': action,
+            'prop': prop,
+        })
         return listing.List(self, 'logevents', 'le', max_items=max_items,
                             api_chunk_size=api_chunk_size, **kwargs)
 
@@ -1641,8 +1695,14 @@ class Site:
         """Retrieve checkuserlog items as a generator."""
 
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        kwargs = dict(listing.List.generate_kwargs('cul', target=target, start=start,
-                                                   end=end, dir=dir, user=user))
+
+        kwargs = listing.List.get_listing_args('cul', False, {
+            'start': start,
+            'end': end,
+            'dir': dir,
+            'target': target,
+            'user': user
+        })
         return listing.NestedList(
             'entries',
             self,
@@ -1674,7 +1734,9 @@ class Site:
         """
 
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        kwargs = dict(listing.List.generate_kwargs('rn', namespace=namespace))
+        kwargs = listing.List.get_listing_args('rn', False, {
+            'namespace': namespace,
+        })
         return listing.List(self, 'random', 'rn', max_items=max_items,
                             api_chunk_size=api_chunk_size, **kwargs)
 
@@ -1698,10 +1760,17 @@ class Site:
         API doc: https://www.mediawiki.org/wiki/API:Recentchanges
         """
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        kwargs = dict(listing.List.generate_kwargs('rc', start=start, end=end, dir=dir,
-                                                   namespace=namespace, prop=prop,
-                                                   show=show, type=type,
-                                                   toponly='1' if toponly else None))
+
+        kwargs = listing.List.get_listing_args('rc', False, {
+            'start': start,
+            'end': end,
+            'dir': dir,
+            'namespace': namespace,
+            'prop': prop,
+            'show': show,
+            'type': type,
+            'toponly': '1' if toponly else None
+        })
         return listing.List(self, 'recentchanges', 'rc', max_items=max_items,
                             api_chunk_size=api_chunk_size, **kwargs)
 
@@ -1784,10 +1853,14 @@ class Site:
             mwclient.listings.List: Search results iterator
         """
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        kwargs = dict(listing.List.generate_kwargs('sr', search=search,
-                                                   namespace=namespace, what=what))
-        if redirects:
-            kwargs['srredirects'] = '1'
+
+        kwargs = listing.List.get_listing_args('sr', False, {
+            'search': search,
+            'namespace': namespace,
+            'what': what,
+            'redirects': '1' if redirects else None
+        })
+
         return listing.List(self, 'search', 'sr', max_items=max_items,
                             api_chunk_size=api_chunk_size, **kwargs)
 
@@ -1811,9 +1884,16 @@ class Site:
         API doc: https://www.mediawiki.org/wiki/API:Usercontribs
         """
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        kwargs = dict(listing.List.generate_kwargs('uc', user=user, start=start, end=end,
-                                                   dir=dir, namespace=namespace,
-                                                   prop=prop, show=show))
+
+        kwargs = listing.List.get_listing_args('uc', False, {
+            'start': start,
+            'end': end,
+            'dir': dir,
+            'namespace': namespace,
+            'prop': prop,
+            'show': show,
+            'user': user
+        })
         return listing.List(self, 'usercontribs', 'uc', max_items=max_items,
                             api_chunk_size=api_chunk_size, uselang=uselang, **kwargs)
 
@@ -1850,11 +1930,17 @@ class Site:
         """
 
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        kwargs = dict(listing.List.generate_kwargs('wl', start=start, end=end,
-                                                   namespace=namespace, dir=dir,
-                                                   prop=prop, show=show))
-        if allrev:
-            kwargs['wlallrev'] = '1'
+
+        kwargs = listing.List.get_listing_args('wl', False, {
+            'start': start,
+            'end': end,
+            'dir': dir,
+            'namespace': namespace,
+            'prop': prop,
+            'show': show,
+            'allrev': '1' if allrev else None
+        })
+
         return listing.List(self, 'watchlist', 'wl', max_items=max_items,
                             api_chunk_size=api_chunk_size, **kwargs)
 
