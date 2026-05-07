@@ -203,9 +203,10 @@ class Page:
         try:
             rev = next(revs)
             if 'slots' in rev:
-                text = rev['slots'][slot]['*']
+                slot_data = rev['slots'].get(slot, {})
+                text = slot_data.get('*', slot_data.get('content', ''))
             else:
-                text = rev['*']
+                text = rev.get('*', rev.get('content', ''))
             self.last_rev_time = rev['timestamp']
         except StopIteration:
             text = ''

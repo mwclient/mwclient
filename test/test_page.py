@@ -381,6 +381,34 @@ class TestPageApiArgs(unittest.TestCase):
             'rvslots': 'main',
         }
 
+    def test_get_page_text_from_formatversion2_slot_content(self):
+        self.site.get.return_value = {'query': {'pages': {'2': {
+            'ns': 0,
+            'pageid': 2,
+            'revisions': [{
+                'slots': {'main': {'content': self.page_text}},
+                'timestamp': '2014-08-29T22:25:15Z',
+            }],
+            'title': self.page.page_title
+        }}}}
+
+        text = self.page.text()
+        assert text == self.page_text
+
+    def test_get_page_text_with_missing_slot_content(self):
+        self.site.get.return_value = {'query': {'pages': {'2': {
+            'ns': 0,
+            'pageid': 2,
+            'revisions': [{
+                'slots': {'main': {}},
+                'timestamp': '2014-08-29T22:25:15Z',
+            }],
+            'title': self.page.page_title
+        }}}}
+
+        text = self.page.text()
+        assert text == ''
+
     def test_get_page_text_cached(self):
         # Check page.text() caching
         self.page.revisions = mock.Mock(return_value=iter([]))  # type: ignore
