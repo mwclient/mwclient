@@ -331,6 +331,31 @@ class TestPage(unittest.TestCase):
         assert not page.exists, 'Page should not exist after move'
         assert not page.redirect, 'Page should not be a redirect after move'
 
+    @mock.patch('mwclient.client.Site')
+    def test_page_uses_prefetched_content(self, mock_site):
+        page_title = 'Some page'
+        page = Page(mock_site, page_title, info={
+            'contentmodel': 'wikitext',
+            'counter': '',
+            'lastrevid': 13355471,
+            'length': 58487,
+            'ns': 0,
+            'pageid': 728,
+            'pagelanguage': 'nb',
+            'protection': [],
+            'title': page_title,
+            'touched': '2014-09-14T21:11:52Z',
+            'revisions': [
+                {
+                    "contentformat": "text/x-wiki",
+                    "contentmodel": "wikitext",
+                    "*": "Some content"
+                }
+            ]
+        })
+
+        assert page.text() == 'Some content'
+
 
 class TestPageApiArgs(unittest.TestCase):
 

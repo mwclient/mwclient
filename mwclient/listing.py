@@ -1,5 +1,5 @@
 from typing import (  # noqa: F401
-    Optional, Tuple, Any, Union, Iterator, Mapping, Iterable, Type, Dict
+    Optional, Tuple, Any, Union, Iterator, Mapping, MutableMapping, Iterable, Type, Dict
 )
 
 import mwclient.image
@@ -150,6 +150,45 @@ class List:
                 yield _prefix + key, value
 
     @staticmethod
+    def get_listing_args(
+        prefix: str, generator: bool, args: Mapping[str, Any]
+    ) -> MutableMapping[str, Any]:
+        """Prefix and extend arguments for List and subclasses.
+
+        Args:
+            prefix: Prefix to apply to each parameter name in `args`.
+            generator: Whether this listing is an API generator.
+            args: Parameters to pass to the API.
+        """
+        prefixed_args = {}
+        prefix = List.get_prefix(prefix, generator)
+        for key, value in args.items():
+            if value is not None and value is not False:
+                prefixed_args[prefix + key] = value
+
+        return prefixed_args
+
+    @staticmethod
+    def get_page_listing_args(
+        prefix: str, generator: bool, with_content: bool, args: Mapping[str, Any]
+    ) -> MutableMapping[str, Any]:
+        """Prefix and extend arguments for Lists returning pages.
+
+        Args:
+            prefix: Prefix to apply to each parameter name in `args`.
+            generator: Whether this listing is an API generator.
+            with_content: Whether the API should prefetch page content for returned items
+            args: Parameters to pass to the API.
+        """
+        prefixed_args = List.get_listing_args(prefix, generator, args)
+
+        if with_content:
+            prefixed_args['rvprop'] = 'content'
+            prefixed_args['prop'] = 'info|imageinfo|revisions'
+
+        return prefixed_args
+
+    @staticmethod
     def get_prefix(prefix: str, generator: bool = False) -> str:
         return ('g' if generator else '') + prefix
 
@@ -190,8 +229,8 @@ class GeneratorList(List):
         self.args['g' + self.prefix + 'limit'] = self.args[self.prefix + 'limit']
         del self.args[self.prefix + 'limit']
         self.generator = 'generator'
-
-        self.args['prop'] = 'info|imageinfo'
+        if 'prop' not in self.args:
+            self.args['prop'] = 'info|imageinfo'
         self.args['inprop'] = 'protection'
 
         self.result_member = 'pages'
@@ -254,12 +293,18 @@ class Category(mwclient.page.Page, GeneratorList):
         dir: str = 'asc',
         start: Optional[str] = None,
         end: Optional[str] = None,
-        generator: bool = True
+        generator: bool = True,
+        with_content: bool = False
     ) -> 'List':
-        prefix = self.get_prefix('cm', generator)
-        kwargs = dict(self.generate_kwargs(prefix, prop=prop, namespace=namespace,
-                                           sort=sort, dir=dir, start=start, end=end,
-                                           title=self.name))
+        kwargs = self.get_page_listing_args('cm', generator, with_content, {
+            'start': start,
+            'end': end,
+            'dir': dir,
+            'namespace': namespace,
+            'prop': prop,
+            'sort': sort,
+            'title': self.name
+        })
         return self.get_list(generator)(self.site, 'categorymembers', 'cm', **kwargs)
 
 

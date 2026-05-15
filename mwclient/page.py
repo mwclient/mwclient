@@ -184,6 +184,11 @@ class Page:
             cache: Use in-memory caching (default: `True`)
         """
 
+        # Try to use text from info if already supplied
+        if 'revisions' in self._info and len(self._info['revisions']) > 0:
+            if '*' in self._info['revisions'][0]:
+                return self._info['revisions'][0]['*']
+
         if not self.can('read'):
             raise mwclient.errors.InsufficientPermission(self)
         if not self.exists:
@@ -452,7 +457,8 @@ class Page:
         limit: Optional[int] = None,
         generator: bool = True,
         max_items: Optional[int] = None,
-        api_chunk_size: Optional[int] = None
+        api_chunk_size: Optional[int] = None,
+        with_content: bool = False
     ) -> 'mwclient.listing.List':
         """List pages that link to the current page, similar to Special:Whatlinkshere.
 
@@ -460,13 +466,14 @@ class Page:
 
         """
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        prefix = mwclient.listing.List.get_prefix('bl', generator)
-        kwargs = dict(mwclient.listing.List.generate_kwargs(
-            prefix, namespace=namespace, filterredir=filterredir,
-        ))
-        if redirect:
-            kwargs[f'{prefix}redirect'] = '1'
-        kwargs[prefix + 'title'] = self.name
+
+        kwargs = mwclient.listing.List.get_page_listing_args(
+            'bl', generator, with_content, {
+                'namespace': namespace,
+                'filterredir': filterredir,
+                'title': self.name,
+                'redirect': '1' if redirect else None
+            })
 
         return mwclient.listing.List.get_list(generator)(
             self.site, 'backlinks', 'bl', max_items=max_items,
@@ -474,7 +481,10 @@ class Page:
         )
 
     def categories(
-        self, generator: bool = True, show: Optional[str] = None
+        self,
+        generator: bool = True,
+        show: Optional[str] = None,
+        with_content: bool = False
     ) -> Union['mwclient.listing.PagePropertyGenerator', 'mwclient.listing.PageProperty']:
         """List categories used on the current page.
 
@@ -488,10 +498,11 @@ class Page:
         Returns:
             mwclient.listings.PagePropertyGenerator
         """
-        prefix = mwclient.listing.List.get_prefix('cl', generator)
-        kwargs = dict(mwclient.listing.List.generate_kwargs(
-            prefix, show=show
-        ))
+
+        kwargs = mwclient.listing.List.get_page_listing_args(
+            'cl', generator, with_content, {
+                'show': show
+            })
 
         if generator:
             return mwclient.listing.PagePropertyGenerator(
@@ -510,7 +521,8 @@ class Page:
         limit: Optional[int] = None,
         generator: bool = True,
         max_items: Optional[int] = None,
-        api_chunk_size: Optional[int] = None
+        api_chunk_size: Optional[int] = None,
+        with_content: bool = False
     ) -> 'mwclient.listing.List':
         """List pages that transclude the current page.
 
@@ -524,15 +536,19 @@ class Page:
             generator: Return generator (Default: True)
             max_items: The maximum number of pages to yield
             api_chunk_size: The API request chunk size
+            with_content: Whether to prefetch content for returned pages
 
         Returns:
             mwclient.listings.List: Page iterator
         """
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        prefix = mwclient.listing.List.get_prefix('ei', generator)
-        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace,
-                                                            filterredir=filterredir))
-        kwargs[prefix + 'title'] = self.name
+
+        kwargs = mwclient.listing.List.get_page_listing_args(
+            'ei', generator, with_content, {
+                'namespace': namespace,
+                'filterredir': filterredir,
+                'title': self.name,
+            })
 
         return mwclient.listing.List.get_list(generator)(
             self.site, 'embeddedin', 'ei', max_items=max_items,
@@ -584,15 +600,18 @@ class Page:
         self,
         namespace: Optional[Namespace] = None,
         generator: bool = True,
-        redirects: bool = False
+        redirects: bool = False,
+        with_content: bool = False
     ) -> Union['mwclient.listing.PagePropertyGenerator', 'mwclient.listing.PageProperty']:
         """List links to other pages from the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Links
 
         """
-        prefix = mwclient.listing.List.get_prefix('pl', generator)
-        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace))
+        kwargs = mwclient.listing.List.get_page_listing_args(
+            'pl', generator, with_content, {
+                'namespace': namespace
+            })
 
         if redirects:
             kwargs['redirects'] = '1'
@@ -651,10 +670,17 @@ class Page:
             mwclient.listings.List: Revision iterator
         """
         (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
-        kwargs = dict(mwclient.listing.List.generate_kwargs(
-            'rv', startid=startid, endid=endid, start=start, end=end, user=user,
-            excludeuser=excludeuser, diffto=diffto, slots=slots
-        ))
+
+        kwargs = mwclient.listing.List.get_listing_args('rv', False, {
+            'startid': startid,
+            'endid': endid,
+            'start': start,
+            'end': end,
+            'user': user,
+            'excludeuser': excludeuser,
+            'diffto': diffto,
+            'slots': slots
+        })
 
         if self.site.version[:2] < (1, 32) and 'rvslots' in kwargs:  # type: ignore[index]
             # https://github.com/mwclient/mwclient/issues/199
@@ -674,15 +700,21 @@ class Page:
                                                   **kwargs)
 
     def templates(
-        self, namespace: Optional[Namespace] = None, generator: bool = True
+        self,
+        namespace: Optional[Namespace] = None,
+        generator: bool = True,
+        with_content: bool = False
     ) -> Union['mwclient.listing.PagePropertyGenerator', 'mwclient.listing.PageProperty']:
         """List templates used on the current page.
 
         API doc: https://www.mediawiki.org/wiki/API:Templates
 
         """
-        prefix = mwclient.listing.List.get_prefix('tl', generator)
-        kwargs = dict(mwclient.listing.List.generate_kwargs(prefix, namespace=namespace))
+
+        kwargs = mwclient.listing.List.get_page_listing_args(
+            'tl', generator, with_content, {
+                'namespace': namespace
+            })
         if generator:
             return mwclient.listing.PagePropertyGenerator(self, 'templates', 'tl',
                                                           **kwargs)

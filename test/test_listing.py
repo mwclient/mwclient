@@ -297,6 +297,52 @@ class TestList(unittest.TestCase):
         assert type(vals[2]) == mwclient.listing.Category
 
     @mock.patch('mwclient.client.Site')
+    def test_pagelist_with_content(self, mock_site):
+        mock_site.__str__.return_value = 'some wiki'
+        mock_site.api_limit = 500
+        mock_site.get.return_value = {
+            "query": {
+                "pages": {
+                    "1886677": {
+                        "pageid": 1886677,
+                        "ns": 0,
+                        "title": "Test",
+                        "contentmodel": "wikitext",
+                        "pagelanguage": "en",
+                        "pagelanguagehtmlcode": "en",
+                        "pagelanguagedir": "ltr",
+                        "touched": "2026-02-23T06:55:21Z",
+                        "lastrevid": 6267986,
+                        "length": 38,
+                        "redirect": "",
+                        "new": "",
+                        "protection": [],
+                        "restrictiontypes": [
+                            "edit",
+                            "move"
+                        ],
+                        "revisions": [
+                            {
+                                "contentmodel": "wikitext",
+                                "contentformat": "text/x-wiki",
+                                "*": "test content"
+                            }
+                        ]
+                    },
+                }
+            }
+        }
+
+        gl = GeneratorList(mock_site, 'pages', 'p', prop='info|imageinfo|revisions')
+        assert gl.args['prop'] == 'info|imageinfo|revisions'
+
+        vals = [x for x in gl];
+    
+        assert len(vals) == 1
+        assert type(vals[0]) == mwclient.page.Page
+        assert vals[0].text() == 'test content'
+
+    @mock.patch('mwclient.client.Site')
     def test_category(self, mock_site):
         # Test that Category works as expected
 
@@ -462,6 +508,34 @@ class TestList(unittest.TestCase):
         vals = [x for x in rvi]
         assert len(vals) == 0
 
+
+class TestGetListingArgs:
+
+    @pytest.mark.parametrize('prefix, generator, args, expected', [
+        ('au', False, { 'from': 'Test', 'limit': 500, 'exclude': None }, { 'aufrom': 'Test', 'aulimit': 500 }),
+        ('ap', True, { 'from': 'Test', 'limit': 500, 'other': False }, { 'gapfrom': 'Test', 'gaplimit': 500 })
+    ])
+    def test_get_listing_args(self, prefix, generator, args, expected):
+        assert List.get_listing_args(prefix, generator, args) == expected
+
+    @pytest.mark.parametrize('prefix, generator, with_content, args, expected', [
+        ('ap', True, False, { 'from': 'Test', 'limit': 500, 'other': False }, { 'gapfrom': 'Test', 'gaplimit': 500 }),
+        ('ap', True, True, { 'from': 'Test', 'limit': 500, 'other': False }, {
+            'gapfrom': 'Test',
+            'gaplimit': 500,
+            'prop': 'info|imageinfo|revisions',
+            'rvprop': 'content'
+            }),
+        ('bl', False, False, { 'from': 'Test', 'limit': 500, 'other': False }, { 'blfrom': 'Test', 'bllimit': 500 }),
+        ('bl', False, True, { 'from': 'Test', 'limit': 500, 'other': False }, {
+            'blfrom': 'Test',
+            'bllimit': 500,
+            'prop': 'info|imageinfo|revisions',
+            'rvprop': 'content'
+            })
+    ])
+    def test_get_page_listing_args(self, prefix, generator, with_content, args, expected):
+        assert List.get_page_listing_args(prefix, generator, with_content, args) == expected
 
 if __name__ == '__main__':
     unittest.main()
