@@ -5,6 +5,7 @@ from typing import (  # noqa: F401
 
 import mwclient.errors
 import mwclient.listing
+from mwclient.entity import Item
 from mwclient._types import Namespace
 from mwclient.util import parse_timestamp, handle_limit
 
@@ -91,6 +92,9 @@ class Page:
 
         self.last_rev_time = None  # type: Optional[time.struct_time]
         self.edit_time = None  # type: Optional[time.struct_time]
+
+        # caching wikibase_item
+        self._wikibase_item: Optional[Item] = None
 
     @property
     def page_title(self) -> str:
@@ -721,3 +725,26 @@ class Page:
         else:
             return mwclient.listing.PageProperty(self, 'templates', 'tl',
                                                  return_values='title', **kwargs)
+
+    @property
+    def wikibase_item(self) -> Optional[Item]:
+        """Item linked to a Page.
+
+        if a wikibase item is linked to a page it returns this item,
+        None otherwise."""
+        if self._wikibase_item is None:
+            info = self.site.api('query',
+                                 prop='pageprops',
+                                 titles=self.name,
+                                 ppprop='wikibase_item')['query']['pages']
+            wb_entity = None
+            for pageid in info:
+                if 'pageprops' in info[pageid]:
+                    # pageprops key is not in info if page don't have
+                    # a wikibase_item property
+                    wb_entity = info[pageid]['pageprops']['wikibase_item']
+            if wb_entity is not None:
+                self._wikibase_item = Item(
+                    self.site.wikibase_repository,
+                    wb_entity)
+        return self._wikibase_item

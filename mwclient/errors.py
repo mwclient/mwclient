@@ -183,3 +183,8 @@ class InvalidResponse(MwClientError):
 class InvalidPageTitle(MwClientError):
     """Raised when an invalid page title is used."""
     pass
+
+
+class WikiBaseNotFound(MwClientError):
+    """When there is no WikibaseClient installed on the local wiki."""
+    pass

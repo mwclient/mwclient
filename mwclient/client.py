@@ -9,6 +9,7 @@ import requests
 from requests.auth import HTTPBasicAuth, AuthBase
 from requests_oauthlib import OAuth1
 
+import mwclient.entity as entity
 import mwclient.errors as errors
 import mwclient.listing as listing
 from mwclient._types import Cookies, Namespace, VersionTuple
@@ -199,6 +200,9 @@ class Site:
         self.Pages = self.pages
         self.Categories = self.categories
         self.Images = self.images
+
+        # wikibase caching
+        self._wikibase_repository: Optional['WikiBaseSite'] = None
 
         # Initialization status
         self.initialized = False
@@ -2042,3 +2046,57 @@ class Site:
                 answers = [answer for answer in answers.values()]
 
             yield from answers
+            for answer in answers:
+                yield answer
+
+    @property
+    def wikibase_repository(self) -> 'WikiBaseSite':
+        """Wiki base repository."""
+        if self._wikibase_repository is None:
+            result = self.api('query', meta='wikibase')
+            if 'query' not in result:
+                # we could look for warning but either the query works or not
+                raise errors.WikiBaseNotFound()
+            url = result['query']['wikibase']['repo']['url']
+            # default init
+            method = self.scheme
+            host = url['base'].replace('//', '')
+            # parsing from the query response
+            if '://' in url['base']:
+                method, host = url['base'].split('://')
+            path = url['scriptpath'] + "/"
+            self._wikibase_repository = WikiBaseSite(
+                host,
+                path=path,
+                scheme=method,
+                pool=self.connection)
+        return self._wikibase_repository
+
+
+class WikiBaseSite(Site):
+
+    """WikiBaseSite object to access to WikiBase API."""
+
+    def __repr__(self) -> str:
+        """Representation of the WikiBaseSite object."""
+        return "<WikiBaseSite object '%s%s'>" % (self.host, self.path)
+
+    def entities(self, ids: List[str]) -> List[Union[entity.Item, entity.Property]]:
+        """Returns entities.
+
+        API doc: https://www.mediawiki.org/wiki/Wikibase/API/en#wbgetentities
+
+        Args:
+            ids: ID or IDs of the entities to fetch."""
+        result = self.api('wbgetentities', ids="|".join(ids))
+        result_entities: List[Union[entity.Item, entity.Property]] = []
+        for entityid in result['entities']:
+            if result['entities'][entityid]['type'] == 'item':
+                item = entity.Item(self, entityid)
+                item.setinfofromwbgetentities(result['entities'][entityid])
+                result_entities.append(item)
+            elif result['entities'][entityid]['type'] == 'property':
+                prop = entity.Property(self, entityid)
+                prop.setinfofromwbgetentities(result['entities'][entityid])
+                result_entities.append(prop)
+        return result_entities
