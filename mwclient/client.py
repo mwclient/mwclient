@@ -465,8 +465,21 @@ class Site:
             self.logged_in = 'anon' not in userinfo
         if 'warnings' in info:
             for module, warning in info['warnings'].items():
-                if '*' in warning:
-                    log.warning(warning['*'])
+                msg = warning.get('*')
+                if not msg:
+                    continue
+                if (
+                    'is deprecated' in msg
+                    or (
+                        module == 'main'
+                        and 'Subscribe to the mediawiki-api-announce mailing' in msg
+                    )
+                ):
+                    # try to avoid fake warnings which are just deprecation warnings
+                    # to keep logs cleans and usefull
+                    warnings.warn(msg, DeprecationWarning)
+                else:
+                    log.warning(msg)
 
         if 'error' in info:
             if info['error'].get('code') in {'internal_api_error_DBConnectionError',
