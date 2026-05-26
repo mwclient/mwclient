@@ -32,4 +32,4 @@ without its namespace prefixed.
     >>> image = site.Pages['Image:Wiki.png'] # an Image object
     >>> image = site.Images['Wiki.png']      # the same Image object
     >>> cat = site.Pages['Category:Python']  # a Category object
-    >>> cat = site.Images['Python']          # the same Category object
+    >>> cat = site.Categories['Python']      # the same Category object

@@ -70,7 +70,7 @@ Categories
 ----------
 
 Categories can be retrieved in the same way as pages, but you can also use
-:meth:`Site.categories() <mwclient.client.Site.categories>` and skip the namespace prefix.
+:attr:`Site.categories <mwclient.client.Site.categories>` and skip the namespace prefix.
 The returned :class:`Category <mwclient.listing.Category>` object
 supports the same methods as the :class:`Page <mwclient.page.Page>`
 object, but also provides an extra function, :meth:`members() <mwclient.listing.Category.members>`,

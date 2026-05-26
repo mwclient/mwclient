@@ -87,7 +87,7 @@ using the `connection_options` parameter of the :class:`~mwclient.client.Site`.
       'http': 'http://10.10.1.10:3128',
       'https': 'http://10.10.1.10:1080',
     }
-    site = mwclient.Site('en.wikipedia.org', connection_options={"proxy": proxies})
+    site = mwclient.Site('en.wikipedia.org', connection_options={"proxies": proxies})
 
 Errors and warnings
 -------------------

@@ -11,12 +11,12 @@ Getting info about a file
 
 To get information about a file:
 
-    >>> file = site.images['Example.jpg']
+    >>> image = site.images['Example.jpg']
 
-where ``file`` is now an instance of :class:`Image <mwclient.image.Image>`
+where ``image`` is now an instance of :class:`Image <mwclient.image.Image>`
 that you can query for various properties:
 
-    >>> file.imageinfo
+    >>> image.imageinfo
     {'comment': 'Reverted to version as of 17:58, 12 March 2010',
      'descriptionshorturl': 'https://commons.wikimedia.org/w/index.php?curid=6428847',
      'descriptionurl': 'https://commons.wikimedia.org/wiki/File:Example.jpg',
@@ -51,7 +51,7 @@ The :meth:`Image.download() <mwclient.image.Image.download>` method can be used 
 the full size file. Pass it a file object and it will stream the image to it,
 avoiding the need for keeping the whole file in memory:
 
-    >>> file = site.images['Example.jpg']
+    >>> image = site.images['Example.jpg']
     >>> with open('Example.jpg', 'wb') as fd:
     ...     image.download(fd)
 
