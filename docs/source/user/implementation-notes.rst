@@ -8,7 +8,7 @@ Some notable exceptions:
 
 * ``Image.imageinfo`` is the imageinfo of the latest image. Earlier versions can be fetched using ``imagehistory()``.
 * ``Site.all*``: parameter ``(ap)from`` renamed to ``start``
-* ``categorymembers`` is implemented as ``Category.members``
+* ``categorymembers`` is available as ``Site.category_members`` or ``Category.members``
 * ``deletedrevs`` is ``deletedrevisions``
 * ``usercontribs`` is ``usercontributions``
 * First parameters of ``search`` and ``usercontributions`` are ``search`` and ``user``, respectively

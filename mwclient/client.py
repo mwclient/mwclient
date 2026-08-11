@@ -1489,6 +1489,42 @@ class Site:
                                                 max_items=max_items,
                                                 api_chunk_size=api_chunk_size, **kwargs)
 
+    def category_members(
+        self,
+        category: str,
+        prop: str = 'ids|title',
+        namespace: Optional[Namespace] = None,
+        sort: str = 'sortkey',
+        dir: str = 'asc',
+        start: Optional[str] = None,
+        end: Optional[str] = None,
+        limit: Optional[int] = None,
+        generator: bool = True,
+        max_items: Optional[int] = None,
+        api_chunk_size: Optional[int] = None,
+        with_content: bool = False
+    ) -> listing.List:
+        """Retrieve pages that belong to a category.
+
+        API doc: https://www.mediawiki.org/wiki/API:Categorymembers
+        """
+        (max_items, api_chunk_size) = handle_limit(limit, max_items, api_chunk_size)
+
+        kwargs = listing.List.get_page_listing_args('cm', generator, with_content, {
+            'title': category,
+            'prop': prop,
+            'namespace': namespace,
+            'sort': sort,
+            'dir': dir,
+            'start': start,
+            'end': end
+        })
+
+        return listing.List.get_list(generator)(
+            self, 'categorymembers', 'cm', max_items=max_items,
+            api_chunk_size=api_chunk_size, **kwargs
+        )
+
     def allusers(
         self,
         start: Optional[str] = None,
