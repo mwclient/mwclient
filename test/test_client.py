@@ -781,6 +781,34 @@ class TestClientApiMethods(TestCase):
         assert len(pages) == 1
         assert pages[0].text() == 'test content'
 
+    def test_category_members_with_content(self):
+        self.api.return_value = {
+            "query": {
+                "pages": {
+                    "1886677": {
+                        "pageid": 1886677,
+                        "ns": 0,
+                        "title": "Test",
+                        "revisions": [{"*": "test content"}],
+                    },
+                }
+            }
+        }
+
+        pages = list(self.site.category_members(
+            "Category:Examples", namespace=0, max_items=1, with_content=True
+        ))
+        args, _ = self.api.call_args
+
+        assert ("generator", "categorymembers") in args
+        assert ("gcmtitle", "Category:Examples") in args
+        assert ("gcmnamespace", 0) in args
+        assert ("prop", "info|imageinfo|revisions") in args
+        assert ("rvprop", "content") in args
+        assert ("gcmlimit", "1") in args
+        assert len(pages) == 1
+        assert pages[0].text() == "test content"
+
 
 class TestVersionTupleFromGenerator:
 
